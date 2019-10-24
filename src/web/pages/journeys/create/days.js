@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import GemsForm from './gems';
 import NestForm from './nest';
 
-function DaysForm({ days, addDay, removeDay }) {
+function DaysForm({ days, addDay, removeDay, onAddGem }) {
   return (
     <div style={{ margin: 8 }}>
       <div style={{ marginBottom: 8, fontSize: 20, display: 'flex' }}>
@@ -13,6 +13,8 @@ function DaysForm({ days, addDay, removeDay }) {
       </div>
       <div>
         {days.map((day, index) => {
+          const addGem = onAddGem.bind(null, day);
+
           return (
             <div key={day.dayNumber}>
               <div style={{ display: 'flex' }}>
@@ -49,7 +51,7 @@ function DaysForm({ days, addDay, removeDay }) {
               </div>
               <GemsForm
                 gems={day.gems}
-                addGem={day.addGem}
+                addGem={addGem}
                 removeGem={day.removeGem}
               />
               <NestForm

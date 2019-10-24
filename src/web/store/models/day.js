@@ -38,8 +38,8 @@ export default class DayModel {
   };
 
   @action
-  addGem = () => {
-    this.gems.push(new GemModel({ sequenceNumber: this.gems.length + 1 }));
+  addGem = (gem) => {
+    this.gems.push(new GemModel({ ...gem, sequenceNumber: this.gems.length + 1 }));
   };
 
   @action
