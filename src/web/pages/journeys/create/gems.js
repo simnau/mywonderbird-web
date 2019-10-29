@@ -1,14 +1,35 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 
+import { post } from '../../../util/fetch';
+import FileSelectButton from '../../../components/file-select-button';
 import GemCaptureForm from './gem-captures';
 
-function GemsForm({ gems, addGem, removeGem }) {
+function GemsForm({ gems, addGem, createGem, removeGem }) {
+  const onSelectFile = async files => {
+    const formData = new FormData();
+    Object.entries(files).forEach(([, file]) => {
+      formData.append(file.name, file);
+    });
+
+    const response = await post('/api/gem-captures/file', formData);
+    const data = response.data;
+
+    createGem({
+      lat: data.latLng && data.latLng.lat,
+      lng: data.latLng && data.latLng.lng,
+      gemCaptures: data.images.map(image => ({
+        url: image,
+      })),
+    });
+  };
+
   return (
     <div style={{ margin: 8 }}>
       <div style={{ display: 'flex' }}>
         <div>Gems</div>
         <button onClick={addGem}>Add gem</button>
+        <FileSelectButton onSelect={onSelectFile} />
       </div>
       <div>
         {gems.map((gem, index) => {

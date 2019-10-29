@@ -18,7 +18,7 @@ function CreateJourney() {
   const onSave = async () => {
     const url = '/api/journeys';
     await post(url, {
-      ...store,
+      ...journey,
       startDate: '2019-01-01',
       userId: 'admin',
     });

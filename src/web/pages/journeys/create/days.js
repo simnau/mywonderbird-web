@@ -52,6 +52,7 @@ function DaysForm({ days, addDay, removeDay, onAddGem }) {
               <GemsForm
                 gems={day.gems}
                 addGem={addGem}
+                createGem={day.addGem}
                 removeGem={day.removeGem}
               />
               <NestForm

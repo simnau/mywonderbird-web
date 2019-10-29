@@ -11,5 +11,7 @@
     "@babel/preset-react",
     "babel-preset-mobx"
   ],
-  "plugins": ["@babel/transform-runtime"]
+  "plugins": [
+    "@babel/transform-runtime"
+  ]
 }

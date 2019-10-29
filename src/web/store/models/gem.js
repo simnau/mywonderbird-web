@@ -23,7 +23,10 @@ export default class GemModel {
     this.lat = lat;
     this.lng = lng;
     this.sequenceNumber = sequenceNumber;
-    this.gemCaptures = gemCaptures;
+    this.gemCaptures = gemCaptures.map(
+      (gemCapture, index) =>
+        new GemCaptureModel({ ...gemCapture, sequenceNumber: index + 1 }),
+    );
   }
 
   @action
@@ -39,7 +42,7 @@ export default class GemModel {
   };
 
   @action
-  removeGemCapture = (index) => {
+  removeGemCapture = index => {
     this.gemCaptures.splice(index, 1);
     this.gemCaptures.forEach((gemCapture, index) => {
       gemCapture.sequenceNumber = index + 1;
