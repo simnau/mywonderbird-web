@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useObservable, observer } from 'mobx-react-lite';
 import { useHistory } from 'react-router-dom';
 
 import { post } from '../../../util/fetch';
 import JourneyMap from '../../../components/journey-map';
+import { Input, TextArea } from '../../../components/input';
+import { Button } from '../../../components/button';
 import JourneyModel from '../../../store/models/journey';
 import DaysForm from './days';
 
 function CreateJourney() {
   const journey = useObservable(new JourneyModel());
   const state = useObservable({
-    addGemEnabled: false,
     selectedDay: null,
+    selectedGem: null,
   });
   const history = useHistory();
+
+  useEffect(() => {
+    journey.addDay({});
+  }, []);
 
   const onSave = async () => {
     const url = '/api/journeys';
@@ -26,7 +32,6 @@ function CreateJourney() {
   };
 
   const addGem = day => {
-    state.addGemEnabled = true;
     state.selectedDay = day;
   };
 
@@ -39,71 +44,76 @@ function CreateJourney() {
     }
 
     state.selectedDay = null;
-    state.addGemEnabled = false;
   };
+
+  const selectOnMap = gem => {
+    state.selectedGem = gem;
+  };
+
+  const finishSelectOnMap = (event, data) => {
+    if (state.selectedGem) {
+      state.selectedGem.lat = data.lngLat.lat;
+      state.selectedGem.lng = data.lngLat.lng;
+    }
+
+    state.selectedGem = null;
+  };
+
+  const onMapClick =
+    (!!state.selectedDay && finishAddGem) ||
+    (!!state.selectedGem && finishSelectOnMap);
 
   return (
     <div>
-      <div>CreateJourney</div>
-      <div style={{ width: '100%', height: 400, position: 'sticky', top: 0 }}>
+      <div
+        style={{
+          width: '100%',
+          height: 400,
+          position: 'sticky',
+          top: 64,
+          zIndex: 1000,
+        }}
+      >
         <JourneyMap
           journey={journey}
-          onClickEnabled={state.addGemEnabled}
-          onClick={finishAddGem}
+          onClickEnabled={!!state.selectedDay || !!state.selectedGem}
+          onClick={onMapClick}
         />
       </div>
-      <div style={{ margin: 8, padding: 8, border: '1px solid black' }}>
-        <div
-          style={{
-            margin: 8,
-            display: 'grid',
-            gridTemplateColumns: '100px 200px',
-          }}
-        >
-          <label>Title</label>
-          <input
-            name="title"
-            value={journey.title}
-            onChange={journey.onFieldChange}
-          />
-        </div>
-        <div
-          style={{
-            margin: 8,
-            display: 'grid',
-            gridTemplateColumns: '100px 200px',
-          }}
-        >
-          <label>Description</label>
-          <textarea
-            name="description"
-            value={journey.description}
-            onChange={journey.onFieldChange}
-          />
-        </div>
-        <div
-          style={{
-            margin: 8,
-            display: 'grid',
-            gridTemplateColumns: '100px 200px',
-          }}
-        >
-          <label>Type</label>
-          <input
-            name="type"
-            value={journey.type}
-            onChange={journey.onFieldChange}
-          />
-        </div>
+      <div style={{ margin: '8px 0px', fontSize: 18, fontWeight: 'bold' }}>
+        CreateJourney
+      </div>
+      <div style={{ display: 'grid', gridRowGap: 16 }}>
+        <Input
+          label="Title"
+          name="title"
+          value={journey.title}
+          onChange={journey.onFieldChange}
+        />
+        <TextArea
+          label="Description"
+          name="description"
+          value={journey.description}
+          onChange={journey.onFieldChange}
+        />
+        <Input
+          label="Type"
+          name="type"
+          value={journey.type}
+          onChange={journey.onFieldChange}
+        />
         <DaysForm
           days={journey.days}
           addDay={journey.addDay}
           removeDay={journey.removeDay}
           onAddGem={addGem}
+          selectOnMap={selectOnMap}
         />
       </div>
       <div>
-        <button onClick={onSave}>Save</button>
+        <Button variant="primary" onClick={onSave}>
+          Save
+        </Button>
       </div>
     </div>
   );

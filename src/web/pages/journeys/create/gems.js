@@ -1,11 +1,24 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import styled from 'styled-components';
 
 import { post } from '../../../util/fetch';
 import FileSelectButton from '../../../components/file-select-button';
+import { Input, TextArea } from '../../../components/input';
+import { OutlineButton } from '../../../components/button';
+import {
+  HeadingContainer,
+  HeadingActionContainer,
+} from '../../../components/heading';
 import GemCaptureForm from './gem-captures';
 
-function GemsForm({ gems, addGem, createGem, removeGem }) {
+const FormContainer = styled.div`
+  display: grid;
+  grid-row-gap: 16px;
+  margin-bottom: 8px;
+`;
+
+function GemsForm({ gems, addGem, createGem, removeGem, selectOnMap }) {
   const onSelectFile = async files => {
     const formData = new FormData();
     Object.entries(files).forEach(([, file]) => {
@@ -26,80 +39,67 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
 
   return (
     <div style={{ margin: 8 }}>
-      <div style={{ display: 'flex' }}>
+      <HeadingContainer>
         <div>Gems</div>
-        <button onClick={addGem}>Add gem</button>
-        <FileSelectButton onSelect={onSelectFile} />
-      </div>
+        <HeadingActionContainer>
+          <OutlineButton variant="primary" onClick={addGem}>
+            Create gem from map
+          </OutlineButton>
+          <FileSelectButton multiple onSelect={onSelectFile}>
+            Create from capture
+          </FileSelectButton>
+        </HeadingActionContainer>
+      </HeadingContainer>
       <div>
         {gems.map((gem, index) => {
           return (
             <div key={gem.sequenceNumber}>
-              <div style={{ display: 'flex' }}>
+              <HeadingContainer>
                 <div>{`Gem #${gem.sequenceNumber}`}</div>
-                <button onClick={() => removeGem(index)}>Remove</button>
-              </div>
-              <div style={{ margin: 8 }}>
-                <div
-                  style={{
-                    margin: 8,
-                    display: 'grid',
-                    gridTemplateColumns: '100px 200px',
-                  }}
-                >
-                  <label>Title</label>
-                  <input
-                    name="title"
-                    value={gem.title}
-                    onChange={gem.onFieldChange}
-                  />
-                </div>
-                <div
-                  style={{
-                    margin: 8,
-                    display: 'grid',
-                    gridTemplateColumns: '100px 200px',
-                  }}
-                >
-                  <label>Description</label>
-                  <textarea
-                    name="description"
-                    value={gem.description}
-                    onChange={gem.onFieldChange}
-                  />
-                </div>
-                <div
-                  style={{
-                    margin: 8,
-                    display: 'grid',
-                    gridTemplateColumns: '100px 200px',
-                  }}
-                >
-                  <label>Latitude</label>
-                  <input
-                    name="lat"
-                    value={gem.lat}
-                    onChange={gem.onFieldChange}
-                  />
-                </div>
-                <div
-                  style={{
-                    margin: 8,
-                    display: 'grid',
-                    gridTemplateColumns: '100px 200px',
-                  }}
-                >
-                  <label>Longitude</label>
-                  <input
-                    name="lng"
-                    value={gem.lng}
-                    onChange={gem.onFieldChange}
-                  />
-                </div>
-              </div>
+                <HeadingActionContainer>
+                  <OutlineButton
+                    variant="primary"
+                    onClick={() => selectOnMap(gem)}
+                  >
+                    Select coordinates on map
+                  </OutlineButton>
+                  <OutlineButton
+                    variant="danger"
+                    onClick={() => removeGem(index)}
+                  >
+                    Remove
+                  </OutlineButton>
+                </HeadingActionContainer>
+              </HeadingContainer>
+              <FormContainer>
+                <Input
+                  label="Title"
+                  name="title"
+                  value={gem.title}
+                  onChange={gem.onFieldChange}
+                />
+                <TextArea
+                  label="Description"
+                  name="description"
+                  value={gem.description}
+                  onChange={gem.onFieldChange}
+                />
+                <Input
+                  label="Latitude"
+                  name="lat"
+                  value={gem.lat}
+                  onChange={gem.onFieldChange}
+                />
+                <Input
+                  label="Longitude"
+                  name="lng"
+                  value={gem.lng}
+                  onChange={gem.onFieldChange}
+                />
+              </FormContainer>
               <GemCaptureForm
                 gemCaptures={gem.gemCaptures}
-                addGemCapture={gem.addGemCapture}
+                addGemCaptures={gem.addGemCaptures}
                 removeGemCapture={gem.removeGemCapture}
               />
             </div>

@@ -1,70 +1,87 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import styled from 'styled-components';
 
+import { OutlineButton } from '../../../components/button';
+import PagedList from '../../../components/paged-list';
+import { Input, TextArea } from '../../../components/input';
+import {
+  HeadingContainer,
+  HeadingActionContainer,
+} from '../../../components/heading';
 import GemsForm from './gems';
 import NestForm from './nest';
 
-function DaysForm({ days, addDay, removeDay, onAddGem }) {
+const FormContainer = styled.div`
+  display: grid;
+  grid-row-gap: 16px;
+`;
+
+function DaysForm({ days, addDay, removeDay, onAddGem, selectOnMap }) {
   return (
     <div style={{ margin: 8 }}>
-      <div style={{ marginBottom: 8, fontSize: 20, display: 'flex' }}>
+      <HeadingContainer>
         <div>Days</div>
-        <button onClick={addDay}>Add day</button>
-      </div>
-      <div>
-        {days.map((day, index) => {
+        <HeadingActionContainer>
+          <OutlineButton variant="primary" onClick={addDay}>
+            Add day
+          </OutlineButton>
+        </HeadingActionContainer>
+      </HeadingContainer>
+      <PagedList items={days}>
+        {({ currentItem: day, itemCount: dayCount, onRemove }) => {
           const addGem = onAddGem.bind(null, day);
+          const isRemoveEnabled = dayCount > 1;
+
+          const onRemoveDay = () => {
+            onRemove();
+            removeDay(day.dayNumber - 1);
+          };
 
           return (
             <div key={day.dayNumber}>
-              <div style={{ display: 'flex' }}>
+              <HeadingContainer>
                 <div>{`Day ${day.dayNumber}`}</div>
-                <button onClick={() => removeDay(index)}>Remove</button>
-              </div>
-              <div
-                style={{
-                  margin: 8,
-                  display: 'grid',
-                  gridTemplateColumns: '100px 200px',
-                }}
-              >
-                <label>Title</label>
-                <input
+                <HeadingActionContainer>
+                  <OutlineButton
+                    variant="danger"
+                    disabled={!isRemoveEnabled}
+                    onClick={onRemoveDay}
+                  >
+                    Remove
+                  </OutlineButton>
+                </HeadingActionContainer>
+              </HeadingContainer>
+              <FormContainer>
+                <Input
+                  label="Title"
                   name="title"
                   value={day.title}
                   onChange={day.onFieldChange}
                 />
-              </div>
-              <div
-                style={{
-                  margin: 8,
-                  display: 'grid',
-                  gridTemplateColumns: '100px 200px',
-                }}
-              >
-                <label>Description</label>
-                <textarea
+                <TextArea
+                  label="Description"
                   name="description"
                   value={day.description}
                   onChange={day.onFieldChange}
                 />
-              </div>
+              </FormContainer>
               <GemsForm
                 gems={day.gems}
                 addGem={addGem}
                 createGem={day.addGem}
                 removeGem={day.removeGem}
+                selectOnMap={selectOnMap}
               />
               <NestForm
                 nest={day.nest}
                 addNest={day.addNest}
                 removeNest={day.removeNest}
               />
-              <hr />
             </div>
           );
-        })}
-      </div>
+        }}
+      </PagedList>
     </div>
   );
 }

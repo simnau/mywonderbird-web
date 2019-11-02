@@ -35,10 +35,10 @@ export default class GemModel {
   };
 
   @action
-  addGemCapture = () => {
-    this.gemCaptures.push(
-      new GemCaptureModel({ sequenceNumber: this.gemCaptures.length + 1 }),
-    );
+  addGemCaptures = (...captures) => {
+    this.gemCaptures = [...this.gemCaptures, ...captures.map((capture, index) => {
+      return new GemCaptureModel({ ...capture, sequenceNumber: this.gemCaptures.length + index + 1 });
+    })];
   };
 
   @action

@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 
-function FileSelectButton({ onSelect }) {
+import { OutlineButton } from './button';
+
+function FileSelectButton({ multiple = false, children, onSelect }) {
   const imageInputRef = useRef();
 
   const onClick = () => {
@@ -15,14 +17,14 @@ function FileSelectButton({ onSelect }) {
 
   return (
     <>
-      <button onClick={onClick}>Upload File</button>
+      <OutlineButton onClick={onClick}>{children}</OutlineButton>
       <input
         ref={imageInputRef}
         type="file"
         style={{ display: 'none' }}
         value=""
         onChange={onSelectFiles}
-        multiple
+        multiple={multiple}
         accept=".jpeg,.jpg,.png"
       />
     </>

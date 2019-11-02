@@ -20,7 +20,7 @@ function ViewJourney({ match }) {
 
   return (
     <div>
-      <div style={{ width: '100%', height: 400, position: 'sticky', top: 0 }}>
+      <div style={{ width: '100%', height: 400, position: 'sticky', top: 64 }}>
         <JourneyMap journey={journey} />
       </div>
       <div>

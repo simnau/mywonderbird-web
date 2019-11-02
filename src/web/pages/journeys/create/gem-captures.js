@@ -1,67 +1,91 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+import styled from 'styled-components';
 
-function GemCapturesForm({ gemCaptures, addGemCapture, removeGemCapture }) {
+import { post } from '../../../util/fetch';
+import { OutlineButton } from '../../../components/button';
+import FileSelectButton from '../../../components/file-select-button';
+import { Input, TextArea } from '../../../components/input';
+import {
+  HeadingContainer,
+  HeadingActionContainer,
+} from '../../../components/heading';
+import VerticalList from '../../../components/horizontal-list';
+
+const CaptureContainer = styled.div`
+  display: grid;
+  grid-template-rows: 40px 200px 60px 60px;
+  grid-template-columns: minmax(1fr, 400px);
+  grid-row-gap: 8px;
+  margin: 8px;
+  width: auto;
+`;
+
+const ImageContainer = styled.div`
+  height: 100%;
+  width: fit-content;
+`;
+
+const Image = styled.img`
+  display: block;
+  width: 100%;
+  min-width: 300px;
+  height: 100%;
+  user-select: none;
+`;
+
+function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
+  const onSelectFile = async files => {
+    const formData = new FormData();
+    Object.entries(files).forEach(([, file]) => {
+      formData.append(file.name, file);
+    });
+
+    const response = await post('/api/gem-captures/file', formData);
+    const data = response.data;
+
+    addGemCaptures(...data.images.map(image => ({ url: image })));
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex' }}>
+      <HeadingContainer>
         <div>Captures</div>
-        <button onClick={addGemCapture}>Add capture</button>
-      </div>
-      {gemCaptures.map((gemCapture, index) => {
-        return (
-          <div key={gemCapture.sequenceNumber} style={{ margin: 8 }}>
-            <div style={{ display: 'flex' }}>
-              <div>{`Capture #${gemCapture.sequenceNumber}`}</div>
-              <button onClick={() => removeGemCapture(index)}>
+        <HeadingActionContainer>
+          <FileSelectButton multiple onSelect={onSelectFile}>
+            Upload captures
+          </FileSelectButton>
+        </HeadingActionContainer>
+      </HeadingContainer>
+      <VerticalList items={gemCaptures} noItemsLabel="No captures">
+        {gemCapture => {
+          return (
+            <CaptureContainer key={gemCapture.sequenceNumber}>
+              <OutlineButton
+                variant="danger"
+                onClick={() => removeGemCapture(gemCapture.sequenceNumber - 1)}
+              >
                 Remove
-              </button>
-            </div>
-            <div
-              style={{
-                margin: 8,
-                display: 'grid',
-                gridTemplateColumns: '100px 200px',
-              }}
-            >
-              <label>Title</label>
-              <input
+              </OutlineButton>
+              <ImageContainer>
+                <Image src={gemCapture.url} draggable={false} />
+              </ImageContainer>
+              <Input
+                label="Title"
                 name="title"
                 value={gemCapture.title}
                 onChange={gemCapture.onFieldChange}
               />
-            </div>
-            <div
-              style={{
-                margin: 8,
-                display: 'grid',
-                gridTemplateColumns: '100px 200px',
-              }}
-            >
-              <label>Description</label>
-              <textarea
+              <TextArea
+                label="Description"
                 name="description"
                 value={gemCapture.description}
                 onChange={gemCapture.onFieldChange}
               />
-            </div>
-            <div
-              style={{
-                margin: 8,
-                display: 'grid',
-                gridTemplateColumns: '100px 200px',
-              }}
-            >
-              <label>URL</label>
-              <input
-                name="url"
-                value={gemCapture.url}
-                onChange={gemCapture.onFieldChange}
-              />
-            </div>
-          </div>
-        );
-      })}
+            </CaptureContainer>
+          );
+        }}
+      </VerticalList>
     </div>
   );
 }
