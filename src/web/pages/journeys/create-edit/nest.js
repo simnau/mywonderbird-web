@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
@@ -8,6 +8,7 @@ import {
   HeadingContainer,
   HeadingActionContainer,
 } from '../../../components/heading';
+import JourneyContext from '../../../contexts/journey';
 
 const FormContainer = styled.div`
   display: grid;
@@ -15,6 +16,12 @@ const FormContainer = styled.div`
 `;
 
 function NestForm({ nest, addNest, removeNest }) {
+  const {
+    selectedNest,
+    selectNestLocationOnMap,
+    cancelSelectNestLocationOnMap,
+  } = useContext(JourneyContext);
+
   return (
     <div style={{ margin: 8 }}>
       <HeadingContainer>
@@ -26,9 +33,27 @@ function NestForm({ nest, addNest, removeNest }) {
             </OutlineButton>
           )}
           {!!nest && (
-            <OutlineButton variant="danger" onClick={removeNest}>
-              Remove nest
-            </OutlineButton>
+            <>
+              {!selectedNest && (
+                <OutlineButton
+                  variant="primary"
+                  onClick={() => selectNestLocationOnMap(nest)}
+                >
+                  Select location on map
+                </OutlineButton>
+              )}
+              {!!selectedNest && (
+                <OutlineButton
+                  variant="danger"
+                  onClick={cancelSelectNestLocationOnMap}
+                >
+                  Cancel select location
+                </OutlineButton>
+              )}
+              <OutlineButton variant="danger" onClick={removeNest}>
+                Remove nest
+              </OutlineButton>
+            </>
           )}
         </HeadingActionContainer>
       </HeadingContainer>
@@ -67,8 +92,8 @@ function NestForm({ nest, addNest, removeNest }) {
           />
           <Input
             label="Id On Platform"
-            name="Platform"
-            value={nest.Platform}
+            name="idOnPlatform"
+            value={nest.idOnPlatform}
             onChange={nest.onFieldChange}
           />
         </FormContainer>

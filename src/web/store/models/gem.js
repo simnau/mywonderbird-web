@@ -1,8 +1,10 @@
 import { observable, action } from 'mobx';
+import uuidv4 from 'uuid/v4';
 
 import GemCaptureModel from './gem-capture';
 
 export default class GemModel {
+  @observable id;
   @observable title;
   @observable description;
   @observable lat;
@@ -11,6 +13,7 @@ export default class GemModel {
   @observable gemCaptures;
 
   constructor({
+    id,
     title = '',
     description = '',
     lat = '',
@@ -18,6 +21,7 @@ export default class GemModel {
     sequenceNumber = '',
     gemCaptures = [],
   } = {}) {
+    this.id = id || uuidv4();
     this.title = title;
     this.description = description;
     this.lat = lat;

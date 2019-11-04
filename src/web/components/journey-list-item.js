@@ -15,6 +15,7 @@ function JourneyListItem({ journey, deleteJourney }) {
         </div>
         <div>
           <Link to={`/journeys/${journey.id}`}>View</Link>
+          <Link to={`/journeys/${journey.id}/edit`}>Edit</Link>
         </div>
         <div>
           <button onClick={onDelete}>Delete</button>

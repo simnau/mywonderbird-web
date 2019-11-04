@@ -1,6 +1,7 @@
 import { observable, action } from 'mobx';
 
 export default class NestModel {
+  @observable id;
   @observable title;
   @observable description;
   @observable lat;
@@ -9,6 +10,7 @@ export default class NestModel {
   @observable idOnPlatform;
 
   constructor({
+    id = undefined,
     title = '',
     description = '',
     lat = '',
@@ -16,6 +18,7 @@ export default class NestModel {
     platform = '',
     idOnPlatform = '',
   } = {}) {
+    this.id = id;
     this.title = title;
     this.description = description;
     this.lat = lat;

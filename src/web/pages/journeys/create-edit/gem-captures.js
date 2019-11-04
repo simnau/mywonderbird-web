@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
@@ -11,6 +11,7 @@ import {
   HeadingActionContainer,
 } from '../../../components/heading';
 import VerticalList from '../../../components/horizontal-list';
+import JourneyContext from '../../../contexts/journey';
 
 const CaptureContainer = styled.div`
   display: grid;
@@ -35,8 +36,11 @@ const Image = styled.img`
 `;
 
 function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
+  const { journeyId } = useContext(JourneyContext);
+
   const onSelectFile = async files => {
     const formData = new FormData();
+    formData.append('journeyId', journeyId);
     Object.entries(files).forEach(([, file]) => {
       formData.append(file.name, file);
     });

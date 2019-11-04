@@ -1,21 +1,21 @@
 const config = require('config');
 
-const s3FileUploader = require('./s3-file-upload'); 
+const s3FileUploader = require('./s3-file-upload');
 
 const fileUploaderType = config.get('media.uploader');
 
 const fileUploaderMapping = {
-  's3': s3FileUploader,
+  s3: s3FileUploader,
 };
 
-async function uploadFile(files) {
+async function uploadFile(files, folder) {
   const fileUploader = fileUploaderMapping[fileUploaderType];
 
   if (!fileUploader) {
     throw new Error(`Unknown file uploader with type ${fileUploaderType}`);
   }
 
-  return fileUploader(files);
+  return fileUploader(files, folder);
 }
 
 module.exports = uploadFile;

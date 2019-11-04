@@ -1,9 +1,11 @@
 import { observable, action } from 'mobx';
+import uuidv4 from 'uuid/v4';
 
 import NestModel from './nest';
 import GemModel from './gem';
 
 export default class DayModel {
+  @observable id;
   @observable title;
   @observable description;
   @observable dayNumber;
@@ -11,15 +13,19 @@ export default class DayModel {
   @observable nest;
 
   constructor({
+    id,
     title = '',
     description = '',
     dayNumber = '',
     gems = [],
+    nest = null,
   } = {}) {
+    this.id = id || uuidv4();
     this.title = title;
     this.description = description;
     this.dayNumber = dayNumber;
-    this.gems = gems;
+    this.gems = gems.map(gem => new GemModel(gem));
+    this.nest = nest ? new NestModel(nest) : null;
   }
 
   @action
@@ -38,8 +44,10 @@ export default class DayModel {
   };
 
   @action
-  addGem = (gem) => {
-    this.gems.push(new GemModel({ ...gem, sequenceNumber: this.gems.length + 1 }));
+  addGem = gem => {
+    this.gems.push(
+      new GemModel({ ...gem, sequenceNumber: this.gems.length + 1 }),
+    );
   };
 
   @action

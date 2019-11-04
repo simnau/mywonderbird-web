@@ -1,20 +1,13 @@
 const exif = require('jpeg-exif');
-const AWS = require('aws-sdk');
 const config = require('config');
 const fileType = require('file-type');
 const uuidv4 = require('uuid/v4');
-const moment = require('moment');
+
+const s3 = require('../../setup/s3');
 
 const {
-  accessKey,
-  secretKey,
   s3: { bucketName },
 } = config.get('aws');
-
-const s3 = new AWS.S3({
-  accessKeyId: accessKey,
-  secretAccessKey: secretKey,
-});
 
 function dmsToDecimal(degrees, minutes, seconds) {
   return degrees + minutes / 60 + seconds / 3600;
@@ -41,7 +34,7 @@ function getLatLngFromExifData(data) {
   };
 }
 
-async function uploadFiles(files) {
+async function uploadFiles(files, folder) {
   const images = [];
   let latLng;
 
@@ -53,9 +46,7 @@ async function uploadFiles(files) {
     }
 
     const imageType = fileType(file.data);
-    const filename = `${moment().format('YYYY-MM-DD')}/${uuidv4()}.${
-      imageType.ext
-    }`;
+    const filename = `${folder}/${uuidv4()}.${imageType.ext}`;
 
     const params = {
       Bucket: bucketName,

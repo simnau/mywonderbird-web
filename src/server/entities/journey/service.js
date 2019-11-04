@@ -1,8 +1,11 @@
+const sequelize = require('../../setup/sequelize');
 const { Journey } = require('../../orm/models/journey');
 const { Day } = require('../../orm/models/day');
 const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const { Nest } = require('../../orm/models/nest');
+const dayService = require('../day/service');
+const { deleteFolder } = require('../../util/s3');
 
 const INCLUDE_MODELS = [
   {
@@ -50,6 +53,13 @@ function findById(id) {
         'sequenceNumber',
         'ASC',
       ],
+      [
+        { model: Day, as: 'days' },
+        { model: Gem, as: 'gems' },
+        { model: GemCapture, as: 'gemCaptures' },
+        'sequenceNumber',
+        'ASC',
+      ],
     ],
   });
 }
@@ -61,7 +71,9 @@ function create(journey) {
 }
 
 async function update(id, journey) {
-  const existingJourney = await findById(id);
+  const existingJourney = await findById(id, {
+    include: INCLUDE_MODELS,
+  });
 
   if (!existingJourney) {
     const error = new Error(`Journey with id ${id} does not exist`);
@@ -70,12 +82,26 @@ async function update(id, journey) {
     throw error;
   }
 
-  return existingJourney.update(journey);
+  return sequelize.transaction(async transaction => {
+    await dayService.updateDays(
+      existingJourney.days,
+      journey.days,
+      id,
+      transaction,
+    );
+    await existingJourney.update(journey, { transaction });
+  });
 }
 
-function del(id) {
-  return Journey.destroy({
-    where: { id },
+async function del(id) {
+  return sequelize.transaction(async transaction => {
+    return Promise.all([
+      Journey.destroy({
+        where: { id },
+        transaction,
+      }),
+      deleteFolder(id),
+    ]);
   });
 }
 

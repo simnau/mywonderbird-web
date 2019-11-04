@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
@@ -10,6 +10,7 @@ import {
   HeadingContainer,
   HeadingActionContainer,
 } from '../../../components/heading';
+import JourneyContext from '../../../contexts/journey';
 import GemCaptureForm from './gem-captures';
 
 const FormContainer = styled.div`
@@ -18,9 +19,19 @@ const FormContainer = styled.div`
   margin-bottom: 8px;
 `;
 
-function GemsForm({ gems, addGem, createGem, removeGem, selectOnMap }) {
+function GemsForm({ gems, addGem, createGem, removeGem }) {
+  const {
+    selectedGem,
+    selectOnMap,
+    cancelSelectOnMap,
+    selectedDay,
+    cancelAddGemFromMap,
+    journeyId,
+  } = useContext(JourneyContext);
+
   const onSelectFile = async files => {
     const formData = new FormData();
+    formData.append('journeyId', journeyId);
     Object.entries(files).forEach(([, file]) => {
       formData.append(file.name, file);
     });
@@ -42,9 +53,16 @@ function GemsForm({ gems, addGem, createGem, removeGem, selectOnMap }) {
       <HeadingContainer>
         <div>Gems</div>
         <HeadingActionContainer>
-          <OutlineButton variant="primary" onClick={addGem}>
-            Create gem from map
-          </OutlineButton>
+          {!selectedDay && (
+            <OutlineButton variant="primary" onClick={addGem}>
+              Create gem from map
+            </OutlineButton>
+          )}
+          {!!selectedDay && (
+            <OutlineButton variant="danger" onClick={cancelAddGemFromMap}>
+              Cancel create gem
+            </OutlineButton>
+          )}
           <FileSelectButton multiple onSelect={onSelectFile}>
             Create from capture
           </FileSelectButton>
@@ -57,12 +75,22 @@ function GemsForm({ gems, addGem, createGem, removeGem, selectOnMap }) {
               <HeadingContainer>
                 <div>{`Gem #${gem.sequenceNumber}`}</div>
                 <HeadingActionContainer>
-                  <OutlineButton
-                    variant="primary"
-                    onClick={() => selectOnMap(gem)}
-                  >
-                    Select coordinates on map
-                  </OutlineButton>
+                  {!selectedGem && (
+                    <OutlineButton
+                      variant="primary"
+                      onClick={() => selectOnMap(gem)}
+                    >
+                      Select coordinates on map
+                    </OutlineButton>
+                  )}
+                  {!!selectedGem && (
+                    <OutlineButton
+                      variant="danger"
+                      onClick={cancelSelectOnMap}
+                    >
+                      Cancel select coordinates
+                    </OutlineButton>
+                  )}
                   <OutlineButton
                     variant="danger"
                     onClick={() => removeGem(index)}

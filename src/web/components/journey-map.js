@@ -1,7 +1,8 @@
 import React from 'react';
-import { Layer, Feature } from 'react-mapbox-gl';
+import { Layer, Feature, Marker } from 'react-mapbox-gl';
 import { observer, useObservable } from 'mobx-react-lite';
 
+import ImageMarker from './image-marker';
 import { getJourneyCoordinates } from '../util/journey';
 import Map from './mapbox';
 
@@ -33,10 +34,25 @@ function JourneyMap({ journey, onClick, onClickEnabled }) {
         onClick={onClickHandler}
       >
         {coordinates.map((dayCoordinates, index) => {
+          const { day, coordinates } = dayCoordinates;
           return (
-            <Layer key={index} type="line" layout={lineLayout} paint={linePaint}>
-              <Feature coordinates={dayCoordinates} />
-            </Layer>
+            <React.Fragment key={index}>
+              <Layer type="line" layout={lineLayout} paint={linePaint}>
+                <Feature coordinates={coordinates} />
+              </Layer>
+              {coordinates.map((dayCoordinate, index) => {
+                return (
+                  <Marker
+                    key={index}
+                    onClick={() => console.log('clicked', dayCoordinate)}
+                    coordinates={dayCoordinate}
+                    anchor="center"
+                  >
+                    <ImageMarker />
+                  </Marker>
+                );
+              })}
+            </React.Fragment>
           );
         })}
       </Map>

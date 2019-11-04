@@ -10,6 +10,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       dayNumber: {
         type: Sequelize.INTEGER,
         allowNull: true,

@@ -8,9 +8,12 @@ const gemCaptureRouter = Router();
 gemCaptureRouter.post(
   '/file',
   asyncHandler(async (req, res) => {
-    const { files } = req;
+    const {
+      files,
+      body: { journeyId },
+    } = req;
 
-    const response = await service.uploadFile(files);
+    const response = await service.uploadFiles(files, journeyId);
 
     res.send(response);
   }),

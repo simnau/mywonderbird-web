@@ -1,8 +1,10 @@
 import { observable, action } from 'mobx';
+import uuidv4 from 'uuid/v4';
 
 import Day from './day';
 
 export default class JourneyModel {
+  @observable id;
   @observable title;
   @observable description;
   @observable type;
@@ -10,17 +12,19 @@ export default class JourneyModel {
   @observable days;
 
   constructor({
+    id,
     title = '',
     description = '',
     type = '',
     startDate = '',
     days = [],
   } = {}) {
+    this.id = id || uuidv4();
     this.title = title;
     this.description = description;
     this.type = type;
     this.startDate = startDate;
-    this.days = days;
+    this.days = days.map(day => new Day(day));
   }
 
   @action

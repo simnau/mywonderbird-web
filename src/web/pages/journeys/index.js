@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { del } from '../../util/fetch';
 import useFetch from '../../util/fetch-effect';
 import JourneyListItem from '../../components/journey-list-item';
+import { Button } from '../../components/button';
 
 function JourneysPage() {
   const { data: journeys, rerun } = useFetch('/api/journeys', []);
@@ -31,7 +32,7 @@ function JourneysPage() {
           />
         ))}
       </div>
-      <button onClick={createJourney}>Create journey</button>
+      <Button variant="primary" onClick={createJourney}>Create journey</Button>
     </div>
   );
 }
