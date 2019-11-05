@@ -65,31 +65,23 @@ function findById(id) {
 }
 
 function create(journey) {
-  return Journey.create(journey, {
-    include: INCLUDE_MODELS,
+  return sequelize.transaction(transaction => {
+    return Journey.create(journey, {
+      include: INCLUDE_MODELS,
+      transaction,
+    });
   });
 }
 
-async function update(id, journey) {
-  const existingJourney = await findById(id, {
-    include: INCLUDE_MODELS,
-  });
-
-  if (!existingJourney) {
-    const error = new Error(`Journey with id ${id} does not exist`);
-    error.status = 404;
-
-    throw error;
-  }
-
+async function update(id, journeyUpdate, existingJourney) {
   return sequelize.transaction(async transaction => {
     await dayService.updateDays(
       existingJourney.days,
-      journey.days,
+      journeyUpdate.days,
       id,
       transaction,
     );
-    await existingJourney.update(journey, { transaction });
+    await existingJourney.update(journeyUpdate, { transaction });
   });
 }
 

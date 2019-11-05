@@ -17,6 +17,11 @@ module.exports = {
     secretKey: 'AWS_SECRET_KEY',
     s3: {
       bucketName: 'AWS_S3_BUCKET_NAME',
-    }
+    },
+    cognito: {
+      region: 'AWS_COGNITO_REGION',
+      poolId: 'AWS_COGNITO_POOL_ID',
+      clientId: 'AWS_COGNITO_CLIENT_ID',
+    },
   },
 };

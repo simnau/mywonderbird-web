@@ -2,17 +2,17 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { useHistory } from 'react-router-dom';
 
-import { del } from '../../util/fetch';
-import useFetch from '../../util/fetch-effect';
-import JourneyListItem from '../../components/journey-list-item';
-import { Button } from '../../components/button';
+import { del } from '../../../util/fetch';
+import useFetch from '../../../util/fetch-effect';
+import JourneyListItem from '../../../components/journey-list-item';
+import { Button } from '../../../components/button';
 
 function JourneysPage() {
-  const { data: journeys, rerun } = useFetch('/api/journeys', []);
+  const { data: journeys, rerun } = useFetch('/api/journeys/all', []);
   const history = useHistory();
 
   const createJourney = () => {
-    history.push('/journeys/create');
+    history.push('/admin/journeys/create');
   };
 
   const deleteJourney = async id => {

@@ -2,14 +2,14 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { OutlineButton } from '../../../components/button';
-import PagedList from '../../../components/paged-list';
-import { Input, TextArea } from '../../../components/input';
+import { OutlineButton } from '../../../../components/button';
+import PagedList from '../../../../components/paged-list';
+import { TextField, TextArea } from '../../../../components/input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../components/heading';
-import JourneyContext from '../../../contexts/journey';
+} from '../../../../components/heading';
+import JourneyContext from '../../../../contexts/journey';
 import GemsForm from './gems';
 import NestForm from './nest';
 
@@ -56,7 +56,7 @@ function DaysForm({ days, addDay, removeDay }) {
                   </HeadingActionContainer>
                 </HeadingContainer>
                 <FormContainer>
-                  <Input
+                  <TextField
                     label="Title"
                     name="title"
                     value={day.title}

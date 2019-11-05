@@ -2,16 +2,16 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { post } from '../../../util/fetch';
-import { OutlineButton } from '../../../components/button';
-import FileSelectButton from '../../../components/file-select-button';
-import { Input, TextArea } from '../../../components/input';
+import { post } from '../../../../util/fetch';
+import { OutlineButton } from '../../../../components/button';
+import FileSelectButton from '../../../../components/file-select-button';
+import { TextField, TextArea } from '../../../../components/input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../components/heading';
-import VerticalList from '../../../components/horizontal-list';
-import JourneyContext from '../../../contexts/journey';
+} from '../../../../components/heading';
+import VerticalList from '../../../../components/horizontal-list';
+import JourneyContext from '../../../../contexts/journey';
 
 const CaptureContainer = styled.div`
   display: grid;
@@ -74,7 +74,7 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
               <ImageContainer>
                 <Image src={gemCapture.url} draggable={false} />
               </ImageContainer>
-              <Input
+              <TextField
                 label="Title"
                 name="title"
                 value={gemCapture.title}

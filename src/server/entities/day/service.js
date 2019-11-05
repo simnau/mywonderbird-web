@@ -24,7 +24,7 @@ const INCLUDE_MODELS = [
   },
 ];
 
-async function updateGems(existingDaysById, dayUpdates, transaction) {
+async function updateGems(existingDaysById, dayUpdates = [], transaction) {
   return Promise.all(
     dayUpdates.map(dayUpdate => {
       const existingDay = existingDaysById[dayUpdate.id];
@@ -77,7 +77,7 @@ function update(days, transaction) {
   );
 }
 
-async function updateDays(existingDays, dayUpdates, journeyId, transaction) {
+async function updateDays(existingDays, dayUpdates = [], journeyId, transaction) {
   const daysToDeleteIds = existingDays
     .filter(existingDay => {
       return !dayUpdates.find(dayUpdate => dayUpdate.id === existingDay.id);

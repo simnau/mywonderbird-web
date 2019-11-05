@@ -6,7 +6,7 @@ export default function Home() {
     <div>
       <div>Home</div>
       <div>
-        <Link to="/journeys">Journeys</Link>
+        <Link to="/admin/journeys">Journeys</Link>
       </div>
     </div>
   );

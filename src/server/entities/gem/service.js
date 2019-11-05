@@ -50,7 +50,7 @@ function update(gems, transaction) {
   );
 }
 
-async function updateDayGems(existingGems, gemUpdates, dayId, transaction) {
+async function updateDayGems(existingGems, gemUpdates = [], dayId, transaction) {
   const gemsToDeleteIds = existingGems
     .filter(existingGem => {
       return !gemUpdates.find(gemUpdate => gemUpdate.id === existingGem.id);

@@ -1,3 +1,5 @@
+const { CUSTOM_ATTRIBUTE_PREFIX } = require('../src/server/constants/cognito');
+
 module.exports = {
   database: {
     url: '',
@@ -18,5 +20,14 @@ module.exports = {
     s3: {
       bucketName: '',
     },
+    cognito: {
+      region: '',
+      poolId: '',
+      clientId: '',
+      roleAttribute: `${CUSTOM_ATTRIBUTE_PREFIX}role`,
+    },
+  },
+  auth: {
+    header: 'Authorization',
   },
 };

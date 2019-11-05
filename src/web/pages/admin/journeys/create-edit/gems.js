@@ -2,15 +2,15 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { post } from '../../../util/fetch';
-import FileSelectButton from '../../../components/file-select-button';
-import { Input, TextArea } from '../../../components/input';
-import { OutlineButton } from '../../../components/button';
+import { post } from '../../../../util/fetch';
+import FileSelectButton from '../../../../components/file-select-button';
+import { TextField, TextArea } from '../../../../components/input';
+import { OutlineButton } from '../../../../components/button';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../components/heading';
-import JourneyContext from '../../../contexts/journey';
+} from '../../../../components/heading';
+import JourneyContext from '../../../../contexts/journey';
 import GemCaptureForm from './gem-captures';
 
 const FormContainer = styled.div`
@@ -100,7 +100,7 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
                 </HeadingActionContainer>
               </HeadingContainer>
               <FormContainer>
-                <Input
+                <TextField
                   label="Title"
                   name="title"
                   value={gem.title}
@@ -112,13 +112,13 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
                   value={gem.description}
                   onChange={gem.onFieldChange}
                 />
-                <Input
+                <TextField
                   label="Latitude"
                   name="lat"
                   value={gem.lat}
                   onChange={gem.onFieldChange}
                 />
-                <Input
+                <TextField
                   label="Longitude"
                   name="lng"
                   value={gem.lng}

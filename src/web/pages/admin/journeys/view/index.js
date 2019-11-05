@@ -2,8 +2,8 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import JourneyMap from '../../../components/journey-map';
-import useFetch from '../../../util/fetch-effect';
+import JourneyMap from '../../../../components/journey-map';
+import useFetch from '../../../../util/fetch-effect';
 
 const FieldContainer = styled.div`
   display: grid;

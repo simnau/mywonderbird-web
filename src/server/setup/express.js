@@ -7,6 +7,7 @@ const config = require('config');
 
 const api = require('./apiRouter');
 const errorHandler = require('../middleware/error-handler');
+const checkAuth = require('../middleware/check-auth');
 
 const app = express();
 const port = config.get('server.port');
@@ -23,6 +24,7 @@ app.use(
     abortOnLimit: true,
   }),
 );
+app.use(checkAuth);
 
 app.use('/', serveStatic(DIST_PATH));
 app.use('/api', api);

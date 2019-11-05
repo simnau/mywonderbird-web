@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useObservable, observer } from 'mobx-react-lite';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+import moment from 'moment';
 
-import { get, post, put } from '../../../util/fetch';
-import JourneyMap from '../../../components/journey-map';
-import { Input, TextArea } from '../../../components/input';
-import { Button } from '../../../components/button';
-import JourneyModel from '../../../store/models/journey';
-import JourneyContext from '../../../contexts/journey';
+import { get, post, put } from '../../../../util/fetch';
+import JourneyMap from '../../../../components/journey-map';
+import { Datepicker, TextField, TextArea } from '../../../../components/input';
+import { Button } from '../../../../components/button';
+import JourneyModel from '../../../../store/models/journey';
+import JourneyContext from '../../../../contexts/journey';
 import DaysForm from './days';
 
 function CreateJourney() {
@@ -42,11 +43,10 @@ function CreateJourney() {
       const url = '/api/journeys';
       await post(url, {
         ...state.journey,
-        startDate: '2019-01-01',
-        userId: 'admin',
+        startDate: moment(state.journey.startDate).format('YYYY-MM-DD'),
       });
     }
-    history.push('/journeys');
+    history.push('/admin/journeys');
   };
 
   const addGemFromMap = day => {
@@ -146,7 +146,7 @@ function CreateJourney() {
             height: 400,
             position: 'sticky',
             top: 64,
-            zIndex: 1000,
+            zIndex: 1,
             paddingBottom: 8,
             backgroundColor: 'white',
           }}
@@ -161,7 +161,7 @@ function CreateJourney() {
           {isEdit ? 'Edit Journey' : 'Create Journey'}
         </div>
         <div style={{ display: 'grid', gridRowGap: 16 }}>
-          <Input
+          <TextField
             label="Title"
             name="title"
             value={state.journey.title}
@@ -173,11 +173,19 @@ function CreateJourney() {
             value={state.journey.description}
             onChange={state.journey.onFieldChange}
           />
-          <Input
+          <TextField
             label="Type"
             name="type"
             value={state.journey.type}
             onChange={state.journey.onFieldChange}
+          />
+          <Datepicker
+            label="Start Date"
+            name="startDate"
+            selected={state.journey.startDate}
+            onChange={state.journey.onStartDateChange}
+            dateFormat="yyyy MMMM dd"
+            maxDate={new Date()}
           />
           <DaysForm
             days={state.journey.days}

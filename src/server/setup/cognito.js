@@ -4,10 +4,13 @@ const config = require('config');
 const {
   accessKey,
   secretKey,
+  cognito: { region },
 } = config.get('aws');
-const s3 = new AWS.S3({
+
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
   accessKeyId: accessKey,
   secretAccessKey: secretKey,
+  region,
 });
 
-module.exports = s3;
+module.exports = cognitoIdentityServiceProvider;

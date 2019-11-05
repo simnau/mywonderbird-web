@@ -2,13 +2,13 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { OutlineButton } from '../../../components/button';
-import { Input, TextArea } from '../../../components/input';
+import { OutlineButton } from '../../../../components/button';
+import { TextField, TextArea } from '../../../../components/input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../components/heading';
-import JourneyContext from '../../../contexts/journey';
+} from '../../../../components/heading';
+import JourneyContext from '../../../../contexts/journey';
 
 const FormContainer = styled.div`
   display: grid;
@@ -60,7 +60,7 @@ function NestForm({ nest, addNest, removeNest }) {
       {!nest && <div>No nest</div>}
       {!!nest && (
         <FormContainer>
-          <Input
+          <TextField
             label="Title"
             name="title"
             value={nest.title}
@@ -72,25 +72,25 @@ function NestForm({ nest, addNest, removeNest }) {
             value={nest.description}
             onChange={nest.onFieldChange}
           />
-          <Input
+          <TextField
             label="Latitude"
             name="lat"
             value={nest.lat}
             onChange={nest.onFieldChange}
           />
-          <Input
+          <TextField
             label="Longitude"
             name="lng"
             value={nest.lng}
             onChange={nest.onFieldChange}
           />
-          <Input
+          <TextField
             label="Platform"
             name="platform"
             value={nest.platform}
             onChange={nest.onFieldChange}
           />
-          <Input
+          <TextField
             label="Id On Platform"
             name="idOnPlatform"
             value={nest.idOnPlatform}
