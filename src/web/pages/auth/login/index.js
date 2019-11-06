@@ -35,7 +35,7 @@ function Login() {
 
   return (
     <Container>
-      <div style={{ marginBottom: 8 }}>Login</div>
+      <div style={{ marginBottom: 8, fontSize: 20, fontWeight: 'bold' }}>Login</div>
       <Form onSubmit={onSubmit}>
         <TextField
           label="Email"
