@@ -11,5 +11,5 @@ module.exports = new Sequelize(url, {
     min: 0,
     idle: 10000,
   },
-  logging: logger.info,
+  logging: logger.info.bind(logger),
 });
