@@ -8,6 +8,7 @@ const config = require('config');
 const api = require('./apiRouter');
 const errorHandler = require('../middleware/error-handler');
 const checkAuth = require('../middleware/check-auth');
+const logger = require('../util/logger');
 
 const app = express();
 const port = config.get('server.port');
@@ -33,5 +34,5 @@ app.use('/*', serveStatic(DIST_PATH));
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  logger.info(`Server listening on port ${port}`);
 });

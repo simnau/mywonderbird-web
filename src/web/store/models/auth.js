@@ -32,10 +32,8 @@ export default class AuthModel {
       if (result.status !== 200) {
         throw new Error('Unable to get user data');
       } else {
-        console.log(this);
         this.isAuthenticated = true;
         this.role = result.data.role;
-        console.log(this);
       }
     }
   };

@@ -1,9 +1,9 @@
 const Sequelize = require('sequelize');
 const config = require('config');
 
-const { url } = config.get('database');
+const logger = require('../util/logger');
 
-console.log('Database URL:', url);
+const { url } = config.get('database');
 
 module.exports = new Sequelize(url, {
   pool: {
@@ -11,5 +11,5 @@ module.exports = new Sequelize(url, {
     min: 0,
     idle: 10000,
   },
-  logging: console.log,
+  logging: logger.info,
 });
