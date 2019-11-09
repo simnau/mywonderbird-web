@@ -3,6 +3,8 @@ const config = require('config');
 
 const { url } = config.get('database');
 
+console.log('Database URL:', url);
+
 module.exports = new Sequelize(url, {
   pool: {
     max: 5,
