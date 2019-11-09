@@ -10,7 +10,7 @@ function InsufficientPermissions() {
 
   const relogin = () => {
     logout();
-    history.push('/auth/login');
+    history.push('/admin/login');
   };
 
   return (

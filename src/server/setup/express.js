@@ -14,6 +14,7 @@ const app = express();
 const port = config.get('server.port');
 const maxUploadSize = config.get('media.fileUpload.maxSize');
 
+const LANDING_PAGE_PATH = path.resolve('src', 'landing-page');
 const DIST_PATH = path.resolve('dist');
 
 app.use(bodyParser.json());
@@ -27,9 +28,11 @@ app.use(
 );
 app.use(checkAuth);
 
-app.use('/', serveStatic(DIST_PATH));
+app.use('/', serveStatic(LANDING_PAGE_PATH));
+app.use('/admin', serveStatic(DIST_PATH));
 app.use('/api', api);
-app.use('/*', serveStatic(DIST_PATH));
+app.use('/admin/*', serveStatic(DIST_PATH));
+app.use('/*', serveStatic(LANDING_PAGE_PATH));
 
 app.use(errorHandler);
 

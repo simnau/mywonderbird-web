@@ -22,10 +22,9 @@ export default function App() {
       <RootContainer>
         <ResponsiveContainer>
           <Switch>
-            <Route exact path="/" component={LandingPage} />
-            <Route path="/admin" component={hasRole(Admin, 'ADMIN')} />
-            <Route exact path="/auth/login" component={unauthorized(Login)} />
-            <Route exact path="/insufficient-permissions" component={InsufficientPermissions} />
+            <Route exact path="/admin/login" component={unauthorized(Login)} />
+            <Route exact path="/admin/insufficient-permissions" component={InsufficientPermissions} />
+            <Route path="/admin/*" component={hasRole(Admin, 'ADMIN')} />
           </Switch>
         </ResponsiveContainer>
       </RootContainer>

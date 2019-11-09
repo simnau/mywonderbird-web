@@ -5,7 +5,7 @@ function LandingPage() {
   const history = useHistory();
 
   useEffect(() => {
-    history.replace('/auth/login');
+    history.replace('/admin/login');
   }, []);
 
   return null;

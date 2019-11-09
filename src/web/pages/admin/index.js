@@ -13,7 +13,7 @@ function Admin() {
     <>
       <Header />
       <Switch>
-        <Route exact path="/admin" component={Home} />
+        <Route exact path="/admin/dashboard" component={Home} />
         <Route
           exact
           path="/admin/journeys/create"

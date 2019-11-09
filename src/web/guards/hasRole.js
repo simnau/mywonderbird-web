@@ -11,11 +11,11 @@ function hasRole(Component, expectedRole) {
 
     useEffect(() => {
       if (!isAuthenticated) {
-        return history.replace('/auth/login');
+        return history.replace('/admin/login');
       }
 
       if (role !== expectedRole) {
-        return history.replace('/insufficient-permissions');
+        return history.replace('/admin/insufficient-permissions');
       }
     }, [isAuthenticated, role]);
 

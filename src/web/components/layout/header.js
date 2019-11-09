@@ -32,14 +32,14 @@ function Header() {
 
   return (
     <HeaderContainer>
-      <Link isActive={isActive('/admin', location.pathname, true)} to="/admin">
-        Home
+      <Link isActive={isActive('/admin/dashboard', location.pathname)} to="/admin/dashboard">
+        Dashboard
       </Link>
       <Link isActive={isActive('/admin/journeys', location.pathname)} to="/admin/journeys">
         Journeys
       </Link>
       {isAuthenticated && <Button onClick={logout}>Logout</Button>}
-      {!isAuthenticated && <Link to="/auth/login">Login</Link>}
+      {!isAuthenticated && <Link to="/admin/login">Login</Link>}
     </HeaderContainer>
   );
 }

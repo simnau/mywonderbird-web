@@ -20,7 +20,7 @@ module.exports = {
   output: {
     filename: '[name].[hash].js',
     path: __dirname + '/../dist',
-    publicPath: '/',
+    publicPath: '/admin',
   },
   plugins: [
     new HtmlWebpackPlugin({

@@ -11,7 +11,7 @@ function unauthorized(Component) {
 
     useEffect(() => {
       if (isAuthenticated) {
-        return history.replace('/admin');
+        return history.replace('/admin/dashboard');
       }
     }, [isAuthenticated]);
 
