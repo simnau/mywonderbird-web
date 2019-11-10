@@ -2,9 +2,13 @@ const fetch = require('node-fetch');
 const config = require('config');
 const jwkToPem = require('jwk-to-pem');
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+const passwordGenerator = require('generate-password');
 
-const { USER_ROLE } = require('../constants/roles');
-const { CUSTOM_ATTRIBUTE_PREFIX } = require('../constants/cognito');
+const { USER_ROLE, ADMIN_ROLE } = require('../constants/roles');
+const {
+  CUSTOM_ATTRIBUTE_PREFIX,
+  ROLE_ATTRIBUTE,
+} = require('../constants/cognito');
 const cognito = require('../setup/cognito');
 const jwtUtil = require('./jwt');
 
@@ -34,8 +38,8 @@ async function verifyToken(token) {
   return jwtUtil.verifyToken(pems, token);
 }
 
-function userToObject(user) {
-  return user.UserAttributes.reduce(
+function userToObject(user, attributeField = 'UserAttributes') {
+  return user[attributeField].reduce(
     (acc, attribute) => {
       const customAttributeIndex = attribute.Name.indexOf(
         CUSTOM_ATTRIBUTE_PREFIX,
@@ -77,7 +81,7 @@ async function registerUser(email, password) {
         Value: email,
       }),
       new AmazonCognitoIdentity.CognitoUserAttribute({
-        Name: 'custom:role',
+        Name: ROLE_ATTRIBUTE,
         Value: USER_ROLE,
       }),
     ];
@@ -90,6 +94,51 @@ async function registerUser(email, password) {
       return resolve(result.user);
     });
   });
+}
+
+async function createUser(email) {
+  const attributeList = [
+    {
+      Name: 'email',
+      Value: email,
+    },
+    {
+      Name: ROLE_ATTRIBUTE,
+      Value: USER_ROLE,
+    },
+  ];
+  const password = passwordGenerator.generate({
+    length: 10,
+    numbers: true,
+  });
+
+  const { User: createdUser } = await cognito
+    .adminCreateUser({
+      UserPoolId: poolId,
+      Username: email,
+      UserAttributes: attributeList,
+      TemporaryPassword: password,
+      MessageAction: 'SUPPRESS',
+    })
+    .promise();
+
+  return userToObject(createdUser, 'Attributes');
+}
+
+async function deleteUser(userId) {
+  const user = await getUser(userId);
+
+  if (!user) {
+    throw new Error(`User with userId ${userId} not found`);
+  }
+
+  if (user.role === ADMIN_ROLE) {
+    throw new Error('Cannot delete an admin user');
+  }
+
+  return cognito
+    .adminDeleteUser({ Username: userId, UserPoolId: poolId })
+    .promise();
 }
 
 async function authenticateUser(email, password) {
@@ -124,9 +173,31 @@ async function authenticateUser(email, password) {
   });
 }
 
+async function listUsers(limit, paginationToken, filter) {
+  const result = await cognito
+    .listUsers({
+      Limit: limit,
+      PaginationToken: paginationToken,
+      AttributesToGet: ['email', ROLE_ATTRIBUTE],
+      Filter: filter,
+      UserPoolId: poolId,
+    })
+    .promise();
+
+  const users = result.Users.map(user => userToObject(user, 'Attributes'));
+
+  return {
+    users,
+    paginationToken: result.PaginationToken,
+  };
+}
+
 module.exports = {
   verifyToken,
   getUser,
   registerUser,
+  createUser,
+  deleteUser,
   authenticateUser,
+  listUsers,
 };

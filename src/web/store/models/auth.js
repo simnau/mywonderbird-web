@@ -10,7 +10,7 @@ export default class AuthModel {
   @action
   login = async ({ email, password }) => {
     const result = await post('/api/auth/login', { email, password });
-    
+
     if (result.status !== 200) {
       throw new Error('Unable to login');
     } else {
@@ -27,13 +27,17 @@ export default class AuthModel {
     const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
 
     if (accessToken) {
-      const result = await get('/api/auth/me');
+      try {
+        const result = await get('/api/auth/me');
 
-      if (result.status !== 200) {
-        throw new Error('Unable to get user data');
-      } else {
-        this.isAuthenticated = true;
-        this.role = result.data.role;
+        if (result.status !== 200) {
+          throw new Error('Unable to get user data');
+        } else {
+          this.isAuthenticated = true;
+          this.role = result.data.role;
+        }
+      } catch (e) {
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
       }
     }
   };

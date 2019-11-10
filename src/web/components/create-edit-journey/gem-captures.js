@@ -2,16 +2,16 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { post } from '../../../../util/fetch';
-import { OutlineButton } from '../../../../components/button';
-import FileSelectButton from '../../../../components/file-select-button';
-import { TextField, TextArea } from '../../../../components/input';
+import { post } from '../../util/fetch';
+import { OutlineButton } from '../button';
+import FileSelectButton from '../file-select-button';
+import { TextField, TextArea } from '../input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../../components/heading';
-import VerticalList from '../../../../components/horizontal-list';
-import JourneyContext from '../../../../contexts/journey';
+} from '../heading';
+import VerticalList from '../horizontal-list';
+import JourneyContext from '../../contexts/journey';
 
 const CaptureContainer = styled.div`
   display: grid;

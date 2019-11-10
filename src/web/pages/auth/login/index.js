@@ -17,25 +17,49 @@ const Form = styled.form`
   grid-row-gap: 8px;
 `;
 
+const ErrorContainer = styled.div`
+  width: 100%;
+  color: red;
+  font-size: 16px;
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 function Login() {
   const { login } = useContext(AuthContext);
   const state = useObservable({
     email: '',
     password: '',
+    error: null,
   });
 
   const onFieldChange = event => {
     state[event.target.name] = event.target.value;
   };
 
-  const onSubmit = event => {
+  const onSubmit = async event => {
     event.preventDefault();
-    login(state);
+    state.error = null;
+
+    try {
+      await login(state);
+    } catch (err) {
+      if (err.response) {
+        state.error = err.response.data.error;
+      } else {
+        state.error = 'Something unexpected happened. Pleas try again later...';
+      }
+    }
   };
 
   return (
     <Container>
-      <div style={{ marginBottom: 8, fontSize: 20, fontWeight: 'bold' }}>Login</div>
+      <div style={{ marginBottom: 8, fontSize: 20, fontWeight: 'bold' }}>
+        Login
+      </div>
+      {state.error && <ErrorContainer>{state.error}</ErrorContainer>}
       <Form onSubmit={onSubmit}>
         <TextField
           label="Email"

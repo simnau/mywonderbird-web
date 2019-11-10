@@ -2,13 +2,13 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { OutlineButton } from '../../../../components/button';
-import { TextField, TextArea } from '../../../../components/input';
+import { OutlineButton } from '../button';
+import { TextField, TextArea } from '../input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../../components/heading';
-import JourneyContext from '../../../../contexts/journey';
+} from '../heading';
+import JourneyContext from '../../contexts/journey';
 
 const FormContainer = styled.div`
   display: grid;

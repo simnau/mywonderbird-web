@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
-import { useObservable, observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import { useHistory, useParams } from 'react-router-dom';
-import moment from 'moment';
+import * as moment from 'moment';
 
-import { get, post, put } from '../../../../util/fetch';
-import JourneyModel from '../../../../store/models/journey';
+import { get, put, post } from '../../../../../util/fetch';
+import CreateEditJourney from '../../../../../components/create-edit-journey';
+import JourneyModel from '../../../../../store/models/journey';
 
-import CreateEditJourney from '../../../../components/create-edit-journey';
-
-function CreateJourney() {
+function CreateEditUserJourney() {
   const history = useHistory();
-  const { id: journeyId } = useParams();
+  const { userId, journeyId } = useParams();
   const state = useObservable({
     selectedDay: null,
     selectedGem: null,
@@ -37,13 +36,13 @@ function CreateJourney() {
         ...state.journey,
       });
     } else {
-      const url = '/api/journeys';
+      const url = `/api/journeys/user/${userId}`;
       await post(url, {
         ...state.journey,
         startDate: moment(state.journey.startDate).format('YYYY-MM-DD'),
       });
     }
-    history.push('/admin/journeys');
+    history.push(`/admin/users/${userId}/journeys`);
   };
 
   return (
@@ -51,4 +50,4 @@ function CreateJourney() {
   );
 }
 
-export default observer(CreateJourney);
+export default observer(CreateEditUserJourney);

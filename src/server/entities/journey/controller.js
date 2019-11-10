@@ -59,7 +59,30 @@ journeyRouter.post(
       body,
       user: { id },
     } = req;
-    const savedJourney = await service.create({ ...body, userId: id });
+    const savedJourney = await service.create({
+      ...body,
+      userId: id,
+      creatorId: id,
+    });
+
+    res.send(savedJourney);
+  }),
+);
+
+journeyRouter.post(
+  '/user/:userId',
+  requireRole(ADMIN_ROLE),
+  asyncHandler(async (req, res) => {
+    const {
+      body,
+      params: { userId },
+      user: { id },
+    } = req;
+    const savedJourney = await service.create({
+      ...body,
+      userId,
+      creatorId: id,
+    });
 
     res.send(savedJourney);
   }),

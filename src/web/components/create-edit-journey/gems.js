@@ -2,15 +2,15 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { post } from '../../../../util/fetch';
-import FileSelectButton from '../../../../components/file-select-button';
-import { TextField, TextArea } from '../../../../components/input';
-import { OutlineButton } from '../../../../components/button';
+import { post } from '../../util/fetch';
+import FileSelectButton from '../file-select-button';
+import { TextField, TextArea } from '../input';
+import { OutlineButton } from '../button';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../../components/heading';
-import JourneyContext from '../../../../contexts/journey';
+} from '../heading';
+import JourneyContext from '../../contexts/journey';
 import GemCaptureForm from './gem-captures';
 
 const FormContainer = styled.div`

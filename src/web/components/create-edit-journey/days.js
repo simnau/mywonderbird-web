@@ -2,14 +2,14 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { OutlineButton } from '../../../../components/button';
-import PagedList from '../../../../components/paged-list';
-import { TextField, TextArea } from '../../../../components/input';
+import { OutlineButton } from '../button';
+import PagedList from '../paged-list';
+import { TextField, TextArea } from '../input';
 import {
   HeadingContainer,
   HeadingActionContainer,
-} from '../../../../components/heading';
-import JourneyContext from '../../../../contexts/journey';
+} from '../heading';
+import JourneyContext from '../../contexts/journey';
 import GemsForm from './gems';
 import NestForm from './nest';
 

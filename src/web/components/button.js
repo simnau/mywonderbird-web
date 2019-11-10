@@ -12,6 +12,8 @@ const baseButtonStyle = css`
   border: none;
   cursor: pointer;
   font-weight: bold;
+  text-decoration: none;
+  text-align: center;
 
   transition: color 100ms linear, background-color 100ms linear,
     border-color 100ms linear;
@@ -25,6 +27,7 @@ const baseButtonStyle = css`
 const outlinePrimaryStyle = css`
   color: ${props => props.color || colors.primary};
   border-color: ${props => props.borderColor || colors.primary};
+  text-decoration: none;
 
   &:hover {
     color: white;

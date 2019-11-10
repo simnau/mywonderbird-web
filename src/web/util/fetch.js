@@ -1,17 +1,23 @@
 import axios from 'axios';
+import qs from 'qs';
 
 import { ACCESS_TOKEN_KEY, AUTHORIZATION_HEADER } from '../constants/auth';
+
+const paramsSerializer = params => {
+  return qs.stringify(params, { arrayFormat: 'bracakets' });
+};
 
 export const getAuthorizationHeaders = () => {
   const authorization = localStorage.getItem(ACCESS_TOKEN_KEY);
   return authorization ? { [AUTHORIZATION_HEADER]: authorization } : {};
 };
 
-export const get = (url, queryParams = {}, config = {}) => {
+export const get = (url, params = {}, config = {}) => {
   const headers = getAuthorizationHeaders();
   return axios.get(url, {
     ...config,
-    queryParams,
+    paramsSerializer,
+    params,
     headers: {
       ...config.headers,
       ...headers,
@@ -19,11 +25,12 @@ export const get = (url, queryParams = {}, config = {}) => {
   });
 };
 
-export const post = (url, body, queryParams = {}, config = {}) => {
+export const post = (url, body, params = {}, config = {}) => {
   const headers = getAuthorizationHeaders();
   return axios.post(url, body, {
     ...config,
-    queryParams,
+    paramsSerializer,
+    params,
     headers: {
       ...config.headers,
       ...headers,
@@ -31,11 +38,12 @@ export const post = (url, body, queryParams = {}, config = {}) => {
   });
 };
 
-export const put = (url, body, queryParams = {}, config = {}) => {
+export const put = (url, body, params = {}, config = {}) => {
   const headers = getAuthorizationHeaders();
   return axios.put(url, body, {
     ...config,
-    queryParams,
+    paramsSerializer,
+    params,
     headers: {
       ...config.headers,
       ...headers,
@@ -43,11 +51,12 @@ export const put = (url, body, queryParams = {}, config = {}) => {
   });
 };
 
-export const del = (url, queryParams = {}, config = {}) => {
+export const del = (url, params = {}, config = {}) => {
   const headers = getAuthorizationHeaders();
   return axios.delete(url, {
     ...config,
-    queryParams,
+    paramsSerializer,
+    params,
     headers: {
       ...config.headers,
       ...headers,

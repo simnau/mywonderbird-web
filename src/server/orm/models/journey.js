@@ -29,6 +29,10 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  creatorId: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
 };
 
 const Journey = sequelize.define('journeys', FIELDS);
