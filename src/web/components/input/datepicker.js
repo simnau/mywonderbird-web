@@ -9,10 +9,10 @@ const InnerDatepicker = styled(ReactDatepicker)`
   width: 100%;
 `;
 
-function Datepicker({ fullWidth = true, label, ...props }) {
+function Datepicker({ fullWidth = true, label, required, ...props }) {
   return (
     <Container fullWidth={fullWidth}>
-      {!!label && <Label>{label}</Label>}
+      {!!label && <Label required={required}>{label}</Label>}
       <InnerDatepicker {...props} />
     </Container>
   );

@@ -2,7 +2,10 @@ import { observable, action } from 'mobx';
 import uuidv4 from 'uuid/v4';
 import moment from 'moment';
 
+import { sanitizeObject } from '../../util/sanitize';
 import Day from './day';
+
+const FIELDS_TO_SANITIZE = ['id', 'title', 'description', 'type'];
 
 export default class JourneyModel {
   @observable id;
@@ -26,6 +29,42 @@ export default class JourneyModel {
     this.type = type;
     this.startDate = moment(startDate).toDate();
     this.days = days.map(day => new Day(day));
+  }
+
+  get sanitized() {
+    const sanitizedData = {
+      startDate: moment(this.startDate).format('YYYY-MM-DD'),
+      days: this.days.map(day => day.sanitized),
+    };
+
+    return sanitizeObject(this, FIELDS_TO_SANITIZE, sanitizedData);
+  }
+
+  get errors() {
+    let errors = {};
+
+    if (!this.title) {
+      errors.title = 'Journey title is required';
+    }
+
+    if (!this.startDate) {
+      errors.startDate = 'Journey start date is required';
+    }
+
+    errors = this.days.reduce((acc, day, index) => {
+      const dayErrors = day.errors;
+
+      if (Object.keys(dayErrors).length === 0) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [`days[${index}]`]: dayErrors,
+      };
+    }, errors);
+
+    return errors;
   }
 
   @action

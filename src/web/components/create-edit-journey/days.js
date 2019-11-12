@@ -5,10 +5,7 @@ import styled from 'styled-components';
 import { OutlineButton } from '../button';
 import PagedList from '../paged-list';
 import { TextField, TextArea } from '../input';
-import {
-  HeadingContainer,
-  HeadingActionContainer,
-} from '../heading';
+import { HeadingContainer, HeadingActionContainer } from '../heading';
 import JourneyContext from '../../contexts/journey';
 import GemsForm from './gems';
 import NestForm from './nest';
@@ -42,45 +39,48 @@ function DaysForm({ days, addDay, removeDay }) {
           };
 
           return (
-              <div key={day.dayNumber}>
-                <HeadingContainer>
-                  <div>{`Day ${day.dayNumber}`}</div>
-                  <HeadingActionContainer>
-                    <OutlineButton
-                      variant="danger"
-                      disabled={!isRemoveEnabled}
-                      onClick={onRemoveDay}
-                    >
-                      Remove
-                    </OutlineButton>
-                  </HeadingActionContainer>
-                </HeadingContainer>
-                <FormContainer>
-                  <TextField
-                    label="Title"
-                    name="title"
-                    value={day.title}
-                    onChange={day.onFieldChange}
-                  />
-                  <TextArea
-                    label="Description"
-                    name="description"
-                    value={day.description}
-                    onChange={day.onFieldChange}
-                  />
-                </FormContainer>
-                <GemsForm
-                  gems={day.gems}
-                  addGem={addGem}
-                  createGem={day.addGem}
-                  removeGem={day.removeGem}
+            <div key={day.dayNumber}>
+              <HeadingContainer>
+                <div>{`Day ${day.dayNumber}`}</div>
+                <HeadingActionContainer>
+                  <OutlineButton
+                    variant="danger"
+                    disabled={!isRemoveEnabled}
+                    onClick={onRemoveDay}
+                  >
+                    Remove
+                  </OutlineButton>
+                </HeadingActionContainer>
+              </HeadingContainer>
+              <FormContainer>
+                <TextField
+                  required
+                  label="Title"
+                  name="title"
+                  value={day.title}
+                  onChange={day.onFieldChange}
+                  error={day.errors.title}
                 />
-                <NestForm
-                  nest={day.nest}
-                  addNest={day.addNest}
-                  removeNest={day.removeNest}
+                <TextArea
+                  label="Description"
+                  name="description"
+                  value={day.description}
+                  onChange={day.onFieldChange}
+                  error={day.errors.description}
                 />
-              </div>
+              </FormContainer>
+              <GemsForm
+                gems={day.gems}
+                addGem={addGem}
+                createGem={day.addGem}
+                removeGem={day.removeGem}
+              />
+              <NestForm
+                nest={day.nest}
+                addNest={day.addNest}
+                removeNest={day.removeNest}
+              />
+            </div>
           );
         }}
       </PagedList>

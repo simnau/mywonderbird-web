@@ -1,7 +1,17 @@
 import { observable, action } from 'mobx';
 import uuidv4 from 'uuid/v4';
 
+import { sanitizeObject } from '../../util/sanitize';
 import GemCaptureModel from './gem-capture';
+
+const FIELDS_TO_SANITIZE = [
+  'id',
+  'title',
+  'description',
+  'lat',
+  'lng',
+  'sequenceNumber',
+];
 
 export default class GemModel {
   @observable id;
@@ -33,6 +43,45 @@ export default class GemModel {
     );
   }
 
+  get sanitized() {
+    const sanitizedData = {
+      gemCaptures: this.gemCaptures.map(gemCapture => gemCapture.sanitized),
+    };
+
+    return sanitizeObject(this, FIELDS_TO_SANITIZE, sanitizedData);
+  }
+
+  get errors() {
+    let errors = {};
+
+    if (!this.title) {
+      errors.title = 'Gem title is required';
+    }
+
+    if (!this.lat) {
+      errors.lat = 'Gem latitude is required';
+    }
+
+    if (!this.lng) {
+      errors.lng = 'Gem longitude is required';
+    }
+
+    errors = this.gemCaptures.reduce((acc, day, index) => {
+      const gemCaptureErorrs = day.errors;
+
+      if (Object.keys(gemCaptureErorrs).length === 0) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [`gemCaptures[${index}]`]: gemCaptureErorrs,
+      };
+    }, errors);
+
+    return errors;
+  }
+
   @action
   onFieldChange = event => {
     this[event.target.name] = event.target.value;
@@ -40,9 +89,15 @@ export default class GemModel {
 
   @action
   addGemCaptures = (...captures) => {
-    this.gemCaptures = [...this.gemCaptures, ...captures.map((capture, index) => {
-      return new GemCaptureModel({ ...capture, sequenceNumber: this.gemCaptures.length + index + 1 });
-    })];
+    this.gemCaptures = [
+      ...this.gemCaptures,
+      ...captures.map((capture, index) => {
+        return new GemCaptureModel({
+          ...capture,
+          sequenceNumber: this.gemCaptures.length + index + 1,
+        });
+      }),
+    ];
   };
 
   @action

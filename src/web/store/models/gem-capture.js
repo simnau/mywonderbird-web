@@ -1,5 +1,15 @@
 import { observable, action } from 'mobx';
 
+import { sanitizeObject } from '../../util/sanitize';
+
+const FIELDS_TO_SANITIZE = [
+  'id',
+  'title',
+  'description',
+  'url',
+  'sequenceNumber',
+];
+
 export default class GemCaptureModel {
   @observable id;
   @observable title;
@@ -19,6 +29,20 @@ export default class GemCaptureModel {
     this.description = description;
     this.url = url;
     this.sequenceNumber = sequenceNumber;
+  }
+
+  get sanitized() {
+    return sanitizeObject(this, FIELDS_TO_SANITIZE);
+  }
+
+  get errors() {
+    const errors = {};
+
+    if (!this.title) {
+      errors.title = 'Gem capture title is required';
+    }
+
+    return errors;
   }
 
   @action

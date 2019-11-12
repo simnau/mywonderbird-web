@@ -123,30 +123,36 @@ function CreateEditJourney({ state, journeyId, onSave }) {
         </div>
         <div style={{ display: 'grid', gridRowGap: 16 }}>
           <TextField
+            required
             label="Title"
             name="title"
             value={state.journey.title}
             onChange={state.journey.onFieldChange}
+            error={state.journey.errors.title}
           />
           <TextArea
             label="Description"
             name="description"
             value={state.journey.description}
             onChange={state.journey.onFieldChange}
+            error={state.journey.errors.description}
           />
           <TextField
             label="Type"
             name="type"
             value={state.journey.type}
             onChange={state.journey.onFieldChange}
+            error={state.journey.errors.type}
           />
           <Datepicker
+            required
             label="Start Date"
             name="startDate"
             selected={state.journey.startDate}
             onChange={state.journey.onStartDateChange}
             dateFormat="yyyy MMMM dd"
             maxDate={new Date()}
+            error={state.journey.errors.startDate}
           />
           <DaysForm
             days={state.journey.days}

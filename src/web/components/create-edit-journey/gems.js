@@ -6,10 +6,7 @@ import { post } from '../../util/fetch';
 import FileSelectButton from '../file-select-button';
 import { TextField, TextArea } from '../input';
 import { OutlineButton } from '../button';
-import {
-  HeadingContainer,
-  HeadingActionContainer,
-} from '../heading';
+import { HeadingContainer, HeadingActionContainer } from '../heading';
 import JourneyContext from '../../contexts/journey';
 import GemCaptureForm from './gem-captures';
 
@@ -84,10 +81,7 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
                     </OutlineButton>
                   )}
                   {!!selectedGem && (
-                    <OutlineButton
-                      variant="danger"
-                      onClick={cancelSelectOnMap}
-                    >
+                    <OutlineButton variant="danger" onClick={cancelSelectOnMap}>
                       Cancel select coordinates
                     </OutlineButton>
                   )}
@@ -101,28 +95,35 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
               </HeadingContainer>
               <FormContainer>
                 <TextField
+                  required
                   label="Title"
                   name="title"
                   value={gem.title}
                   onChange={gem.onFieldChange}
+                  error={gem.errors.title}
                 />
                 <TextArea
                   label="Description"
                   name="description"
                   value={gem.description}
                   onChange={gem.onFieldChange}
+                  error={gem.errors.description}
                 />
                 <TextField
+                  required
                   label="Latitude"
                   name="lat"
                   value={gem.lat}
                   onChange={gem.onFieldChange}
+                  error={gem.errors.lat}
                 />
                 <TextField
+                  required
                   label="Longitude"
                   name="lng"
                   value={gem.lng}
                   onChange={gem.onFieldChange}
+                  error={gem.errors.lng}
                 />
               </FormContainer>
               <GemCaptureForm

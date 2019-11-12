@@ -15,8 +15,7 @@ import JourneyContext from '../../contexts/journey';
 
 const CaptureContainer = styled.div`
   display: grid;
-  grid-template-rows: 40px 200px 60px 60px;
-  grid-template-columns: minmax(1fr, 400px);
+  grid-template-rows: 40px 200px 1fr 1fr;
   grid-row-gap: 8px;
   margin: 8px;
   width: auto;
@@ -79,12 +78,14 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
                 name="title"
                 value={gemCapture.title}
                 onChange={gemCapture.onFieldChange}
+                error={gemCapture.errors.title}
               />
               <TextArea
                 label="Description"
                 name="description"
                 value={gemCapture.description}
                 onChange={gemCapture.onFieldChange}
+                error={gemCapture.errors.description}
               />
             </CaptureContainer>
           );

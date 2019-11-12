@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 
+import { del } from '../../../../util/fetch';
 import useFetch from '../../../../util/fetch-effect';
 import { H3 } from '../../../../components/typography';
 import JourneyListItem from '../../../../components/journey-list-item';
@@ -14,7 +15,10 @@ function UserJourneys() {
     [],
   );
 
-  const deleteJourney = () => {};
+  const deleteJourney = async (id) => {
+    await del(`/api/journeys/${id}`);
+    rerun();
+  };
 
   return (
     <div>
@@ -29,7 +33,11 @@ function UserJourneys() {
           />
         ))}
       </div>
-      <Button variant="primary" as={Link} to={`/admin/users/${userId}/journeys/create`}>
+      <Button
+        variant="primary"
+        as={Link}
+        to={`/admin/users/${userId}/journeys/create`}
+      >
         Create journey
       </Button>
     </div>

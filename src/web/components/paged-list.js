@@ -50,7 +50,7 @@ function PagedList({ children, items }) {
     <Container>
       <PaginationContainer>
         <OutlineButton disabled={!isPreviousEnabled} onClick={onPreviousClick}>
-          <ChevronLeft size="24px"/>
+          <ChevronLeft size="24px" />
         </OutlineButton>
         <OutlineButton disabled={!isNextEnabled} onClick={onNextClick}>
           <ChevronRight size="24px" />
@@ -61,7 +61,12 @@ function PagedList({ children, items }) {
       </PaginationContainer>
       {currentItem && (
         <ItemContainer>
-          {children({ currentItem, itemCount: items.length, onRemove })}
+          {children({
+            currentItem,
+            itemCount: items.length,
+            onRemove,
+            index: state.currentPage,
+          })}
         </ItemContainer>
       )}
     </Container>

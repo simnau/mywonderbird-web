@@ -4,10 +4,7 @@ import styled from 'styled-components';
 
 import { OutlineButton } from '../button';
 import { TextField, TextArea } from '../input';
-import {
-  HeadingContainer,
-  HeadingActionContainer,
-} from '../heading';
+import { HeadingContainer, HeadingActionContainer } from '../heading';
 import JourneyContext from '../../contexts/journey';
 
 const FormContainer = styled.div`
@@ -61,40 +58,51 @@ function NestForm({ nest, addNest, removeNest }) {
       {!!nest && (
         <FormContainer>
           <TextField
+            required
             label="Title"
             name="title"
             value={nest.title}
             onChange={nest.onFieldChange}
+            error={nest.errors.title}
           />
           <TextArea
             label="Description"
             name="description"
             value={nest.description}
             onChange={nest.onFieldChange}
+            error={nest.errors.description}
           />
           <TextField
+            required
             label="Latitude"
             name="lat"
             value={nest.lat}
             onChange={nest.onFieldChange}
+            error={nest.errors.lat}
           />
           <TextField
+            required
             label="Longitude"
             name="lng"
             value={nest.lng}
             onChange={nest.onFieldChange}
+            error={nest.errors.lng}
           />
           <TextField
+            required
             label="Platform"
             name="platform"
             value={nest.platform}
             onChange={nest.onFieldChange}
+            error={nest.errors.platform}
           />
           <TextField
+            required
             label="Id On Platform"
             name="idOnPlatform"
             value={nest.idOnPlatform}
             onChange={nest.onFieldChange}
+            error={nest.errors.idOnPlatform}
           />
         </FormContainer>
       )}
