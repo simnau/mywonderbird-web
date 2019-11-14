@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import { post } from '../../util/fetch';
+import { getResizedImagesAndCoordinates } from '../../util/image';
 import FileSelectButton from '../file-select-button';
 import { TextField, TextArea } from '../input';
 import { OutlineButton } from '../button';
@@ -27,9 +28,14 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
   } = useContext(JourneyContext);
 
   const onSelectFile = async files => {
+    const {
+      coordinates,
+      resizedImages,
+    } = await getResizedImagesAndCoordinates(Object.values(files));
+
     const formData = new FormData();
     formData.append('journeyId', journeyId);
-    Object.entries(files).forEach(([, file]) => {
+    resizedImages.forEach(file => {
       formData.append(file.name, file);
     });
 
@@ -37,8 +43,8 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
     const data = response.data;
 
     createGem({
-      lat: data.latLng && data.latLng.lat,
-      lng: data.latLng && data.latLng.lng,
+      lat: coordinates && coordinates.lat,
+      lng: coordinates && coordinates.lng,
       gemCaptures: data.images.map(image => ({
         url: image,
       })),
