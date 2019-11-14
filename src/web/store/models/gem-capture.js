@@ -38,10 +38,6 @@ export default class GemCaptureModel {
   get errors() {
     const errors = {};
 
-    if (!this.title) {
-      errors.title = 'Gem capture title is required';
-    }
-
     return errors;
   }
 
