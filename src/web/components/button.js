@@ -14,6 +14,7 @@ const baseButtonStyle = css`
   font-weight: bold;
   text-decoration: none;
   text-align: center;
+  display: inline-block;
 
   transition: color 100ms linear, background-color 100ms linear,
     border-color 100ms linear;

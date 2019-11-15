@@ -49,12 +49,32 @@ export function getResizedImage(
   });
 }
 
+export function createResizedImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async event => {
+      const imageData = event.target.result;
+      const resizedImage = await getResizedImage(imageData, file.name);
+
+      resolve(resizedImage);
+    };
+    reader.onerror = error => {
+      reject(error);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+export function getResizedImages(files) {
+  return Promise.all(files.map(file => createResizedImage(file)));
+}
+
 export function getResizedImageAndCoordinates(file, currentCoordinates) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async event => {
       const imageData = event.target.result;
-      const resizedImage = await getResizedImage(imageData);
+      const resizedImage = await getResizedImage(imageData, file.name);
 
       resolve({
         resizedImage,

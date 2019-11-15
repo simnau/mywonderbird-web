@@ -1,17 +1,16 @@
 import React, { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import { post } from '../../util/fetch';
+import { getResizedImages } from '../../util/image';
 import { OutlineButton } from '../button';
 import FileSelectButton from '../file-select-button';
 import { TextField, TextArea } from '../input';
-import {
-  HeadingContainer,
-  HeadingActionContainer,
-} from '../heading';
+import { HeadingContainer, HeadingActionContainer } from '../heading';
 import VerticalList from '../horizontal-list';
 import JourneyContext from '../../contexts/journey';
+import Loader from '../loader';
 
 const CaptureContainer = styled.div`
   display: grid;
@@ -34,20 +33,37 @@ const Image = styled.img`
   user-select: none;
 `;
 
+const UploadActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+
+  > *:not(:last-child) {
+    margin-right: 8px;
+  }
+`;
+
 function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
   const { journeyId } = useContext(JourneyContext);
+  const state = useObservable({
+    isUploading: false,
+  });
 
   const onSelectFile = async files => {
+    state.isUploading = true;
+
+    const resizedImages = await getResizedImages(Object.values(files));
+
     const formData = new FormData();
     formData.append('journeyId', journeyId);
-    Object.entries(files).forEach(([, file]) => {
+    resizedImages.forEach(file => {
       formData.append(file.name, file);
     });
 
-    const response = await post('/api/gem-captures/file', formData);
-    const data = response.data;
+    const { data } = await post('/api/gem-captures/file', formData);
 
     addGemCaptures(...data.images.map(image => ({ url: image })));
+
+    state.isUploading = false;
   };
 
   return (
@@ -55,9 +71,16 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
       <HeadingContainer>
         <div>Captures</div>
         <HeadingActionContainer>
-          <FileSelectButton multiple onSelect={onSelectFile}>
-            Upload captures
-          </FileSelectButton>
+          <UploadActionContainer>
+            <FileSelectButton
+              multiple
+              onSelect={onSelectFile}
+              disabled={state.isUploading}
+            >
+              Upload captures
+            </FileSelectButton>
+            {state.isUploading && <Loader width={24} height={24} />}
+          </UploadActionContainer>
         </HeadingActionContainer>
       </HeadingContainer>
       <VerticalList items={gemCaptures} noItemsLabel="No captures">

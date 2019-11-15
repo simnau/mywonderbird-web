@@ -1,4 +1,3 @@
-const exif = require('jpeg-exif');
 const config = require('config');
 const fileType = require('file-type');
 const uuidv4 = require('uuid/v4');
@@ -9,42 +8,10 @@ const {
   s3: { bucketName },
 } = config.get('aws');
 
-function dmsToDecimal(degrees, minutes, seconds) {
-  return degrees + minutes / 60 + seconds / 3600;
-}
-
-function getLatLngFromExifData(data) {
-  if (!data || !data.GPSInfo) {
-    return null;
-  }
-
-  const {
-    GPSInfo: {
-      GPSLatitude: [latDegrees, latMinutes, latSeconds],
-      GPSLongitude: [lngDegrees, lngMinutes, lngSeconds],
-    },
-  } = data;
-
-  const lat = dmsToDecimal(latDegrees, latMinutes, latSeconds);
-  const lng = dmsToDecimal(lngDegrees, lngMinutes, lngSeconds);
-
-  return {
-    lat,
-    lng,
-  };
-}
-
 async function uploadFiles(files, folder) {
   const images = [];
-  let latLng;
 
   for (const [, file] of Object.entries(files)) {
-    const data = exif.fromBuffer(file.data);
-
-    if (!latLng) {
-      latLng = getLatLngFromExifData(data);
-    }
-
     const imageType = fileType(file.data);
     const filename = `${folder}/${uuidv4()}.${imageType.ext}`;
 
@@ -61,7 +28,6 @@ async function uploadFiles(files, folder) {
   }
 
   return {
-    latLng,
     images,
   };
 }

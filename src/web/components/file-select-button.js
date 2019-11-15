@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import { OutlineButton } from './button';
 
-function FileSelectButton({ multiple = false, children, onSelect }) {
+function FileSelectButton({ multiple = false, children, onSelect, ...props }) {
   const imageInputRef = useRef();
 
   const onClick = () => {
@@ -17,7 +17,9 @@ function FileSelectButton({ multiple = false, children, onSelect }) {
 
   return (
     <>
-      <OutlineButton onClick={onClick}>{children}</OutlineButton>
+      <OutlineButton {...props} onClick={onClick}>
+        {children}
+      </OutlineButton>
       <input
         ref={imageInputRef}
         type="file"

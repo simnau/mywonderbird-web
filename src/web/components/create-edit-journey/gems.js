@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import { post } from '../../util/fetch';
@@ -10,11 +10,21 @@ import { OutlineButton } from '../button';
 import { HeadingContainer, HeadingActionContainer } from '../heading';
 import JourneyContext from '../../contexts/journey';
 import GemCaptureForm from './gem-captures';
+import Loader from '../loader';
 
 const FormContainer = styled.div`
   display: grid;
   grid-row-gap: 16px;
   margin-bottom: 8px;
+`;
+
+const UploadActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+
+  > *:not(:last-child) {
+    margin-right: 8px;
+  }
 `;
 
 function GemsForm({ gems, addGem, createGem, removeGem }) {
@@ -26,12 +36,16 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
     cancelAddGemFromMap,
     journeyId,
   } = useContext(JourneyContext);
+  const state = useObservable({
+    isUploading: false,
+  });
 
   const onSelectFile = async files => {
-    const {
-      coordinates,
-      resizedImages,
-    } = await getResizedImagesAndCoordinates(Object.values(files));
+    state.isUploading = true;
+
+    const { coordinates, resizedImages } = await getResizedImagesAndCoordinates(
+      Object.values(files),
+    );
 
     const formData = new FormData();
     formData.append('journeyId', journeyId);
@@ -39,8 +53,7 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
       formData.append(file.name, file);
     });
 
-    const response = await post('/api/gem-captures/file', formData);
-    const data = response.data;
+    const { data } = await post('/api/gem-captures/file', formData);
 
     createGem({
       lat: coordinates && coordinates.lat,
@@ -49,6 +62,8 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
         url: image,
       })),
     });
+
+    state.isUploading = false;
   };
 
   return (
@@ -66,9 +81,16 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
               Cancel create gem
             </OutlineButton>
           )}
-          <FileSelectButton multiple onSelect={onSelectFile}>
-            Create from capture
-          </FileSelectButton>
+          <UploadActionContainer>
+            <FileSelectButton
+              multiple
+              onSelect={onSelectFile}
+              disabled={state.isUploading}
+            >
+              Create from capture
+            </FileSelectButton>
+            {state.isUploading && <Loader width={24} height={24} />}
+          </UploadActionContainer>
         </HeadingActionContainer>
       </HeadingContainer>
       <div>

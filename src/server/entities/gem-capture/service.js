@@ -5,10 +5,9 @@ const fileUploader = require('../../util/file-upload');
 const { GemCapture } = require('../../orm/models/gem-capture');
 
 async function uploadFiles(files, folder) {
-  const { latLng, images } = await fileUploader(files, folder);
+  const { images } = await fileUploader(files, folder);
 
   return {
-    latLng,
     images,
   };
 }
