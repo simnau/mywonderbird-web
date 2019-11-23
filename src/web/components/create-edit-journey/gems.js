@@ -11,6 +11,7 @@ import { HeadingContainer, HeadingActionContainer } from '../heading';
 import JourneyContext from '../../contexts/journey';
 import GemCaptureForm from './gem-captures';
 import Loader from '../loader';
+import { CenteredContainer } from '../layout/containers';
 
 const FormContainer = styled.div`
   display: grid;
@@ -27,7 +28,14 @@ const UploadActionContainer = styled.div`
   }
 `;
 
-function GemsForm({ gems, addGem, createGem, removeGem }) {
+function GemsForm({
+  gems,
+  addGem,
+  createGem,
+  removeGem,
+  sortGemUp,
+  sortGemDown,
+}) {
   const {
     selectedGem,
     selectOnMap,
@@ -72,7 +80,7 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
   };
 
   return (
-    <div style={{ margin: 8 }}>
+    <div style={{ margin: '8px 8px 32px 8px' }}>
       <HeadingContainer>
         <div>Gems</div>
         <HeadingActionContainer>
@@ -98,10 +106,18 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
           </UploadActionContainer>
         </HeadingActionContainer>
       </HeadingContainer>
+      <hr style={{ backgroundColor: 'lightgray', margin: '24px 0' }} />
       <div>
+        {!gems.length && (
+          <CenteredContainer height={100}>
+            <span style={{ color: 'gray' }}>No gems created</span>
+          </CenteredContainer>
+        )}
         {gems.map((gem, index) => {
+          const onSortGemUp = () => sortGemUp(index);
+          const onSortGemDown = () => sortGemDown(index);
           return (
-            <div key={gem.sequenceNumber}>
+            <div key={gem.sequenceNumber} style={{ marginBottom: 8 }}>
               <HeadingContainer>
                 <div>{`Gem #${gem.sequenceNumber}`}</div>
                 <HeadingActionContainer>
@@ -123,6 +139,15 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
                     onClick={() => removeGem(index)}
                   >
                     Remove
+                  </OutlineButton>
+                  <OutlineButton onClick={onSortGemUp} disabled={index <= 0}>
+                    Sort Up
+                  </OutlineButton>
+                  <OutlineButton
+                    onClick={onSortGemDown}
+                    disabled={index >= gems.length - 1}
+                  >
+                    Sort Down
                   </OutlineButton>
                 </HeadingActionContainer>
               </HeadingContainer>
@@ -168,6 +193,29 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
           );
         })}
       </div>
+      <hr style={{ backgroundColor: 'lightgray', margin: '24px 0' }} />
+      <HeadingActionContainer>
+        {!selectedDay && (
+          <OutlineButton variant="primary" onClick={addGem}>
+            Create gem from map
+          </OutlineButton>
+        )}
+        {!!selectedDay && (
+          <OutlineButton variant="danger" onClick={cancelAddGemFromMap}>
+            Cancel create gem
+          </OutlineButton>
+        )}
+        <UploadActionContainer>
+          <FileSelectButton
+            multiple
+            onSelect={onSelectFile}
+            disabled={state.isUploading}
+          >
+            Create from capture
+          </FileSelectButton>
+          {state.isUploading && <Loader width={24} height={24} />}
+        </UploadActionContainer>
+      </HeadingActionContainer>
     </div>
   );
 }

@@ -74,6 +74,8 @@ function DaysForm({ days, addDay, removeDay }) {
                 addGem={addGem}
                 createGem={day.addGem}
                 removeGem={day.removeGem}
+                sortGemUp={day.sortGemUp}
+                sortGemDown={day.sortGemDown}
               />
               <NestForm
                 nest={day.nest}

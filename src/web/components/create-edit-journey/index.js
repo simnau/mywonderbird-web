@@ -100,11 +100,60 @@ function CreateEditJourney({ state, journeyId, onSave }) {
         cancelSelectNestLocationOnMap,
       }}
     >
-      <div>
+      <div style={{ display: 'grid', gridTemplateColumns: '10fr 9fr' }}>
+        <div style={{ margin: '32px 16px' }}>
+          <div style={{ margin: '8px 0px', fontSize: 18, fontWeight: 'bold' }}>
+            {isEdit ? 'Edit Journey' : 'Create Journey'}
+          </div>
+          <div style={{ display: 'grid', gridRowGap: 16 }}>
+            <TextField
+              required
+              label="Title"
+              name="title"
+              value={state.journey.title}
+              onChange={state.journey.onFieldChange}
+              error={state.journey.errors.title}
+            />
+            <TextArea
+              label="Description"
+              name="description"
+              value={state.journey.description}
+              onChange={state.journey.onFieldChange}
+              error={state.journey.errors.description}
+            />
+            <TextField
+              label="Type"
+              name="type"
+              value={state.journey.type}
+              onChange={state.journey.onFieldChange}
+              error={state.journey.errors.type}
+            />
+            <Datepicker
+              required
+              label="Start Date"
+              name="startDate"
+              selected={state.journey.startDate}
+              onChange={state.journey.onStartDateChange}
+              dateFormat="yyyy MMMM dd"
+              maxDate={new Date()}
+              error={state.journey.errors.startDate}
+            />
+            <DaysForm
+              days={state.journey.days}
+              addDay={state.journey.addDay}
+              removeDay={state.journey.removeDay}
+            />
+          </div>
+          <div>
+            <Button variant="primary" onClick={onSave}>
+              Save
+            </Button>
+          </div>
+        </div>
         <div
           style={{
             width: '100%',
-            height: 400,
+            height: 'calc(100vh - 64px)',
             position: 'sticky',
             top: 64,
             zIndex: 1,
@@ -117,53 +166,6 @@ function CreateEditJourney({ state, journeyId, onSave }) {
             onClickEnabled={mapClickEnabled}
             onClick={onMapClick}
           />
-        </div>
-        <div style={{ margin: '8px 0px', fontSize: 18, fontWeight: 'bold' }}>
-          {isEdit ? 'Edit Journey' : 'Create Journey'}
-        </div>
-        <div style={{ display: 'grid', gridRowGap: 16 }}>
-          <TextField
-            required
-            label="Title"
-            name="title"
-            value={state.journey.title}
-            onChange={state.journey.onFieldChange}
-            error={state.journey.errors.title}
-          />
-          <TextArea
-            label="Description"
-            name="description"
-            value={state.journey.description}
-            onChange={state.journey.onFieldChange}
-            error={state.journey.errors.description}
-          />
-          <TextField
-            label="Type"
-            name="type"
-            value={state.journey.type}
-            onChange={state.journey.onFieldChange}
-            error={state.journey.errors.type}
-          />
-          <Datepicker
-            required
-            label="Start Date"
-            name="startDate"
-            selected={state.journey.startDate}
-            onChange={state.journey.onStartDateChange}
-            dateFormat="yyyy MMMM dd"
-            maxDate={new Date()}
-            error={state.journey.errors.startDate}
-          />
-          <DaysForm
-            days={state.journey.days}
-            addDay={state.journey.addDay}
-            removeDay={state.journey.removeDay}
-          />
-        </div>
-        <div>
-          <Button variant="primary" onClick={onSave}>
-            Save
-          </Button>
         </div>
       </div>
     </JourneyContext.Provider>

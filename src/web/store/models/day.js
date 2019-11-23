@@ -7,6 +7,14 @@ import GemModel from './gem';
 
 const FIELDS_TO_SANITIZE = ['id', 'title', 'description', 'dayNumber'];
 
+function swapGemsAtIndexes(index1, index2, gems) {
+  const gem1 = gems[index1];
+  const gem2 = gems[index2];
+
+  gems[index1] = new GemModel({ ...gem2, sequenceNumber: gem1.sequenceNumber });
+  gems[index2] = new GemModel({ ...gem1, sequenceNumber: gem2.sequenceNumber });
+}
+
 export default class DayModel {
   @observable id;
   @observable title;
@@ -95,5 +103,19 @@ export default class DayModel {
     this.gems.forEach((gem, index) => {
       gem.sequenceNumber = index + 1;
     });
+  };
+
+  @action
+  sortGemUp = index => {
+    if (index > 0) {
+      swapGemsAtIndexes(index - 1, index, this.gems);
+    }
+  };
+
+  @action
+  sortGemDown = index => {
+    if (index < this.gems.length - 1) {
+      swapGemsAtIndexes(index, index + 1, this.gems);
+    }
   };
 }
