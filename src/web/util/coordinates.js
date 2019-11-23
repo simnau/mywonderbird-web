@@ -13,7 +13,7 @@ export function convertDMSToDD(degrees, minutes, seconds, direction) {
 export async function getCoordinatesFromImage(imageFileBlob) {
   const exifData = exif.readFromBinaryFile(imageFileBlob);
 
-  if (!exifData) {
+  if (!exifData || !exifData.GPSLatitude || !exifData.GPSLongitude) {
     return null;
   }
 

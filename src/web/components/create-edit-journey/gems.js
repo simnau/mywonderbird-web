@@ -41,29 +41,34 @@ function GemsForm({ gems, addGem, createGem, removeGem }) {
   });
 
   const onSelectFile = async files => {
-    state.isUploading = true;
+    try {
+      state.isUploading = true;
 
-    const { coordinates, resizedImages } = await getResizedImagesAndCoordinates(
-      Object.values(files),
-    );
+      const {
+        coordinates,
+        resizedImages,
+      } = await getResizedImagesAndCoordinates(Object.values(files));
 
-    const formData = new FormData();
-    formData.append('journeyId', journeyId);
-    resizedImages.forEach(file => {
-      formData.append(file.name, file);
-    });
+      const formData = new FormData();
+      formData.append('journeyId', journeyId);
+      resizedImages.forEach(file => {
+        formData.append(file.name, file);
+      });
 
-    const { data } = await post('/api/gem-captures/file', formData);
+      const { data } = await post('/api/gem-captures/file', formData);
 
-    createGem({
-      lat: coordinates && coordinates.lat,
-      lng: coordinates && coordinates.lng,
-      gemCaptures: data.images.map(image => ({
-        url: image,
-      })),
-    });
-
-    state.isUploading = false;
+      createGem({
+        lat: coordinates && coordinates.lat,
+        lng: coordinates && coordinates.lng,
+        gemCaptures: data.images.map(image => ({
+          url: image,
+        })),
+      });
+    } catch (e) {
+      console.log(e);
+    } finally {
+      state.isUploading = false;
+    }
   };
 
   return (

@@ -49,21 +49,25 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
   });
 
   const onSelectFile = async files => {
-    state.isUploading = true;
+    try {
+      state.isUploading = true;
 
-    const resizedImages = await getResizedImages(Object.values(files));
+      const resizedImages = await getResizedImages(Object.values(files));
 
-    const formData = new FormData();
-    formData.append('journeyId', journeyId);
-    resizedImages.forEach(file => {
-      formData.append(file.name, file);
-    });
+      const formData = new FormData();
+      formData.append('journeyId', journeyId);
+      resizedImages.forEach(file => {
+        formData.append(file.name, file);
+      });
 
-    const { data } = await post('/api/gem-captures/file', formData);
+      const { data } = await post('/api/gem-captures/file', formData);
 
-    addGemCaptures(...data.images.map(image => ({ url: image })));
-
-    state.isUploading = false;
+      addGemCaptures(...data.images.map(image => ({ url: image })));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      state.isUploading = false;
+    }
   };
 
   return (
