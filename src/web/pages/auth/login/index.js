@@ -76,6 +76,7 @@ function Login() {
           type="password"
           value={state.password}
           onChange={onFieldChange}
+          autoComplete="none"
         />
         <Button variant="primary" type="submit">
           Login

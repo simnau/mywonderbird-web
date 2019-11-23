@@ -6,18 +6,17 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import createStore from './store';
 import App from './app';
 import AuthContext from './contexts/auth';
-import AuthModel from './store/models/auth';
+import authModel from './setup/authModel';
 
 import 'reset-css';
 
 const store = createStore();
-const authStore = new AuthModel();
 
 async function init() {
-  await authStore.reauthenticateFromStorage();
+  await authModel.reauthenticateFromStorage();
 
   ReactDOM.render(
-    <AuthContext.Provider value={authStore}>
+    <AuthContext.Provider value={authModel}>
       <MobXProviderContext.Provider value={store}>
         <Router>
           <App />

@@ -3,7 +3,6 @@ const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 const config = require('config');
 const jwt = require('jsonwebtoken');
 
-const cognito = require('../../setup/cognito');
 const cognitoUtil = require('../../util/cognito');
 
 global.fetch = fetch;
@@ -63,9 +62,14 @@ async function login(email, password) {
   }
 }
 
+async function refreshToken(token) {
+  return cognitoUtil.refreshToken(token);
+}
+
 module.exports = {
   register,
   sendConfirmationCode,
   confirm,
   login,
+  refreshToken,
 };

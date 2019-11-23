@@ -73,6 +73,22 @@ async function getUser(userId) {
   return userToObject(user);
 }
 
+async function refreshToken(token) {
+  const result = await cognito
+    .initiateAuth({
+      AuthFlow: 'REFRESH_TOKEN_AUTH',
+      AuthParameters: {
+        REFRESH_TOKEN: token,
+      },
+      ClientId: clientId,
+    })
+    .promise();
+
+  return {
+    accessToken: result.AuthenticationResult.AccessToken,
+  };
+}
+
 async function registerUser(email, password) {
   return new Promise((resolve, reject) => {
     const attributeList = [
@@ -194,6 +210,7 @@ async function listUsers(limit, paginationToken, filter) {
 
 module.exports = {
   verifyToken,
+  refreshToken,
   getUser,
   registerUser,
   createUser,

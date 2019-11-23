@@ -1,65 +1,95 @@
 import axios from 'axios';
 import qs from 'qs';
 
-import { ACCESS_TOKEN_KEY, AUTHORIZATION_HEADER } from '../constants/auth';
+import { REFRESH_TOKEN_URL } from '../constants/urls';
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  AUTHORIZATION_HEADER,
+} from '../constants/auth';
+import authModel from '../setup/authModel';
 
-const paramsSerializer = params => {
-  return qs.stringify(params, { arrayFormat: 'bracakets' });
-};
+function paramsSerializer(params) {
+  return qs.stringify(params, { arrayFormat: 'brackets' });
+}
 
-export const getAuthorizationHeaders = () => {
+export function getAuthorizationHeaders() {
   const authorization = localStorage.getItem(ACCESS_TOKEN_KEY);
   return authorization ? { [AUTHORIZATION_HEADER]: authorization } : {};
-};
+}
 
-export const get = (url, params = {}, config = {}) => {
+async function refreshToken() {
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+  if (!refreshToken) {
+    throw new Error('No refresh token found');
+  }
+
+  return axios.post(REFRESH_TOKEN_URL, {
+    refreshToken,
+  });
+}
+
+function enhancedFetch(config, retry = false) {
   const headers = getAuthorizationHeaders();
-  return axios.get(url, {
+
+  return axios({
     ...config,
     paramsSerializer,
-    params,
     headers: {
       ...config.headers,
       ...headers,
     },
-  });
-};
+  }).catch(async e => {
+    if (e.response.status === 401 && !retry) {
+      const { data } = await refreshToken();
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+      return enhancedFetch(config, true).catch(e => {
+        if (e.response.status === 401) {
+          authModel.logout();
+        }
+        throw e;
+      });
+    }
 
-export const post = (url, body, params = {}, config = {}) => {
-  const headers = getAuthorizationHeaders();
-  return axios.post(url, body, {
-    ...config,
-    paramsSerializer,
-    params,
-    headers: {
-      ...config.headers,
-      ...headers,
-    },
+    throw e;
   });
-};
+}
 
-export const put = (url, body, params = {}, config = {}) => {
-  const headers = getAuthorizationHeaders();
-  return axios.put(url, body, {
+export function get(url, params = {}, config = {}) {
+  return enhancedFetch({
     ...config,
-    paramsSerializer,
+    method: 'get',
     params,
-    headers: {
-      ...config.headers,
-      ...headers,
-    },
+    url,
   });
-};
+}
 
-export const del = (url, params = {}, config = {}) => {
-  const headers = getAuthorizationHeaders();
-  return axios.delete(url, {
+export function post(url, body, params = {}, config = {}) {
+  return enhancedFetch({
     ...config,
-    paramsSerializer,
+    data: body,
+    method: 'post',
     params,
-    headers: {
-      ...config.headers,
-      ...headers,
-    },
+    url,
   });
-};
+}
+
+export function put(url, body, params = {}, config = {}) {
+  return enhancedFetch({
+    ...config,
+    data: body,
+    method: 'put',
+    params,
+    url,
+  });
+}
+
+export function del(url, params = {}, config = {}) {
+  return enhancedFetch({
+    ...config,
+    method: 'delete',
+    params,
+    url,
+  });
+}

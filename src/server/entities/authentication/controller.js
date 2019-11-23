@@ -69,4 +69,14 @@ authenticationRouter.get(
   }),
 );
 
+authenticationRouter.post(
+  '/refresh',
+  asyncHandler(async (req, res) => {
+    const { refreshToken } = req.body;
+    const tokens = await service.refreshToken(refreshToken);
+
+    return res.send(tokens);
+  }),
+);
+
 module.exports = authenticationRouter;

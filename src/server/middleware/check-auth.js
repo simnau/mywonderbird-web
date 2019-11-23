@@ -20,7 +20,7 @@ const requireAuth = async (req, res, next) => {
     const user = await cognitoUtil.getUser(id);
     if (!user) {
       return res
-        .status(401)
+        .status(404)
         .send({ error: 'User not found for the Authorization' });
     }
 
@@ -29,7 +29,7 @@ const requireAuth = async (req, res, next) => {
     return next();
   } catch (e) {
     return res
-      .status(500)
+      .status(401)
       .send({ error: 'An error occured. Please try again.' });
   }
 };
