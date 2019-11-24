@@ -7,6 +7,8 @@ import JourneyModel from '../../../../store/models/journey';
 import FormContext from '../../../../contexts/form';
 
 import CreateEditJourney from '../../../../components/create-edit-journey';
+import { CenteredContainer } from '../../../../components/layout/containers';
+import Loader from '../../../../components/loader';
 
 function CreateJourney() {
   const history = useHistory();
@@ -17,6 +19,7 @@ function CreateJourney() {
     selectedNest: null,
     journey: new JourneyModel({ days: [{ dayNumber: 1 }] }),
     submitted: false,
+    isLoading: true,
   });
 
   const isEdit = !!journeyId;
@@ -24,11 +27,19 @@ function CreateJourney() {
   if (isEdit) {
     useEffect(() => {
       const fetchJourney = async () => {
-        const response = await get(`/api/journeys/${journeyId}`);
-        state.journey = new JourneyModel(response.data);
+        try {
+          const response = await get(`/api/journeys/${journeyId}`);
+          state.journey = new JourneyModel(response.data);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          state.isLoading = false;
+        }
       };
       fetchJourney();
     }, []);
+  } else {
+    state.isLoading = false;
   }
 
   const onSave = async () => {
@@ -47,6 +58,14 @@ function CreateJourney() {
     }
     history.push('/admin/journeys');
   };
+
+  if (state.isLoading) {
+    return (
+      <CenteredContainer height="400px">
+        <Loader />
+      </CenteredContainer>
+    );
+  }
 
   return (
     <FormContext.Provider value={{ submitted: state.submitted }}>

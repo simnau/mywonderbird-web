@@ -1,9 +1,10 @@
 import React from 'react';
-import { Layer, Feature, Marker } from 'react-mapbox-gl';
+import { Layer, Feature, Marker, ZoomControl } from 'react-mapbox-gl';
 import { observer, useObservable } from 'mobx-react-lite';
 
 import ImageMarker from './image-marker';
 import { getJourneyCoordinates } from '../util/journey';
+import { findDayCoordinateBoundingBox } from '../util/coordinates';
 import Map from './mapbox';
 
 const lineLayout = {
@@ -18,9 +19,18 @@ const linePaint = {
 
 function JourneyMap({ journey, onClick, onClickEnabled }) {
   const coordinates = getJourneyCoordinates(journey);
-  const zoom = useObservable([15]);
+  const state = useObservable({
+    zoom: [7],
+  });
 
   const onClickHandler = onClickEnabled ? onClick : undefined;
+
+  const onStyleLoad = map => {
+    const boundingBox = findDayCoordinateBoundingBox(coordinates);
+    if (boundingBox) {
+      map.fitBounds(boundingBox);
+    }
+  };
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
@@ -30,8 +40,9 @@ function JourneyMap({ journey, onClick, onClickEnabled }) {
           height: '100%',
           width: '100%',
         }}
-        zoom={zoom}
+        zoom={state.zoom}
         onClick={onClickHandler}
+        onStyleLoad={onStyleLoad}
       >
         {coordinates.map((dayCoordinates, index) => {
           const { day, coordinates } = dayCoordinates;
@@ -55,6 +66,7 @@ function JourneyMap({ journey, onClick, onClickEnabled }) {
             </React.Fragment>
           );
         })}
+        <ZoomControl />
       </Map>
     </div>
   );

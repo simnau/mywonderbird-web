@@ -6,6 +6,8 @@ import { get, put, post } from '../../../../../util/fetch';
 import CreateEditJourney from '../../../../../components/create-edit-journey';
 import JourneyModel from '../../../../../store/models/journey';
 import FormContext from '../../../../../contexts/form';
+import { CenteredContainer } from '../../../../../components/layout/containers';
+import Loader from '../../../../../components/loader';
 
 function CreateEditUserJourney() {
   const history = useHistory();
@@ -16,6 +18,7 @@ function CreateEditUserJourney() {
     selectedNest: null,
     journey: new JourneyModel({ days: [{ dayNumber: 1 }] }),
     submitted: false,
+    isLoading: true,
   });
 
   const isEdit = !!journeyId;
@@ -23,11 +26,19 @@ function CreateEditUserJourney() {
   if (isEdit) {
     useEffect(() => {
       const fetchJourney = async () => {
-        const response = await get(`/api/journeys/${journeyId}`);
-        state.journey = new JourneyModel(response.data);
+        try {
+          const response = await get(`/api/journeys/${journeyId}`);
+          state.journey = new JourneyModel(response.data);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          state.isLoading = false;
+        }
       };
       fetchJourney();
     }, []);
+  } else {
+    state.isLoading = false;
   }
 
   const onSave = async () => {
@@ -46,6 +57,14 @@ function CreateEditUserJourney() {
     }
     history.push(`/admin/users/${userId}/journeys`);
   };
+
+  if (state.isLoading) {
+    return (
+      <CenteredContainer height="400px">
+        <Loader />
+      </CenteredContainer>
+    );
+  }
 
   return (
     <FormContext.Provider value={{ submitted: state.submitted }}>
