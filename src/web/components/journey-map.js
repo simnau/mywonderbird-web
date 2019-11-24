@@ -17,7 +17,7 @@ const linePaint = {
   'line-width': 8,
 };
 
-function JourneyMap({ journey, onClick, onClickEnabled }) {
+function JourneyMap({ journey, onClick, onClickEnabled, mapRef }) {
   const coordinates = getJourneyCoordinates(journey);
   const state = useObservable({
     zoom: [7],
@@ -26,6 +26,7 @@ function JourneyMap({ journey, onClick, onClickEnabled }) {
   const onClickHandler = onClickEnabled ? onClick : undefined;
 
   const onStyleLoad = map => {
+    mapRef.current = map;
     const boundingBox = findDayCoordinateBoundingBox(coordinates);
     if (boundingBox) {
       map.fitBounds(boundingBox);

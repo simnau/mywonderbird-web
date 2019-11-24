@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import AsyncSelect from 'react-select/async';
 
+import { get } from '../../util/fetch';
 import JourneyMap from '../journey-map';
 import JourneyContext from '../../contexts/journey';
 import { Datepicker, TextField, TextArea } from '../input';
@@ -8,6 +10,7 @@ import { Button } from '../button';
 import DaysForm from './days';
 
 function CreateEditJourney({ state, journeyId, onSave }) {
+  const mapRef = useRef();
   const isEdit = !!journeyId;
 
   const addGemFromMap = day => {
@@ -82,6 +85,30 @@ function CreateEditJourney({ state, journeyId, onSave }) {
     }
   };
 
+  const searchCountries = async inputValue => {
+    const { data } = await get('/api/geo/countries/search', {
+      q: inputValue.trim(),
+    });
+    return data;
+  };
+
+  const countrySelected = async selected => {
+    if (!selected) {
+      return;
+    }
+
+    const { data: countryBoundaries } = await get(
+      `/api/geo/country-boundaries/${selected.value}`,
+    );
+
+    if (mapRef && mapRef.current) {
+      mapRef.current.fitBounds([
+        countryBoundaries.topLeft,
+        countryBoundaries.bottomRight,
+      ]);
+    }
+  };
+
   const mapClickEnabled =
     !!state.selectedDay || !!state.selectedGem || !!state.selectedNest;
 
@@ -106,6 +133,14 @@ function CreateEditJourney({ state, journeyId, onSave }) {
             {isEdit ? 'Edit Journey' : 'Create Journey'}
           </div>
           <div style={{ display: 'grid', gridRowGap: 16 }}>
+            {!isEdit && (
+              <AsyncSelect
+                cacheOptions
+                loadOptions={searchCountries}
+                placeholder="Select a country to start"
+                onChange={countrySelected}
+              />
+            )}
             <TextField
               required
               label="Title"
@@ -165,6 +200,7 @@ function CreateEditJourney({ state, journeyId, onSave }) {
             journey={state.journey}
             onClickEnabled={mapClickEnabled}
             onClick={onMapClick}
+            mapRef={mapRef}
           />
         </div>
       </div>
