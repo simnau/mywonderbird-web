@@ -3,7 +3,13 @@ const logger = require('../util/logger');
 module.exports = (err, req, res, next) => {
   logger.error(err.message);
 
-  res.status(err.status || 500).send({
+  const errorData = {
     error: err.message || err,
-  });
+  };
+
+  if (err.code) {
+    errorData.code = err.code;
+  }
+
+  res.status(err.status || 500).send(errorData);
 };
