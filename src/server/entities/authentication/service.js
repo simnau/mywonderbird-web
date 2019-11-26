@@ -66,10 +66,20 @@ async function refreshToken(token) {
   return cognitoUtil.refreshToken(token);
 }
 
+async function forgotPassword(email) {
+  return cognitoUtil.forgotPassword(email);
+}
+
+async function resetPassword(email, password, code) {
+  return cognitoUtil.resetPassword(email, password, code);
+}
+
 module.exports = {
   register,
   sendConfirmationCode,
   confirm,
   login,
   refreshToken,
+  forgotPassword,
+  resetPassword,
 };

@@ -208,6 +208,30 @@ async function listUsers(limit, paginationToken, filter) {
   };
 }
 
+async function forgotPassword(email) {
+  const result = await cognito
+    .forgotPassword({
+      Username: email,
+      ClientId: clientId,
+    })
+    .promise();
+
+  return result;
+}
+
+async function resetPassword(email, password, code) {
+  const result = await cognito
+    .confirmForgotPassword({
+      Username: email,
+      Password: password,
+      ConfirmationCode: code,
+      ClientId: clientId,
+    })
+    .promise();
+
+  return result;
+}
+
 module.exports = {
   verifyToken,
   refreshToken,
@@ -217,4 +241,6 @@ module.exports = {
   deleteUser,
   authenticateUser,
   listUsers,
+  forgotPassword,
+  resetPassword,
 };

@@ -79,4 +79,18 @@ authenticationRouter.post(
   }),
 );
 
+authenticationRouter.post('/forgot-password', asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const result = await service.forgotPassword(email);
+
+  return res.send(result);
+}));
+
+authenticationRouter.post('/reset-password', asyncHandler(async (req, res) => {
+  const { email, password, code } = req.body;
+  const result = await service.resetPassword(email, password, code);
+
+  return res.send(result);
+}));
+
 module.exports = authenticationRouter;
