@@ -13,10 +13,11 @@ import { CenteredContainer } from '../../../../components/layout/containers';
 function UserJourneys() {
   const { userId } = useParams();
 
-  const { data: journeys, isLoading, rerun } = useFetch(
-    `/api/journeys/all?userId=${userId}`,
-    [],
-  );
+  const {
+    data: { total, journeys },
+    isLoading,
+    rerun,
+  } = useFetch(`/api/journeys/all?userId=${userId}`, []);
 
   const deleteJourney = async id => {
     await del(`/api/journeys/${id}`);

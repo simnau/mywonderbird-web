@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const sequelize = require('../../setup/sequelize');
 const { Journey } = require('../../orm/models/journey');
 const { Day } = require('../../orm/models/day');
@@ -30,16 +32,48 @@ const INCLUDE_MODELS = [
   },
 ];
 
-function findAll() {
-  return Journey.findAll({});
+async function findAll(page, pageSize) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+
+  const { count: total, rows: journeys } = await Journey.findAndCountAll({
+    offset,
+    limit,
+  });
+
+  return { total, journeys };
 }
 
-function findAllByUser(userId) {
-  return Journey.findAll({
+async function findAllByUser(userId, page, pageSize) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+
+  const { count: total, rows: journeys } = await Journey.findAndCountAll({
     where: {
       userId,
     },
+    offset,
+    limit,
   });
+
+  return { total, journeys };
+}
+
+async function findAllNotByUser(userId, page, pageSize) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+
+  const { count: total, rows: journeys } = await Journey.findAndCountAll({
+    where: {
+      userId: {
+        [Op.ne]: userId,
+      },
+    },
+    offset,
+    limit,
+  });
+
+  return { total, journeys };
 }
 
 function findById(id) {
@@ -100,6 +134,7 @@ async function del(id) {
 module.exports = {
   findAll,
   findAllByUser,
+  findAllNotByUser,
   findById,
   create,
   update,

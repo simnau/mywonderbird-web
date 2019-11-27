@@ -8,14 +8,17 @@ const service = require('./service');
 
 const journeyRouter = Router();
 
+const DEFAULT_PAGE_SIZE = 20;
+
 journeyRouter.get(
   '/',
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
       user: { id },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
-    const journeys = await service.findAllByUser(id);
+    const journeys = await service.findAllByUser(id, page, pageSize);
 
     res.send(journeys);
   }),
@@ -25,10 +28,24 @@ journeyRouter.get(
   '/all',
   requireRole(ADMIN_ROLE),
   asyncHandler(async (req, res) => {
-    const { userId } = req.query;
+    const { userId, page = 1, pageSize = DEFAULT_PAGE_SIZE } = req.query;
     const journeys = await (userId
-      ? service.findAllByUser(userId)
-      : service.findAll());
+      ? service.findAllByUser(userId, page, pageSize)
+      : service.findAll(page, pageSize));
+
+    res.send(journeys);
+  }),
+);
+
+journeyRouter.get(
+  '/feed',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+    } = req;
+    const journeys = await service.findAllNotByUser(id, page, pageSize);
 
     res.send(journeys);
   }),
