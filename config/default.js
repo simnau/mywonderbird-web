@@ -30,4 +30,7 @@ module.exports = {
   auth: {
     header: 'Authorization',
   },
+  feed: {
+    maxImageCount: 4,
+  },
 };

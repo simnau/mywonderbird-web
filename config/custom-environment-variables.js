@@ -24,4 +24,7 @@ module.exports = {
       clientId: 'AWS_COGNITO_CLIENT_ID',
     },
   },
+  feed: {
+    maxImageCount: 'FEED_MAX_IMAGE_COUNT',
+  },
 };

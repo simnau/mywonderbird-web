@@ -32,6 +32,23 @@ const INCLUDE_MODELS = [
   },
 ];
 
+const INCLUDE_ORDER = [
+  [{ model: Day, as: 'days' }, 'dayNumber', 'ASC'],
+  [
+    { model: Day, as: 'days' },
+    { model: Gem, as: 'gems' },
+    'sequenceNumber',
+    'ASC',
+  ],
+  [
+    { model: Day, as: 'days' },
+    { model: Gem, as: 'gems' },
+    { model: GemCapture, as: 'gemCaptures' },
+    'sequenceNumber',
+    'ASC',
+  ],
+];
+
 async function findAll(page, pageSize) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
@@ -61,9 +78,39 @@ async function findAllByUser(userId, page, pageSize) {
   return { total, journeys };
 }
 
-async function findAllNotByUser(userId, page, pageSize) {
+async function findAllNotByUser(
+  userId,
+  page,
+  pageSize,
+  { loadIncludes = false } = {},
+) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
+
+  if (loadIncludes) {
+    const [total, journeys] = await Promise.all([
+      Journey.count({
+        where: {
+          userId: {
+            [Op.ne]: userId,
+          },
+        },
+      }),
+      Journey.findAll({
+        where: {
+          userId: {
+            [Op.ne]: userId,
+          },
+        },
+        order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER],
+        include: INCLUDE_MODELS,
+        offset,
+        limit,
+      }),
+    ]);
+
+    return { total, journeys };
+  }
 
   const { count: total, rows: journeys } = await Journey.findAndCountAll({
     where: {
@@ -82,22 +129,7 @@ async function findAllNotByUser(userId, page, pageSize) {
 function findById(id) {
   return Journey.findByPk(id, {
     include: INCLUDE_MODELS,
-    order: [
-      [{ model: Day, as: 'days' }, 'dayNumber', 'ASC'],
-      [
-        { model: Day, as: 'days' },
-        { model: Gem, as: 'gems' },
-        'sequenceNumber',
-        'ASC',
-      ],
-      [
-        { model: Day, as: 'days' },
-        { model: Gem, as: 'gems' },
-        { model: GemCapture, as: 'gemCaptures' },
-        'sequenceNumber',
-        'ASC',
-      ],
-    ],
+    order: INCLUDE_ORDER,
   });
 }
 

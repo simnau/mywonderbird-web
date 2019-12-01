@@ -1,13 +1,16 @@
 const { Router } = require('express');
 const asyncHandler = require('express-async-handler');
+const config = require('config');
 
 const { ADMIN_ROLE } = require('../../constants/roles');
 const requireRole = require('../../middleware/require-role');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
+const { findCoordinateBoundingBox } = require('../../util/geo');
 
 const journeyRouter = Router();
 
+const feedMaxImageCount = config.get('feed.maxImageCount');
 const DEFAULT_PAGE_SIZE = 20;
 
 journeyRouter.get(
@@ -37,6 +40,52 @@ journeyRouter.get(
   }),
 );
 
+function journeyToFeedJourneyDTO(journey) {
+  const { days, ...journeyData } = journey.toJSON();
+
+  const images = [];
+  const coordinates = [];
+
+  for (const day of days) {
+    for (const gem of day.gems) {
+      if (
+        images.length < feedMaxImageCount &&
+        gem.gemCaptures &&
+        gem.gemCaptures.length &&
+        gem.gemCaptures[0].url
+      ) {
+        images.push(gem.gemCaptures[0].url);
+      }
+
+      coordinates.push({
+        id: gem.id,
+        lat: gem.lat,
+        lng: gem.lng,
+        type: 'gem',
+      });
+    }
+
+    if (day.nest) {
+      coordinates.push({
+        id: day.nest.id,
+        lat: day.nest.lat,
+        lng: day.nest.lng,
+        type: 'nest',
+      });
+    }
+  }
+
+  const boundingBox = findCoordinateBoundingBox(coordinates);
+
+  return {
+    ...journeyData,
+    images,
+    coordinates,
+    length: days.length,
+    boundingBox,
+  };
+}
+
 journeyRouter.get(
   '/feed',
   requireAuth,
@@ -45,9 +94,17 @@ journeyRouter.get(
       user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
-    const journeys = await service.findAllNotByUser(id, page, pageSize);
+    const { total, journeys } = await service.findAllNotByUser(
+      id,
+      page,
+      pageSize,
+      {
+        loadIncludes: true,
+      },
+    );
+    const journeyDTOs = journeys.map(journeyToFeedJourneyDTO);
 
-    res.send(journeys);
+    res.send({ total, journeys: journeyDTOs });
   }),
 );
 
