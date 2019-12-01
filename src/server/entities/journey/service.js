@@ -37,6 +37,7 @@ async function findAll(page, pageSize) {
   const limit = pageSize;
 
   const { count: total, rows: journeys } = await Journey.findAndCountAll({
+    order: [['updatedAt', 'DESC']],
     offset,
     limit,
   });
@@ -52,6 +53,7 @@ async function findAllByUser(userId, page, pageSize) {
     where: {
       userId,
     },
+    order: [['updatedAt', 'DESC']],
     offset,
     limit,
   });
@@ -69,6 +71,7 @@ async function findAllNotByUser(userId, page, pageSize) {
         [Op.ne]: userId,
       },
     },
+    order: [['updatedAt', 'DESC']],
     offset,
     limit,
   });
