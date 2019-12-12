@@ -4,6 +4,8 @@ const asyncHandler = require('express-async-handler');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
 
+const AVATAR_FOLDER = 'avatars';
+
 const router = Router();
 
 router.get(
@@ -34,6 +36,23 @@ router.post(
     await service.createOrUpdateProfile(id, body);
 
     res.send({ succes: true });
+  }),
+);
+
+router.post(
+  '/avatar',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      files,
+    } = req;
+    const { images } = await service.uploadAvatar(
+      files,
+      `${AVATAR_FOLDER}/${id}`,
+    );
+
+    res.send({ images });
   }),
 );
 

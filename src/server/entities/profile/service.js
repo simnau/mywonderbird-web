@@ -1,3 +1,4 @@
+const fileUploader = require('../../util/file-upload');
 const { Profile } = require('../../orm/models/profile');
 
 async function findProfileById(id) {
@@ -14,7 +15,16 @@ async function createOrUpdateProfile(id, profileData) {
   }
 }
 
+async function uploadAvatar(files, folder) {
+  const { images } = await fileUploader(files, folder, true);
+
+  return {
+    images,
+  };
+}
+
 module.exports = {
   findProfileById,
   createOrUpdateProfile,
+  uploadAvatar,
 };

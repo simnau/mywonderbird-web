@@ -8,16 +8,19 @@ const {
   s3: { bucketName },
 } = config.get('aws');
 
-async function uploadFiles(files, folder) {
+async function uploadFiles(files, folder, useOriginalFilename = false) {
   const images = [];
 
   for (const [, file] of Object.entries(files)) {
     const imageType = fileType(file.data);
-    const filename = `${folder}/${uuidv4()}.${imageType.ext}`;
+    const filename = useOriginalFilename
+      ? file.name
+      : `${uuidv4()}/${imageType.ext}`;
+    const fullFilename = `${folder}/${filename}`;
 
     const params = {
       Bucket: bucketName,
-      Key: filename,
+      Key: fullFilename,
       Body: file.data,
       ContentType: imageType.mime,
     };
