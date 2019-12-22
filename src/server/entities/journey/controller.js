@@ -21,9 +21,12 @@ journeyRouter.get(
       user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
-    const journeys = await service.findAllByUser(id, page, pageSize);
+    const { journeys, total } = await service.findAllByUser(id, page, pageSize);
+    const journeysWithProfile = await service.addUserProfileToJourneys(
+      journeys,
+    );
 
-    res.send(journeys);
+    res.send({ journeys: journeysWithProfile, total });
   }),
 );
 
@@ -32,16 +35,19 @@ journeyRouter.get(
   requireRole(ADMIN_ROLE),
   asyncHandler(async (req, res) => {
     const { userId, page = 1, pageSize = DEFAULT_PAGE_SIZE } = req.query;
-    const journeys = await (userId
+    const { journeys, total } = await (userId
       ? service.findAllByUser(userId, page, pageSize)
       : service.findAll(page, pageSize));
+    const journeysWithProfile = await service.addUserProfileToJourneys(
+      journeys,
+    );
 
-    res.send(journeys);
+    res.send({ journeys: journeysWithProfile, total });
   }),
 );
 
 function journeyToFeedJourneyDTO(journey) {
-  const { days, ...journeyData } = journey.toJSON();
+  const { days, ...journeyData } = journey;
 
   const images = [];
   const coordinates = [];
@@ -102,7 +108,10 @@ journeyRouter.get(
         loadIncludes: true,
       },
     );
-    const journeyDTOs = journeys.map(journeyToFeedJourneyDTO);
+    const journeysWithProfile = await service.addUserProfileToJourneys(
+      journeys,
+    );
+    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
 
     res.send({ total, journeys: journeyDTOs });
   }),
@@ -121,7 +130,9 @@ journeyRouter.get(
       });
     }
 
-    return res.send(journey);
+    const journeyWithProfle = await service.addUserProfileToJourney(journey);
+
+    return res.send(journeyWithProfle);
   }),
 );
 

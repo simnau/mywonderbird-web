@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const fileUploader = require('../../util/file-upload');
 const { Profile } = require('../../orm/models/profile');
 
@@ -23,8 +25,19 @@ async function uploadAvatar(files, folder) {
   };
 }
 
+async function findProfilesByIds(ids) {
+  return Profile.findAll({
+    where: {
+      id: {
+        [Op.in]: ids,
+      },
+    },
+  });
+}
+
 module.exports = {
   findProfileById,
+  findProfilesByIds,
   createOrUpdateProfile,
   uploadAvatar,
 };

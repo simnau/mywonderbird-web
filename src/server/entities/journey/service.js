@@ -7,6 +7,7 @@ const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const { Nest } = require('../../orm/models/nest');
 const dayService = require('../day/service');
+const profileService = require('../profile/service');
 const { deleteFolder } = require('../../util/s3');
 
 const INCLUDE_MODELS = [
@@ -166,6 +167,37 @@ async function del(id) {
   });
 }
 
+async function addUserProfileToJourneys(journeys) {
+  const uniqueUserIds = [...new Set(journeys.map(journey => journey.userId))];
+  const userProfiles = await profileService.findProfilesByIds(uniqueUserIds);
+  const profilesById = userProfiles.reduce(
+    (result, profile) => ({
+      ...result,
+      [profile.id]: profile,
+    }),
+    {},
+  );
+
+  return journeys.map(journey => {
+    const journeyData = journey.toJSON ? journey.toJSON() : journey;
+    const profile = profilesById[journeyData.userId] || {};
+    return {
+      ...journeyData,
+      userProfile: profile,
+    };
+  });
+}
+
+async function addUserProfileToJourney(journey) {
+  const userProfile = await profileService.findProfileById(journey.userId);
+
+  const journeyData = journey.toJSON ? journey.toJSON() : journey;
+  return {
+    ...journeyData,
+    userProfile: userProfile || {},
+  };
+}
+
 module.exports = {
   findAll,
   findAllByUser,
@@ -174,4 +206,6 @@ module.exports = {
   create,
   update,
   delete: del,
+  addUserProfileToJourney,
+  addUserProfileToJourneys,
 };
