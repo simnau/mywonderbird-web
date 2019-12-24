@@ -18,8 +18,23 @@ async function deleteUser(userId) {
   return cognitoUtil.deleteUser(userId);
 }
 
+async function getUser(userId) {
+  return cognitoUtil.getUser(userId);
+}
+
+async function updateUserRole(userId, role) {
+  return cognitoUtil.updateUserRole(userId, role);
+}
+
+async function markUserAsRegistered(userId) {
+  return cognitoUtil.markUserAsRegistered(userId);
+}
+
 module.exports = {
   getUsers,
   createUser,
   deleteUser,
+  getUser,
+  updateUserRole,
+  markUserAsRegistered,
 };

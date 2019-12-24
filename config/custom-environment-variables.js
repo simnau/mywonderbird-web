@@ -22,6 +22,7 @@ module.exports = {
       region: 'AWS_COGNITO_REGION',
       poolId: 'AWS_COGNITO_POOL_ID',
       clientId: 'AWS_COGNITO_CLIENT_ID',
+      domain: 'AWS_COGNITO_DOMAIN',
     },
   },
   feed: {

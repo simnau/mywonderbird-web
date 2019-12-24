@@ -16,15 +16,17 @@ const requireAuth = async (req, res, next) => {
       return next();
     }
 
-    const { sub: id } = await cognitoUtil.verifyToken(jwtToken);
-    const user = await cognitoUtil.getUser(id);
+    const { username } = await cognitoUtil.verifyToken(jwtToken);
+    const user = await cognitoUtil.getUser(username);
     if (!user) {
       return res
         .status(404)
         .send({ error: 'User not found for the Authorization' });
     }
 
-    req.user = user;
+    const { identities, ...userData } = user;
+
+    req.user = userData;
     req.isAuthenticated = true;
     return next();
   } catch (e) {

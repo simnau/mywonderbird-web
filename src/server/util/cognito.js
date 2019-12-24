@@ -194,7 +194,6 @@ async function listUsers(limit, paginationToken, filter) {
     .listUsers({
       Limit: limit,
       PaginationToken: paginationToken,
-      AttributesToGet: ['email', ROLE_ATTRIBUTE],
       Filter: filter,
       UserPoolId: poolId,
     })
@@ -206,6 +205,40 @@ async function listUsers(limit, paginationToken, filter) {
     users,
     paginationToken: result.PaginationToken,
   };
+}
+
+async function updateUserRole(userId, role) {
+  const result = await cognito
+    .adminUpdateUserAttributes({
+      UserAttributes: [
+        {
+          Name: `${CUSTOM_ATTRIBUTE_PREFIX}role`,
+          Value: role,
+        },
+      ],
+      UserPoolId: poolId,
+      Username: userId,
+    })
+    .promise();
+
+  return result;
+}
+
+async function markUserAsRegistered(userId) {
+  const result = await cognito
+    .adminUpdateUserAttributes({
+      UserAttributes: [
+        {
+          Name: `${CUSTOM_ATTRIBUTE_PREFIX}registered`,
+          Value: 'true',
+        },
+      ],
+      UserPoolId: poolId,
+      Username: userId,
+    })
+    .promise();
+
+  return result;
 }
 
 async function forgotPassword(email) {
@@ -243,4 +276,6 @@ module.exports = {
   listUsers,
   forgotPassword,
   resetPassword,
+  updateUserRole,
+  markUserAsRegistered,
 };

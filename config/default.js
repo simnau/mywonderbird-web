@@ -24,6 +24,7 @@ module.exports = {
       region: '',
       poolId: '',
       clientId: '',
+      domain: '',
       roleAttribute: `${CUSTOM_ATTRIBUTE_PREFIX}role`,
     },
   },
