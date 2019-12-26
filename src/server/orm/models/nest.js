@@ -26,11 +26,11 @@ const FIELDS = {
   },
   platform: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   idOnPlatform: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   dayId: {
     type: Sequelize.UUID,
@@ -39,6 +39,10 @@ const FIELDS = {
       model: 'days',
       key: 'id',
     },
+  },
+  url: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
 };
 

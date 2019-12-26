@@ -89,20 +89,11 @@ function NestForm({ nest, addNest, removeNest }) {
             error={nest.errors.lng}
           />
           <TextField
-            required
-            label="Platform"
-            name="platform"
-            value={nest.platform}
+            label="Link"
+            name="url"
+            value={nest.url}
             onChange={nest.onFieldChange}
-            error={nest.errors.platform}
-          />
-          <TextField
-            required
-            label="Id On Platform"
-            name="idOnPlatform"
-            value={nest.idOnPlatform}
-            onChange={nest.onFieldChange}
-            error={nest.errors.idOnPlatform}
+            error={nest.errors.url}
           />
         </FormContainer>
       )}

@@ -10,6 +10,7 @@ const FIELDS_TO_SANITIZE = [
   'lng',
   'platform',
   'idOnPlatform',
+  'url',
 ];
 
 export default class NestModel {
@@ -20,6 +21,7 @@ export default class NestModel {
   @observable lng;
   @observable platform;
   @observable idOnPlatform;
+  @observable url;
 
   constructor({
     id = undefined,
@@ -29,6 +31,7 @@ export default class NestModel {
     lng = '',
     platform = '',
     idOnPlatform = '',
+    url = '',
   } = {}) {
     this.id = id;
     this.title = title;
@@ -37,6 +40,7 @@ export default class NestModel {
     this.lng = lng;
     this.platform = platform;
     this.idOnPlatform = idOnPlatform;
+    this.url = url;
   }
 
   get sanitized() {
@@ -51,19 +55,11 @@ export default class NestModel {
     }
 
     if (!this.lat) {
-      errors. lat = 'Nest latitude is required';
+      errors.lat = 'Nest latitude is required';
     }
 
     if (!this.lng) {
       errors.lng = 'Nest longitude is required';
-    }
-
-    if (!this.platform) {
-      errors.platform = 'Nest platform is required';
-    }
-
-    if (!this.idOnPlatform) {
-      errors.idOnPlatform = 'Nest id on platform is required';
     }
 
     return errors;
