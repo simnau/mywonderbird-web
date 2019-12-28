@@ -74,17 +74,24 @@ function JourneyListItem({ journey, deleteJourney, editLink }) {
                 marginRight: 8,
               }}
             >
+              Published?
+            </label>
+            <span>{journey.published ? 'Yes' : 'No'}</span>
+          </FieldContainer>
+          <FieldContainer>
+            <label
+              style={{
+                fontWeight: 'bold',
+                marginRight: 8,
+              }}
+            >
               Start Date
             </label>
             <span>{moment(journey.startDate).format('YYYY MMMM DD')}</span>
           </FieldContainer>
         </div>
         <div style={{ display: 'grid', gridRowGap: 8, alignSelf: 'start' }}>
-          <Button
-            variant="primary"
-            as={Link}
-            to={editLink}
-          >
+          <Button variant="primary" as={Link} to={editLink}>
             Edit
           </Button>
           <Button variant="danger" onClick={onDelete}>

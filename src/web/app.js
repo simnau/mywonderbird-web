@@ -10,6 +10,7 @@ import hasRole from './guards/hasRole';
 import unauthorized from './guards/unauthorized';
 
 import 'react-datepicker/dist/react-datepicker.css';
+import 'react-toggle/style.css';
 import InsufficientPermissions from './pages/error/insufficient-permissions';
 
 const RootContainer = styled.div`

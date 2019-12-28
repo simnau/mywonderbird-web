@@ -33,6 +33,10 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  published: {
+    type: Sequelize.BOOLEAN,
+    allowNull: true,
+  },
 };
 
 const Journey = sequelize.define('journeys', FIELDS);

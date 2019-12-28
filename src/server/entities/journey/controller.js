@@ -102,6 +102,7 @@ journeyRouter.get(
     } = req;
     const { total, journeys } = await service.findAll(page, pageSize, {
       loadIncludes: true,
+      published: true,
     });
     const journeysWithProfile = await service.addUserProfileToJourneys(
       journeys,

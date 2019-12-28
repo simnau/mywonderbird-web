@@ -5,7 +5,7 @@ import moment from 'moment';
 import { sanitizeObject } from '../../util/sanitize';
 import Day from './day';
 
-const FIELDS_TO_SANITIZE = ['id', 'title', 'description', 'type'];
+const FIELDS_TO_SANITIZE = ['id', 'title', 'description', 'type', 'published'];
 
 export default class JourneyModel {
   @observable id;
@@ -14,6 +14,7 @@ export default class JourneyModel {
   @observable type;
   @observable startDate;
   @observable days;
+  @observable published;
 
   constructor({
     id,
@@ -22,6 +23,7 @@ export default class JourneyModel {
     type = '',
     startDate = new Date(),
     days = [],
+    published = false,
   } = {}) {
     this.id = id || uuidv4();
     this.title = title;
@@ -29,6 +31,7 @@ export default class JourneyModel {
     this.type = type;
     this.startDate = moment(startDate).toDate();
     this.days = days.map(day => new Day(day));
+    this.published = published;
   }
 
   get sanitized() {
@@ -70,6 +73,11 @@ export default class JourneyModel {
   @action
   onFieldChange = event => {
     this[event.target.name] = event.target.value;
+  };
+
+  @action
+  onPublishedToggle = () => {
+    this.published = !this.published;
   };
 
   @action

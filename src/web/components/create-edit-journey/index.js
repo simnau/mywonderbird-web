@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import AsyncSelect from 'react-select/async';
+import styled from 'styled-components';
+import Toggle from 'react-toggle';
 
 import { get } from '../../util/fetch';
 import JourneyMap from '../journey-map';
@@ -8,6 +10,26 @@ import JourneyContext from '../../contexts/journey';
 import { Datepicker, TextField, TextArea } from '../input';
 import { Button } from '../button';
 import DaysForm from './days';
+
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+
+  > :not(:last-child) {
+    margin-right: 8px;
+  }
+`;
+
+const PublishedContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+
+  > :not(:last-child) {
+    margin-right: 8px;
+  }
+`;
 
 function CreateEditJourney({ state, journeyId, onSave }) {
   const mapRef = useRef();
@@ -129,9 +151,25 @@ function CreateEditJourney({ state, journeyId, onSave }) {
     >
       <div style={{ display: 'grid', gridTemplateColumns: '10fr 9fr' }}>
         <div style={{ margin: '32px 16px' }}>
-          <div style={{ margin: '8px 0px', fontSize: 18, fontWeight: 'bold' }}>
-            {isEdit ? 'Edit Journey' : 'Create Journey'}
-          </div>
+          <HeaderContainer>
+            <div style={{ fontSize: 18, fontWeight: 'bold' }}>
+              {isEdit ? 'Edit Journey' : 'Create Journey'}
+            </div>
+            <Button variant="primary" onClick={onSave}>
+              Save
+            </Button>
+          </HeaderContainer>
+          {isEdit && (
+            <PublishedContainer>
+              <Toggle
+                checked={state.journey.published}
+                onChange={state.journey.onPublishedToggle}
+              />
+              <span style={{ fontWeight: 600, color: 'rgba(31, 32, 65, 0.9)' }}>
+                {state.journey.published ? 'Published' : 'Not Published'}
+              </span>
+            </PublishedContainer>
+          )}
           <div style={{ display: 'grid', gridRowGap: 16 }}>
             {!isEdit && (
               <AsyncSelect
