@@ -50,9 +50,23 @@ const INCLUDE_ORDER = [
   ],
 ];
 
-async function findAll(page, pageSize) {
+async function findAll(page, pageSize, { loadIncludes = false } = {}) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
+
+  if (loadIncludes) {
+    const [total, journeys] = await Promise.all([
+      Journey.count(),
+      Journey.findAll({
+        order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER],
+        include: INCLUDE_MODELS,
+        offset,
+        limit,
+      }),
+    ]);
+
+    return { total, journeys };
+  }
 
   const { count: total, rows: journeys } = await Journey.findAndCountAll({
     order: [['updatedAt', 'DESC']],

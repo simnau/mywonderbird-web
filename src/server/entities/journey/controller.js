@@ -100,14 +100,9 @@ journeyRouter.get(
       user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
-    const { total, journeys } = await service.findAllNotByUser(
-      id,
-      page,
-      pageSize,
-      {
-        loadIncludes: true,
-      },
-    );
+    const { total, journeys } = await service.findAll(page, pageSize, {
+      loadIncludes: true,
+    });
     const journeysWithProfile = await service.addUserProfileToJourneys(
       journeys,
     );
