@@ -183,7 +183,9 @@ async function del(id) {
 
 async function addUserProfileToJourneys(journeys) {
   const uniqueUserIds = [...new Set(journeys.map(journey => journey.userId))];
-  const userProfiles = await profileService.findProfilesByIds(uniqueUserIds);
+  const userProfiles = await profileService.findProfilesByProviderIds(
+    uniqueUserIds,
+  );
   const profilesById = userProfiles.reduce(
     (result, profile) => ({
       ...result,

@@ -15,7 +15,7 @@ router.get(
     const {
       user: { id },
     } = req;
-    const profile = await service.findProfileById(id);
+    const profile = await service.findProfileByProviderId(id);
 
     if (!profile) {
       res.status(404).send({ message: 'Profile not found' });
@@ -33,7 +33,7 @@ router.post(
       user: { id },
       body,
     } = req;
-    await service.createOrUpdateProfile(id, body);
+    await service.createOrUpdateProfileByProviderId(id, body);
 
     res.send({ succes: true });
   }),

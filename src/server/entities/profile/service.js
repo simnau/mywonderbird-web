@@ -7,13 +7,21 @@ async function findProfileById(id) {
   return Profile.findByPk(id);
 }
 
-async function createOrUpdateProfile(id, profileData) {
-  const existingProfile = await findProfileById(id);
+async function findProfileByProviderId(providerId) {
+  return Profile.findOne({
+    where: {
+      providerId,
+    },
+  });
+}
+
+async function createOrUpdateProfileByProviderId(providerId, profileData) {
+  const existingProfile = await findProfileByProviderId(providerId);
 
   if (existingProfile) {
     return existingProfile.update(profileData);
   } else {
-    return Profile.create({ ...profileData, id });
+    return Profile.create({ ...profileData, providerId });
   }
 }
 
@@ -25,11 +33,11 @@ async function uploadAvatar(files, folder) {
   };
 }
 
-async function findProfilesByIds(ids) {
+async function findProfilesByProviderIds(providerIds) {
   return Profile.findAll({
     where: {
-      id: {
-        [Op.in]: ids,
+      providerId: {
+        [Op.in]: providerIds,
       },
     },
   });
@@ -37,7 +45,8 @@ async function findProfilesByIds(ids) {
 
 module.exports = {
   findProfileById,
-  findProfilesByIds,
-  createOrUpdateProfile,
+  findProfileByProviderId,
+  findProfilesByProviderIds,
+  createOrUpdateProfileByProviderId,
   uploadAvatar,
 };

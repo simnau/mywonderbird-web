@@ -5,7 +5,7 @@ const sequelize = require('../../setup/sequelize');
 const FIELDS = {
   id: {
     primaryKey: true,
-    type: Sequelize.UUID,
+    type: Sequelize.STRING,
     defaultValue: Sequelize.UUIDV4,
   },
   username: {
@@ -19,6 +19,12 @@ const FIELDS = {
   avatarUrl: {
     type: Sequelize.STRING,
     allowNull: true,
+  },
+  providerId: {
+    type: Sequelize.STRING,
+    defaultValue: Sequelize.UUIDV4,
+    allowNull: false,
+    unique: true,
   },
 };
 
