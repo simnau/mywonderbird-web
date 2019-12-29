@@ -24,13 +24,9 @@ authenticationRouter.post(
   asyncHandler(async (req, res) => {
     const { email, code } = req.body;
 
-    service.confirm(email, code, (err, result) => {
-      if (err) {
-        return res.status(400).send(err.message);
-      }
+    const result = await service.confirm(email, code);
 
-      return res.send(result);
-    });
+    return res.send(result);
   }),
 );
 
@@ -40,13 +36,9 @@ authenticationRouter.post(
   asyncHandler(async (req, res) => {
     const { email } = req.body;
 
-    service.sendConfirmationCode(email, (err, result) => {
-      if (err) {
-        return res.status(400).send(err.message);
-      }
+    const result = await service.sendConfirmationCode(email);
 
-      return res.send(result);
-    });
+    return res.send(result);
   }),
 );
 
@@ -79,18 +71,24 @@ authenticationRouter.post(
   }),
 );
 
-authenticationRouter.post('/forgot-password', asyncHandler(async (req, res) => {
-  const { email } = req.body;
-  const result = await service.forgotPassword(email);
+authenticationRouter.post(
+  '/forgot-password',
+  asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const result = await service.forgotPassword(email);
 
-  return res.send(result);
-}));
+    return res.send(result);
+  }),
+);
 
-authenticationRouter.post('/reset-password', asyncHandler(async (req, res) => {
-  const { email, password, code } = req.body;
-  const result = await service.resetPassword(email, password, code);
+authenticationRouter.post(
+  '/reset-password',
+  asyncHandler(async (req, res) => {
+    const { email, password, code } = req.body;
+    const result = await service.resetPassword(email, password, code);
 
-  return res.send(result);
-}));
+    return res.send(result);
+  }),
+);
 
 module.exports = authenticationRouter;

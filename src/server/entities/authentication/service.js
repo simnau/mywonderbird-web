@@ -18,48 +18,52 @@ function register(email, password) {
   return cognitoUtil.registerUser(email, password);
 }
 
-function sendConfirmationCode(email, callback) {
+function sendConfirmationCode(email) {
   const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
     Username: email,
     Pool: userPool,
   });
 
-  cognitoUser.resendConfirmationCode((err, result) => {
-    if (err) {
-      return callback(err);
-    }
+  return new Promise((resolve, reject) => {
+    cognitoUser.resendConfirmationCode((err, result) => {
+      if (err) {
+        return reject(err);
+      }
 
-    return callback(null, result);
+      return resolve(result);
+    });
   });
 }
 
-function confirm(email, code, callback) {
+function confirm(email, code) {
   const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
     Username: email,
     Pool: userPool,
   });
 
-  cognitoUser.confirmRegistration(code, false, (err, result) => {
-    if (err) {
-      return callback(err);
-    }
+  return new Promise((resolve, reject) => {
+    cognitoUser.confirmRegistration(code, false, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
 
-    return callback(null, result);
+      return resolve(result);
+    });
   });
 }
 
 async function login(email, password) {
-  const {
-    idToken,
-    ...result
-  } = await cognitoUtil.authenticateUser(email, password);
+  const { idToken, ...result } = await cognitoUtil.authenticateUser(
+    email,
+    password,
+  );
 
   const { 'custom:role': role } = jwt.decode(idToken);
 
   return {
     ...result,
     role,
-  }
+  };
 }
 
 async function refreshToken(token) {
