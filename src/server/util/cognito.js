@@ -58,6 +58,7 @@ function userToObject(user, attributeField = 'UserAttributes') {
     },
     {
       id: user.Username,
+      status: user.UserStatus,
     },
   );
 }
@@ -134,7 +135,7 @@ async function createUser(email) {
       Username: email,
       UserAttributes: attributeList,
       TemporaryPassword: password,
-      MessageAction: 'SUPPRESS',
+      DesiredDeliveryMediums: ['EMAIL'],
     })
     .promise();
 
@@ -265,6 +266,81 @@ async function resetPassword(email, password, code) {
   return result;
 }
 
+async function changePassword(email, newPassword) {
+  const result = await cognito
+    .adminSetUserPassword({
+      Username: email,
+      Password: newPassword,
+      UserPoolId: poolId,
+      Permanent: true,
+    })
+    .promise();
+
+  return result;
+}
+
+async function forceChangePassword(email, currentPassword, newPassword) {
+  return new Promise((resolve, reject) => {
+    const authenticationDetials = new AmazonCognitoIdentity.AuthenticationDetails(
+      {
+        Username: email,
+        Password: currentPassword,
+      },
+    );
+
+    const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    cognitoUser.authenticateUser(authenticationDetials, {
+      onSuccess(result) {
+        const accessToken = result.getAccessToken().getJwtToken();
+        const refreshToken = result.getRefreshToken().getToken();
+        const idToken = result.getIdToken().getJwtToken();
+        resolve({
+          accessToken,
+          refreshToken,
+          idToken,
+        });
+      },
+      onFailure(err) {
+        reject(err);
+      },
+      newPasswordRequired(userAttributes) {
+        delete userAttributes.email_verified;
+        delete userAttributes.phone_number_verified;
+
+        // Get these details and call
+        cognitoUser.completeNewPasswordChallenge(
+          newPassword,
+          userAttributes,
+          this,
+        );
+      },
+    });
+  });
+}
+
+async function createTemporaryPassword(email) {
+  const password = passwordGenerator.generate({
+    length: 10,
+    numbers: true,
+  });
+
+  const { User: createdUser } = await cognito
+    .adminCreateUser({
+      UserPoolId: poolId,
+      Username: email,
+      TemporaryPassword: password,
+      DesiredDeliveryMediums: ['EMAIL'],
+      MessageAction: 'RESEND',
+    })
+    .promise();
+
+  return userToObject(createdUser, 'Attributes');
+}
+
 module.exports = {
   verifyToken,
   refreshToken,
@@ -276,6 +352,9 @@ module.exports = {
   listUsers,
   forgotPassword,
   resetPassword,
+  changePassword,
+  forceChangePassword,
   updateUserRole,
   markUserAsRegistered,
+  createTemporaryPassword,
 };

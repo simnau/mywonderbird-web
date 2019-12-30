@@ -63,13 +63,14 @@ function Users() {
     state.paginationToken = data.paginationToken;
   };
 
+  const loadUsers = async () => {
+    state.isLoading = true;
+    const result = await fetchUsers();
+    setStateData(result);
+    state.isLoading = false;
+  };
+
   useEffect(() => {
-    const loadUsers = async () => {
-      state.isLoading = true;
-      const result = await fetchUsers();
-      setStateData(result);
-      state.isLoading = false;
-    };
     loadUsers();
   }, []);
 
@@ -82,7 +83,9 @@ function Users() {
 
   const deleteUser = async userId => {
     await del(`/api/users/${userId}`);
-    rerun();
+    state.users = [];
+    state.paginationToken = null;
+    await loadUsers();
   };
 
   return (

@@ -91,4 +91,58 @@ authenticationRouter.post(
   }),
 );
 
+authenticationRouter.post(
+  '/change-password',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { currentPassword, newPassword },
+      user: { provider, email },
+    } = req;
+
+    if (provider !== 'Cognito') {
+      return res.status(403).send({
+        error:
+          'Only accounts with username/password login method can change passwords',
+      });
+    }
+
+    await service.changePassword(email, currentPassword, newPassword);
+
+    return res.send({
+      message: 'Password changed successfully',
+    });
+  }),
+);
+
+authenticationRouter.post(
+  '/force-change-password',
+  asyncHandler(async (req, res) => {
+    const {
+      body: { email, currentPassword, newPassword },
+    } = req;
+
+    await service.forceChangePassword(email, currentPassword, newPassword);
+
+    return res.send({
+      message: 'Password changed successfully',
+    });
+  }),
+);
+
+authenticationRouter.post(
+  '/temporary-password',
+  asyncHandler(async (req, res) => {
+    const {
+      body: { email },
+    } = req;
+
+    await service.createTemporaryPassword(email);
+
+    return res.send({
+      message: 'A temporary password has been sent to the email provided',
+    });
+  }),
+);
+
 module.exports = authenticationRouter;

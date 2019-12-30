@@ -26,6 +26,16 @@ const requireAuth = async (req, res, next) => {
 
     const { identities, ...userData } = user;
 
+    if (identities) {
+      const identityData = JSON.parse(identities);
+
+      userData.provider = identityData.length
+        ? identityData[0].providerType
+        : 'Cognito';
+    } else {
+      userData.provider = 'Cognito';
+    }
+
     req.user = userData;
     req.isAuthenticated = true;
     return next();
