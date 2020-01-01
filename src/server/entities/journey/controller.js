@@ -31,6 +31,42 @@ journeyRouter.get(
 );
 
 journeyRouter.get(
+  '/my',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+    } = req;
+    const { total, journeys } = await service.findAllByUser(id, page, pageSize, {
+      loadIncludes: true,
+    });
+    const journeysWithProfile = await service.addUserProfileToJourneys(
+      journeys,
+    );
+    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
+
+    res.send({ total, journeys: journeyDTOs });
+  }),
+);
+
+journeyRouter.get(
+  '/count',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+    } = req;
+
+    const count = await service.findCountByUser(id);
+
+    return res.send({
+      count,
+    });
+  }),
+);
+
+journeyRouter.get(
   '/all',
   requireRole(ADMIN_ROLE),
   asyncHandler(async (req, res) => {

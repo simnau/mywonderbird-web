@@ -84,9 +84,35 @@ async function findAll(
   return { total, journeys };
 }
 
-async function findAllByUser(userId, page, pageSize) {
+async function findAllByUser(
+  userId,
+  page,
+  pageSize,
+  { loadIncludes = false } = {},
+) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
+
+  if (loadIncludes) {
+    const [total, journeys] = await Promise.all([
+      Journey.count({
+        where: {
+          userId,
+        },
+      }),
+      Journey.findAll({
+        where: {
+          userId,
+        },
+        order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+        include: INCLUDE_MODELS,
+        offset,
+        limit,
+      }),
+    ]);
+
+    return { total, journeys };
+  }
 
   const { count: total, rows: journeys } = await Journey.findAndCountAll({
     where: {
@@ -98,6 +124,14 @@ async function findAllByUser(userId, page, pageSize) {
   });
 
   return { total, journeys };
+}
+
+async function findCountByUser(userId) {
+  return Journey.count({
+    where: {
+      userId,
+    },
+  });
 }
 
 async function findAllNotByUser(
@@ -231,4 +265,5 @@ module.exports = {
   delete: del,
   addUserProfileToJourney,
   addUserProfileToJourneys,
+  findCountByUser,
 };
