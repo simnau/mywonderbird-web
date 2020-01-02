@@ -88,22 +88,19 @@ async function findAllByUser(
   userId,
   page,
   pageSize,
-  { loadIncludes = false } = {},
+  { loadIncludes = false, published = false } = {},
 ) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
+  const where = published ? { published, userId } : { userId };
 
   if (loadIncludes) {
     const [total, journeys] = await Promise.all([
       Journey.count({
-        where: {
-          userId,
-        },
+        where,
       }),
       Journey.findAll({
-        where: {
-          userId,
-        },
+        where,
         order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
         include: INCLUDE_MODELS,
         offset,
@@ -115,9 +112,7 @@ async function findAllByUser(
   }
 
   const { count: total, rows: journeys } = await Journey.findAndCountAll({
-    where: {
-      userId,
-    },
+    where,
     order: [['createdAt', 'DESC']],
     offset,
     limit,
@@ -224,13 +219,13 @@ async function del(id) {
 
 async function addUserProfileToJourneys(journeys) {
   const uniqueUserIds = [...new Set(journeys.map(journey => journey.userId))];
-  const userProfiles = await profileService.findProfilesByProviderIds(
+  const userProfiles = await profileService.findOrCreateProfilesByProviderIds(
     uniqueUserIds,
   );
   const profilesById = userProfiles.reduce(
     (result, profile) => ({
       ...result,
-      [profile.id]: profile,
+      [profile.providerId]: profile,
     }),
     {},
   );

@@ -15,13 +15,22 @@ router.get(
     const {
       user: { id },
     } = req;
-    const profile = await service.findProfileByProviderId(id);
+    const profile = await service.findOrCreateProfileByProviderId(id);
 
-    if (!profile) {
-      res.status(404).send({ message: 'Profile not found' });
-    } else {
-      res.send(profile);
-    }
+    res.send(profile);
+  }),
+);
+
+router.get(
+  '/:providerId',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { providerId },
+    } = req;
+    const profile = await service.findProfileByProviderId(providerId);
+
+    res.send(profile);
   }),
 );
 

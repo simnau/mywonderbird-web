@@ -15,13 +15,17 @@ async function findProfileByProviderId(providerId) {
   });
 }
 
+async function createProfile(providerId, profileData = {}) {
+  return Profile.create({ ...profileData, providerId });
+}
+
 async function createOrUpdateProfileByProviderId(providerId, profileData) {
   const existingProfile = await findProfileByProviderId(providerId);
 
   if (existingProfile) {
     return existingProfile.update(profileData);
   } else {
-    return Profile.create({ ...profileData, providerId });
+    return createProfile(providerId, profileData);
   }
 }
 
@@ -31,6 +35,24 @@ async function uploadAvatar(files, folder) {
   return {
     images,
   };
+}
+
+async function findOrCreateProfileByProviderId(providerId) {
+  let profile = await findProfileByProviderId(providerId);
+
+  if (!profile) {
+    profile = await createProfile(providerId);
+  }
+
+  return profile;
+}
+
+async function findOrCreateProfilesByProviderIds(providerIds) {
+  return Promise.all(
+    providerIds.map(async providerId =>
+      findOrCreateProfileByProviderId(providerId),
+    ),
+  );
 }
 
 async function findProfilesByProviderIds(providerIds) {
@@ -47,6 +69,9 @@ module.exports = {
   findProfileById,
   findProfileByProviderId,
   findProfilesByProviderIds,
+  findOrCreateProfileByProviderId,
+  findOrCreateProfilesByProviderIds,
+  createProfile,
   createOrUpdateProfileByProviderId,
   uploadAvatar,
 };

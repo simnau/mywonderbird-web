@@ -38,9 +38,14 @@ journeyRouter.get(
       user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
-    const { total, journeys } = await service.findAllByUser(id, page, pageSize, {
-      loadIncludes: true,
-    });
+    const { total, journeys } = await service.findAllByUser(
+      id,
+      page,
+      pageSize,
+      {
+        loadIncludes: true,
+      },
+    );
     const journeysWithProfile = await service.addUserProfileToJourneys(
       journeys,
     );
@@ -79,6 +84,30 @@ journeyRouter.get(
     );
 
     res.send({ journeys: journeysWithProfile, total });
+  }),
+);
+
+journeyRouter.get(
+  '/all/:userId',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+      params: { userId },
+    } = req;
+
+    const { journeys, total } = await service.findAllByUser(
+      userId,
+      page,
+      pageSize,
+      { loadIncludes: true, published: true },
+    );
+    const journeysWithProfile = await service.addUserProfileToJourneys(
+      journeys,
+    );
+    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
+
+    res.send({ journeys: journeyDTOs, total });
   }),
 );
 
