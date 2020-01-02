@@ -241,7 +241,9 @@ async function addUserProfileToJourneys(journeys) {
 }
 
 async function addUserProfileToJourney(journey) {
-  const userProfile = await profileService.findProfileById(journey.userId);
+  const userProfile = await profileService.findProfileByProviderId(
+    journey.userId,
+  );
 
   const journeyData = journey.toJSON ? journey.toJSON() : journey;
   return {
