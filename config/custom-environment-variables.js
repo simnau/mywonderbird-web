@@ -28,4 +28,8 @@ module.exports = {
   feed: {
     maxImageCount: 'FEED_MAX_IMAGE_COUNT',
   },
+  mailerlite: {
+    apiKey: 'MAILERLITE_API_KEY',
+    groupId: 'MAILERLITE_GROUP_ID',
+  },
 };

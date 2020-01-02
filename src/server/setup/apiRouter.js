@@ -7,6 +7,7 @@ const profile = require('../entities/profile/controller');
 const authentication = require('../entities/authentication/controller');
 const oauth = require('../entities/oauth/controller');
 const geo = require('../entities/geo/controller');
+const subscription = require('../entities/subscription/controller');
 
 const apiRouter = Router();
 
@@ -17,5 +18,6 @@ apiRouter.use('/profile', profile);
 apiRouter.use('/auth', authentication);
 apiRouter.use('/oauth', oauth);
 apiRouter.use('/geo', geo);
+apiRouter.use('/subscription', subscription);
 
 module.exports = apiRouter;

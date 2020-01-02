@@ -34,4 +34,7 @@ module.exports = {
   feed: {
     maxImageCount: 4,
   },
+  mailerlite: {
+    apiUrl: 'https://api.mailerlite.com/api/v2',
+  },
 };
