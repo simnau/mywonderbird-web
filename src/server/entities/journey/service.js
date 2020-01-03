@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const config = require('config');
 
 const sequelize = require('../../setup/sequelize');
 const { Journey } = require('../../orm/models/journey');
@@ -8,7 +9,12 @@ const { GemCapture } = require('../../orm/models/gem-capture');
 const { Nest } = require('../../orm/models/nest');
 const dayService = require('../day/service');
 const profileService = require('../profile/service');
+const favoriteJourneyService = require('../favorite-journey/service');
 const { deleteFolder } = require('../../util/s3');
+const { findCoordinateBoundingBox } = require('../../util/geo');
+const { unique } = require('../../util/array');
+
+const feedMaxImageCount = config.get('feed.maxImageCount');
 
 const INCLUDE_MODELS = [
   {
@@ -93,6 +99,45 @@ async function findAllByUser(
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
   const where = published ? { published, userId } : { userId };
+
+  if (loadIncludes) {
+    const [total, journeys] = await Promise.all([
+      Journey.count({
+        where,
+      }),
+      Journey.findAll({
+        where,
+        order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+        include: INCLUDE_MODELS,
+        offset,
+        limit,
+      }),
+    ]);
+
+    return { total, journeys };
+  }
+
+  const { count: total, rows: journeys } = await Journey.findAndCountAll({
+    where,
+    order: [['createdAt', 'DESC']],
+    offset,
+    limit,
+  });
+
+  return { total, journeys };
+}
+
+async function findAllByIds(
+  ids,
+  page,
+  pageSize,
+  { loadIncludes = false, published = false } = {},
+) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+  const where = published
+    ? { published, id: { [Op.in]: ids } }
+    : { id: { [Op.in]: ids } };
 
   if (loadIncludes) {
     const [total, journeys] = await Promise.all([
@@ -218,7 +263,7 @@ async function del(id) {
 }
 
 async function addUserProfileToJourneys(journeys) {
-  const uniqueUserIds = [...new Set(journeys.map(journey => journey.userId))];
+  const uniqueUserIds = unique(journeys.map(journey => journey.userId));
   const userProfiles = await profileService.findOrCreateProfilesByProviderIds(
     uniqueUserIds,
   );
@@ -252,9 +297,90 @@ async function addUserProfileToJourney(journey) {
   };
 }
 
+function journeyToFeedJourneyDTO(journey) {
+  const { days, ...journeyData } = journey;
+
+  const images = [];
+  const coordinates = [];
+
+  for (const day of days) {
+    for (const gem of day.gems) {
+      if (
+        images.length < feedMaxImageCount &&
+        gem.gemCaptures &&
+        gem.gemCaptures.length &&
+        gem.gemCaptures[0].url
+      ) {
+        images.push(gem.gemCaptures[0].url);
+      }
+
+      coordinates.push({
+        id: gem.id,
+        lat: gem.lat,
+        lng: gem.lng,
+        type: 'gem',
+      });
+    }
+
+    if (day.nest) {
+      coordinates.push({
+        id: day.nest.id,
+        lat: day.nest.lat,
+        lng: day.nest.lng,
+        type: 'nest',
+      });
+    }
+  }
+
+  const boundingBox = findCoordinateBoundingBox(coordinates);
+
+  return {
+    ...journeyData,
+    images,
+    coordinates,
+    length: days.length,
+    boundingBox,
+  };
+}
+
+async function addIsFavoriteToJourneys(journeys, userId) {
+  const journeyIds = journeys.map(journey => journey.id);
+  const favoriteJourneys = await favoriteJourneyService.findByJourneyIdsAndUserId(
+    journeyIds,
+    userId,
+  );
+  const favoriteJourneysByJourneyId = favoriteJourneys.reduce(
+    (result, favoriteJourney) => ({
+      ...result,
+      [favoriteJourney.journeyId]: favoriteJourney,
+    }),
+    {},
+  );
+
+  return journeys.map(journey => {
+    const favoriteJourney = favoriteJourneysByJourneyId[journey.id];
+
+    return {
+      ...journey,
+      isFavorite: !!favoriteJourney,
+    };
+  });
+}
+
+async function enrichJourneys(journeys, userId) {
+  const journeysWithProfile = await addUserProfileToJourneys(journeys);
+  const journeysWithFavorites = await addIsFavoriteToJourneys(
+    journeysWithProfile,
+    userId,
+  );
+
+  return journeysWithFavorites.map(journeyToFeedJourneyDTO);
+}
+
 module.exports = {
   findAll,
   findAllByUser,
+  findAllByIds,
   findAllNotByUser,
   findById,
   create,
@@ -263,4 +389,6 @@ module.exports = {
   addUserProfileToJourney,
   addUserProfileToJourneys,
   findCountByUser,
+  journeyToFeedJourneyDTO,
+  enrichJourneys,
 };

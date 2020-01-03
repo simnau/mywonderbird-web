@@ -1,6 +1,7 @@
 const { Router } = require('express');
 
 const journey = require('../entities/journey/controller');
+const favoriteJourney = require('../entities/favorite-journey/controller');
 const gemCaptures = require('../entities/gem-capture/controller');
 const user = require('../entities/user/controller');
 const profile = require('../entities/profile/controller');
@@ -12,6 +13,7 @@ const subscription = require('../entities/subscription/controller');
 const apiRouter = Router();
 
 apiRouter.use('/journeys', journey);
+apiRouter.use('/favorite-journeys', favoriteJourney);
 apiRouter.use('/gem-captures', gemCaptures);
 apiRouter.use('/users', user);
 apiRouter.use('/profile', profile);

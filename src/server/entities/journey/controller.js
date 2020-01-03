@@ -1,16 +1,13 @@
 const { Router } = require('express');
 const asyncHandler = require('express-async-handler');
-const config = require('config');
 
 const { ADMIN_ROLE } = require('../../constants/roles');
 const requireRole = require('../../middleware/require-role');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
-const { findCoordinateBoundingBox } = require('../../util/geo');
 
 const journeyRouter = Router();
 
-const feedMaxImageCount = config.get('feed.maxImageCount');
 const DEFAULT_PAGE_SIZE = 20;
 
 journeyRouter.get(
@@ -46,10 +43,7 @@ journeyRouter.get(
         loadIncludes: true,
       },
     );
-    const journeysWithProfile = await service.addUserProfileToJourneys(
-      journeys,
-    );
-    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
+    const journeyDTOs = await service.enrichJourneys(journeys, id);
 
     res.send({ total, journeys: journeyDTOs });
   }),
@@ -92,6 +86,7 @@ journeyRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
+      user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
       params: { userId },
     } = req;
@@ -102,76 +97,25 @@ journeyRouter.get(
       pageSize,
       { loadIncludes: true, published: true },
     );
-    const journeysWithProfile = await service.addUserProfileToJourneys(
-      journeys,
-    );
-    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
+    const journeyDTOs = await service.enrichJourneys(journeys, id);
 
     res.send({ journeys: journeyDTOs, total });
   }),
 );
-
-function journeyToFeedJourneyDTO(journey) {
-  const { days, ...journeyData } = journey;
-
-  const images = [];
-  const coordinates = [];
-
-  for (const day of days) {
-    for (const gem of day.gems) {
-      if (
-        images.length < feedMaxImageCount &&
-        gem.gemCaptures &&
-        gem.gemCaptures.length &&
-        gem.gemCaptures[0].url
-      ) {
-        images.push(gem.gemCaptures[0].url);
-      }
-
-      coordinates.push({
-        id: gem.id,
-        lat: gem.lat,
-        lng: gem.lng,
-        type: 'gem',
-      });
-    }
-
-    if (day.nest) {
-      coordinates.push({
-        id: day.nest.id,
-        lat: day.nest.lat,
-        lng: day.nest.lng,
-        type: 'nest',
-      });
-    }
-  }
-
-  const boundingBox = findCoordinateBoundingBox(coordinates);
-
-  return {
-    ...journeyData,
-    images,
-    coordinates,
-    length: days.length,
-    boundingBox,
-  };
-}
 
 journeyRouter.get(
   '/feed',
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
+      user: { id },
       query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
     } = req;
     const { total, journeys } = await service.findAll(page, pageSize, {
       loadIncludes: true,
       published: true,
     });
-    const journeysWithProfile = await service.addUserProfileToJourneys(
-      journeys,
-    );
-    const journeyDTOs = journeysWithProfile.map(journeyToFeedJourneyDTO);
+    const journeyDTOs = await service.enrichJourneys(journeys, id);
 
     res.send({ total, journeys: journeyDTOs });
   }),
