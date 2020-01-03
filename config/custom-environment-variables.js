@@ -32,4 +32,7 @@ module.exports = {
     apiKey: 'MAILERLITE_API_KEY',
     groupId: 'MAILERLITE_GROUP_ID',
   },
+  segment: {
+    writeKey: 'SEGMENT_WRITE_KEY',
+  },
 };

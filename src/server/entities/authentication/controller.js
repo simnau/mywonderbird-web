@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const asyncHandler = require('express-async-handler');
 
+const segmentUtil = require('../../util/segment');
 const requireUnauth = require('../../middleware/require-unauth');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
@@ -49,6 +50,8 @@ authenticationRouter.post(
     const { email, password } = req.body;
 
     const result = await service.login(email, password);
+    segmentUtil.trackLogin(result.userId);
+
     res.send(result);
   }),
 );

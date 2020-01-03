@@ -177,10 +177,12 @@ async function authenticateUser(email, password) {
         const accessToken = result.getAccessToken().getJwtToken();
         const refreshToken = result.getRefreshToken().getToken();
         const idToken = result.getIdToken().getJwtToken();
+        const userId = result.getIdToken().payload.sub;
         resolve({
           accessToken,
           refreshToken,
           idToken,
+          userId,
         });
       },
       onFailure(err) {
