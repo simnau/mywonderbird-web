@@ -51,12 +51,8 @@ export default class DayModel {
   get errors() {
     let errors = {};
 
-    if (!this.title) {
-      errors.title = 'Day title is required';
-    }
-
     if (this.nest && Object.keys(this.nest.errors).length > 0) {
-      errors.nest = this.nest.errors;
+      errors.Nest = this.nest.errors;
     }
 
     errors = this.gems.reduce((acc, day, index) => {
@@ -68,7 +64,7 @@ export default class DayModel {
 
       return {
         ...acc,
-        [`gems[${index}]`]: gemErrors,
+        [`Gem ${index + 1}`]: gemErrors,
       };
     }, errors);
 

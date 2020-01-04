@@ -63,7 +63,7 @@ export default class JourneyModel {
 
       return {
         ...acc,
-        [`days[${index}]`]: dayErrors,
+        [`Day ${index + 1}`]: dayErrors,
       };
     }, errors);
 

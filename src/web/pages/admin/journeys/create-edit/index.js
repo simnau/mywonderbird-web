@@ -20,6 +20,7 @@ function CreateJourney() {
     journey: new JourneyModel({ days: [{ dayNumber: 1 }] }),
     submitted: false,
     isLoading: true,
+    currentDay: 0,
   });
 
   const isEdit = !!journeyId;

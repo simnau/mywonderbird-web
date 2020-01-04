@@ -11,6 +11,28 @@ import { Datepicker, TextField, TextArea } from '../input';
 import { Button } from '../button';
 import DaysForm from './days';
 
+const ErrorsContainer = styled.div`
+  padding: 8px;
+  background-color: red;
+  color: white;
+  z-index: 1;
+`;
+
+const ErrorList = styled.div`
+  margin-left: 8px;
+
+  > *:not(:last-child) {
+    margin-bottom: 4px;
+  }
+`;
+
+const Error = styled.p`
+  &:before {
+    content: '*';
+    margin-right: 4px;
+  }
+`;
+
 const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
@@ -30,6 +52,25 @@ const PublishedContainer = styled.div`
     margin-right: 8px;
   }
 `;
+
+function renderErrorList(errors) {
+  return (
+    <ErrorList>
+      {Object.entries(errors).map(([key, error]) => {
+        return (
+          <div key={key}>
+            {typeof error !== 'string' && <div>{key}</div>}
+            {typeof error === 'string' ? (
+              <Error>{error}</Error>
+            ) : (
+              renderErrorList(error)
+            )}
+          </div>
+        );
+      })}
+    </ErrorList>
+  );
+}
 
 function CreateEditJourney({ state, journeyId, onSave }) {
   const mapRef = useRef();
@@ -151,6 +192,12 @@ function CreateEditJourney({ state, journeyId, onSave }) {
     >
       <div style={{ display: 'grid', gridTemplateColumns: '10fr 9fr' }}>
         <div style={{ margin: '32px 16px' }}>
+          {state.submitted &&
+            Object.keys(state.journey.errors).length !== 0 && (
+              <ErrorsContainer>
+                {renderErrorList(state.journey.errors)}
+              </ErrorsContainer>
+            )}
           <HeaderContainer>
             <div style={{ fontSize: 18, fontWeight: 'bold' }}>
               {isEdit ? 'Edit Journey' : 'Create Journey'}

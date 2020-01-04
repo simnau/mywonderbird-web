@@ -75,7 +75,7 @@ export default class GemModel {
 
       return {
         ...acc,
-        [`gemCaptures[${index}]`]: gemCaptureErorrs,
+        [`Gem Capture ${index + 1}`]: gemCaptureErorrs,
       };
     }, errors);
 

@@ -54,7 +54,6 @@ function DaysForm({ days, addDay, removeDay }) {
               </HeadingContainer>
               <FormContainer>
                 <TextField
-                  required
                   label="Title"
                   name="title"
                   value={day.title}

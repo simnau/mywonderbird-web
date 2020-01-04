@@ -12,7 +12,7 @@ const FIELDS = {
   },
   title: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   description: {
     type: Sequelize.TEXT,
