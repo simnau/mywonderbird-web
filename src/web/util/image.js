@@ -1,4 +1,5 @@
 import { dataURLToBlob, blobToArrayBuffer } from 'blob-util';
+import fixOrientation from 'fix-orientation';
 
 import { MAX_IMAGE_SIZE } from '../constants/image';
 import { getCoordinatesFromImage } from './coordinates';
@@ -17,35 +18,38 @@ export function getResizedImage(
   maxSize = MAX_IMAGE_SIZE,
 ) {
   return new Promise(resolve => {
-    const image = new Image();
-    image.src = imageData;
+    fixOrientation(imageData, { image: true }, function(fixed) {
+      const image = new Image();
+      image.src = fixed;
 
-    image.onload = () => {
-      const aspectRatio = image.width / image.height;
-      const maxWidth = getMaxWidth(maxSize, aspectRatio);
-      const maxHeight = getMaxHeight(maxSize, aspectRatio);
-      const resizedWidth = image.width < maxWidth ? image.width : maxWidth;
-      const resizedHeight = image.height < maxHeight ? image.height : maxHeight;
+      image.onload = () => {
+        const aspectRatio = image.width / image.height;
+        const maxWidth = getMaxWidth(maxSize, aspectRatio);
+        const maxHeight = getMaxHeight(maxSize, aspectRatio);
+        const resizedWidth = image.width < maxWidth ? image.width : maxWidth;
+        const resizedHeight =
+          image.height < maxHeight ? image.height : maxHeight;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = resizedWidth;
-      canvas.height = resizedHeight;
+        const canvas = document.createElement('canvas');
+        canvas.width = resizedWidth;
+        canvas.height = resizedHeight;
 
-      const context = canvas.getContext('2d');
-      context.drawImage(image, 0, 0, resizedWidth, resizedHeight);
-      context.canvas.toBlob(
-        blob => {
-          const resizedFile = new File([blob], imageName, {
-            type: 'image/jpeg',
-            lastModified: Date.now(),
-          });
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, resizedWidth, resizedHeight);
+        context.canvas.toBlob(
+          blob => {
+            const resizedFile = new File([blob], imageName, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
 
-          resolve(resizedFile);
-        },
-        'image/jpeg',
-        0.8,
-      );
-    };
+            resolve(resizedFile);
+          },
+          'image/jpeg',
+          0.8,
+        );
+      };
+    });
   });
 }
 
