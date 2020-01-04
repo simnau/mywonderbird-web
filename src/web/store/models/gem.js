@@ -107,4 +107,36 @@ export default class GemModel {
       gemCapture.sequenceNumber = index + 1;
     });
   };
+
+  @action
+  moveGemCaptureLeft = index => {
+    if (index <= 0 || index >= this.gemCaptures.length) {
+      return;
+    }
+
+    const gemCaptureToMove = this.gemCaptures[index];
+    const gemCaptureOnLeft = this.gemCaptures[index - 1];
+
+    gemCaptureToMove.sequenceNumber -= 1;
+    gemCaptureOnLeft.sequenceNumber += 1;
+
+    this.gemCaptures[index - 1] = gemCaptureToMove;
+    this.gemCaptures[index] = gemCaptureOnLeft;
+  };
+
+  @action
+  moveGemCaptureRight = index => {
+    if (index < 0 || index >= this.gemCaptures.length - 1) {
+      return;
+    }
+
+    const gemCaptureToMove = this.gemCaptures[index];
+    const gemCaptureOnRight = this.gemCaptures[index + 1];
+
+    gemCaptureToMove.sequenceNumber += 1;
+    gemCaptureOnRight.sequenceNumber -= 1;
+
+    this.gemCaptures[index + 1] = gemCaptureToMove;
+    this.gemCaptures[index] = gemCaptureOnRight;
+  };
 }

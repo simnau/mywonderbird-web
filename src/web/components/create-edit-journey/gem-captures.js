@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
 import { observer, useObservable } from 'mobx-react-lite';
 import styled from 'styled-components';
+import TrashCanIcon from 'mdi-react/TrashCanIcon';
+import ChevronLeftIcon from 'mdi-react/ChevronLeftIcon';
+import ChevronRightIcon from 'mdi-react/ChevronRightIcon';
 
 import { post } from '../../util/fetch';
 import { getResizedImages } from '../../util/image';
@@ -8,7 +11,7 @@ import { OutlineButton } from '../button';
 import FileSelectButton from '../file-select-button';
 import { TextField, TextArea } from '../input';
 import { HeadingContainer, HeadingActionContainer } from '../heading';
-import VerticalList from '../horizontal-list';
+import HorizontalList from '../horizontal-list';
 import JourneyContext from '../../contexts/journey';
 import Loader from '../loader';
 
@@ -18,6 +21,14 @@ const CaptureContainer = styled.div`
   grid-row-gap: 8px;
   margin: 8px;
   width: auto;
+`;
+
+const ActionContainer = styled.div`
+  display: flex;
+
+  > *:not(:last-child) {
+    margin-right: 8px;
+  }
 `;
 
 const ImageContainer = styled.div`
@@ -42,7 +53,13 @@ const UploadActionContainer = styled.div`
   }
 `;
 
-function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
+function GemCapturesForm({
+  gemCaptures,
+  addGemCaptures,
+  removeGemCapture,
+  moveGemCaptureLeft,
+  moveGemCaptureRight,
+}) {
   const { journeyId } = useContext(JourneyContext);
   const state = useObservable({
     isUploading: false,
@@ -87,16 +104,51 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
           </UploadActionContainer>
         </HeadingActionContainer>
       </HeadingContainer>
-      <VerticalList items={gemCaptures} noItemsLabel="No captures">
-        {gemCapture => {
+      <HorizontalList items={gemCaptures} noItemsLabel="No captures">
+        {(gemCapture, index) => {
+          const moveLeftDisabled = index <= 0;
+          const moveRightDisabled = index >= gemCaptures.length - 1;
+          const onRemove = () =>
+            removeGemCapture(gemCapture.sequenceNumber - 1);
+          const onMoveLeft = () => {
+            if (!moveLeftDisabled) {
+              moveGemCaptureLeft(index);
+            }
+          };
+          const onMoveRight = () => {
+            if (!moveRightDisabled) {
+              moveGemCaptureRight(index);
+            }
+          };
+          const stopPropagation = e => e.stopPropagation();
+
           return (
             <CaptureContainer key={gemCapture.sequenceNumber}>
-              <OutlineButton
-                variant="danger"
-                onClick={() => removeGemCapture(gemCapture.sequenceNumber - 1)}
-              >
-                Remove
-              </OutlineButton>
+              <ActionContainer>
+                <OutlineButton
+                  disabled={moveLeftDisabled}
+                  variant="default"
+                  onClick={onMoveLeft}
+                  onMouseDown={stopPropagation}
+                >
+                  <ChevronLeftIcon />
+                </OutlineButton>
+                <OutlineButton
+                  disabled={moveRightDisabled}
+                  variant="default"
+                  onClick={onMoveRight}
+                  onMouseDown={stopPropagation}
+                >
+                  <ChevronRightIcon />
+                </OutlineButton>
+                <OutlineButton
+                  variant="danger"
+                  onClick={onRemove}
+                  onMouseDown={stopPropagation}
+                >
+                  <TrashCanIcon />
+                </OutlineButton>
+              </ActionContainer>
               <ImageContainer>
                 <Image src={gemCapture.url} draggable={false} />
               </ImageContainer>
@@ -105,6 +157,7 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
                 name="title"
                 value={gemCapture.title}
                 onChange={gemCapture.onFieldChange}
+                onMouseDown={stopPropagation}
                 error={gemCapture.errors.title}
               />
               <TextArea
@@ -112,12 +165,13 @@ function GemCapturesForm({ gemCaptures, addGemCaptures, removeGemCapture }) {
                 name="description"
                 value={gemCapture.description}
                 onChange={gemCapture.onFieldChange}
+                onMouseDown={stopPropagation}
                 error={gemCapture.errors.description}
               />
             </CaptureContainer>
           );
         }}
-      </VerticalList>
+      </HorizontalList>
     </div>
   );
 }

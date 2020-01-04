@@ -188,6 +188,8 @@ function GemsForm({
                 gemCaptures={gem.gemCaptures}
                 addGemCaptures={gem.addGemCaptures}
                 removeGemCapture={gem.removeGemCapture}
+                moveGemCaptureLeft={gem.moveGemCaptureLeft}
+                moveGemCaptureRight={gem.moveGemCaptureRight}
               />
             </div>
           );

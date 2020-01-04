@@ -117,7 +117,9 @@ function HorizontalList({ children, items, noItemsLabel = 'No items' }) {
           style={{ transform: `translateX(${state.offset}px)` }}
         >
           {items.map((item, index) => {
-            return <ItemContainer key={index}>{children(item)}</ItemContainer>;
+            return (
+              <ItemContainer key={index}>{children(item, index)}</ItemContainer>
+            );
           })}
         </ItemsContainer>
       </DraggableContainer>
