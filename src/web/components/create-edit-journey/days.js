@@ -16,7 +16,7 @@ const FormContainer = styled.div`
 `;
 
 function DaysForm({ days, addDay, removeDay }) {
-  const { addGemFromMap } = useContext(JourneyContext);
+  const { addGemFromMap, openSelectPlacesModal } = useContext(JourneyContext);
 
   return (
     <div style={{ margin: 8 }}>
@@ -31,6 +31,7 @@ function DaysForm({ days, addDay, removeDay }) {
       <PagedList items={days}>
         {({ currentItem: day, itemCount: dayCount, onRemove }) => {
           const addGem = addGemFromMap.bind(null, day);
+          const openGemModal = () => openSelectPlacesModal(day);
           const isRemoveEnabled = dayCount > 1;
 
           const onRemoveDay = () => {
@@ -75,6 +76,7 @@ function DaysForm({ days, addDay, removeDay }) {
                 removeGem={day.removeGem}
                 sortGemUp={day.sortGemUp}
                 sortGemDown={day.sortGemDown}
+                openGemModal={openGemModal}
               />
               <NestForm
                 nest={day.nest}

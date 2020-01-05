@@ -35,6 +35,7 @@ function GemsForm({
   removeGem,
   sortGemUp,
   sortGemDown,
+  openGemModal,
 }) {
   const {
     selectedGem,
@@ -104,6 +105,9 @@ function GemsForm({
             </FileSelectButton>
             {state.isUploading && <Loader width={24} height={24} />}
           </UploadActionContainer>
+          <OutlineButton variant="default" onClick={openGemModal}>
+            Search
+          </OutlineButton>
         </HeadingActionContainer>
       </HeadingContainer>
       <hr style={{ backgroundColor: 'lightgray', margin: '24px 0' }} />

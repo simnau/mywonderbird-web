@@ -1,5 +1,6 @@
 const { countries } = require('country-code-lookup');
 
+const { mapsClient } = require('../../setup/google');
 const countryBoundaries = require('../../resources/countriy-boundaries');
 
 const countryDTOs = countries.map(country => ({
@@ -35,8 +36,40 @@ function findBoundsBy3LetterCountryCode(code) {
   };
 }
 
+function placesResultToDTO(result) {
+  const {
+    id,
+    geometry: { location },
+    name,
+  } = result;
+
+  return {
+    id,
+    location,
+    name,
+  };
+}
+
+function searchPlaces(query) {
+  return new Promise((resolve, reject) => {
+    mapsClient.places(
+      {
+        query,
+      },
+      (err, response) => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(response.json.results.map(placesResultToDTO));
+      },
+    );
+  });
+}
+
 module.exports = {
   getCountries,
   searchCountries,
   findBoundsBy3LetterCountryCode,
+  searchPlaces,
 };

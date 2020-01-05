@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import AsyncSelect from 'react-select/async';
 import styled from 'styled-components';
 import Toggle from 'react-toggle';
@@ -10,6 +10,7 @@ import JourneyContext from '../../contexts/journey';
 import { Datepicker, TextField, TextArea } from '../input';
 import { Button } from '../button';
 import DaysForm from './days';
+import PlaceLookupModal from '../place-lookup-modal';
 
 const ErrorsContainer = styled.div`
   padding: 8px;
@@ -73,7 +74,11 @@ function renderErrorList(errors) {
 }
 
 function CreateEditJourney({ state, journeyId, onSave }) {
+  const innerState = useObservable({
+    showSearchPlacesModal: false,
+  });
   const mapRef = useRef();
+  const autosuggestRef = useRef();
   const isEdit = !!journeyId;
 
   const addGemFromMap = day => {
@@ -172,6 +177,44 @@ function CreateEditJourney({ state, journeyId, onSave }) {
     }
   };
 
+  const openSelectPlacesModal = day => {
+    state.selectedDay = day;
+    innerState.showSelectPlacesModal = true;
+    setTimeout(() => {
+      if (autosuggestRef.current) {
+        autosuggestRef.current.input.focus();
+      }
+    }, 0);
+  };
+
+  const closeSelectPlacesModal = () => {
+    state.selectedDay = null;
+    setTimeout(() => {
+      innerState.showSelectPlacesModal = false;
+    }, 0);
+  };
+
+  const onSelectPlace = item => {
+    if (state.selectedDay) {
+      state.selectedDay.addGem({
+        lat: item.location.lat,
+        lng: item.location.lng,
+        title: item.name,
+      });
+
+      if (mapRef.current) {
+        mapRef.current.jumpTo({
+          center: {
+            lon: item.location.lng,
+            lat: item.location.lat,
+          },
+        });
+      }
+    }
+
+    closeSelectPlacesModal();
+  };
+
   const mapClickEnabled =
     !!state.selectedDay || !!state.selectedGem || !!state.selectedNest;
 
@@ -188,6 +231,7 @@ function CreateEditJourney({ state, journeyId, onSave }) {
         selectedNest: state.selectedNest,
         selectNestLocationOnMap,
         cancelSelectNestLocationOnMap,
+        openSelectPlacesModal,
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '10fr 9fr' }}>
@@ -288,6 +332,12 @@ function CreateEditJourney({ state, journeyId, onSave }) {
             mapRef={mapRef}
           />
         </div>
+        <PlaceLookupModal
+          isOpen={innerState.showSelectPlacesModal}
+          onClose={closeSelectPlacesModal}
+          onSelect={onSelectPlace}
+          autosuggestRef={autosuggestRef}
+        />
       </div>
     </JourneyContext.Provider>
   );

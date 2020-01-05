@@ -35,4 +35,9 @@ module.exports = {
   segment: {
     writeKey: 'SEGMENT_WRITE_KEY',
   },
+  google: {
+    maps: {
+      apiKey: 'GOOGLE_MAPS_API_KEY',
+    },
+  },
 };
