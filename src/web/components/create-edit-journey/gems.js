@@ -85,8 +85,11 @@ function GemsForm({
       <HeadingContainer>
         <div>Gems</div>
         <HeadingActionContainer>
+          <OutlineButton variant="primary" onClick={openGemModal}>
+            Search
+          </OutlineButton>
           {!selectedDay && (
-            <OutlineButton variant="primary" onClick={addGem}>
+            <OutlineButton variant="default" onClick={addGem}>
               Create gem from map
             </OutlineButton>
           )}
@@ -105,9 +108,6 @@ function GemsForm({
             </FileSelectButton>
             {state.isUploading && <Loader width={24} height={24} />}
           </UploadActionContainer>
-          <OutlineButton variant="default" onClick={openGemModal}>
-            Search
-          </OutlineButton>
         </HeadingActionContainer>
       </HeadingContainer>
       <hr style={{ backgroundColor: 'lightgray', margin: '24px 0' }} />
