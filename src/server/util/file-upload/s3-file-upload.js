@@ -15,7 +15,7 @@ async function uploadFiles(files, folder, useOriginalFilename = false) {
     const imageType = fileType(file.data);
     const filename = useOriginalFilename
       ? file.name
-      : `${uuidv4()}/${imageType.ext}`;
+      : `${uuidv4()}.${imageType.ext}`;
     const fullFilename = `${folder}/${filename}`;
 
     const params = {

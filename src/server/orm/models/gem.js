@@ -11,7 +11,7 @@ const FIELDS = {
   },
   title: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   description: {
     type: Sequelize.TEXT,
@@ -23,6 +23,11 @@ const FIELDS = {
   },
   lng: {
     type: Sequelize.FLOAT,
+    allowNull: false,
+  },
+  type: {
+    type: Sequelize.STRING,
+    defaultValue: 'any',
     allowNull: false,
   },
   sequenceNumber: {

@@ -157,7 +157,6 @@ function GemsForm({
               </HeadingContainer>
               <FormContainer>
                 <TextField
-                  required
                   label="Title"
                   name="title"
                   value={gem.title}

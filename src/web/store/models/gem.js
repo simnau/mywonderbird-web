@@ -54,10 +54,6 @@ export default class GemModel {
   get errors() {
     let errors = {};
 
-    if (!this.title) {
-      errors.title = 'Gem title is required';
-    }
-
     if (!this.lat) {
       errors.lat = 'Gem latitude is required';
     }
