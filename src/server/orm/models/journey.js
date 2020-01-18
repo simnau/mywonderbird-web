@@ -39,6 +39,8 @@ const FIELDS = {
   },
   draft: {
     type: Sequelize.BOOLEAN,
+    defaultValue: false,
+    nullable: false,
   },
 };
 
