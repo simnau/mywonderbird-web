@@ -11,7 +11,7 @@ const FIELDS = {
   },
   title: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   description: {
     type: Sequelize.TEXT,
@@ -23,7 +23,7 @@ const FIELDS = {
   },
   startDate: {
     type: Sequelize.DATE,
-    allowNull: false,
+    allowNull: true,
   },
   userId: {
     type: Sequelize.STRING,
@@ -36,6 +36,9 @@ const FIELDS = {
   published: {
     type: Sequelize.BOOLEAN,
     allowNull: true,
+  },
+  draft: {
+    type: Sequelize.BOOLEAN,
   },
 };
 

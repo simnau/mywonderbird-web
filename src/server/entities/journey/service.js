@@ -59,11 +59,15 @@ const INCLUDE_ORDER = [
 async function findAll(
   page,
   pageSize,
-  { loadIncludes = false, published = false } = {},
+  { loadIncludes = false, published = false, draft = false } = {},
 ) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
-  const where = published ? { published } : {};
+  const where = { draft };
+
+  if (published) {
+    where.published = published;
+  }
 
   if (loadIncludes) {
     const [total, journeys] = await Promise.all([
@@ -94,11 +98,15 @@ async function findAllByUser(
   userId,
   page,
   pageSize,
-  { loadIncludes = false, published = false } = {},
+  { loadIncludes = false, published = false, draft = false } = {},
 ) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
-  const where = published ? { published, userId } : { userId };
+  const where = { userId, draft };
+
+  if (published) {
+    where.published = published;
+  }
 
   if (loadIncludes) {
     const [total, journeys] = await Promise.all([
@@ -131,13 +139,15 @@ async function findAllByIds(
   ids,
   page,
   pageSize,
-  { loadIncludes = false, published = false } = {},
+  { loadIncludes = false, published = false, draft = false } = {},
 ) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
-  const where = published
-    ? { published, id: { [Op.in]: ids } }
-    : { id: { [Op.in]: ids } };
+  const where = { id: { [Op.in]: ids }, draft };
+
+  if (published) {
+    where.published = published;
+  }
 
   if (loadIncludes) {
     const [total, journeys] = await Promise.all([
@@ -170,6 +180,16 @@ async function findCountByUser(userId) {
   return Journey.count({
     where: {
       userId,
+      draft: false,
+    },
+  });
+}
+
+async function findDraftCountByUser(userId) {
+  return Journey.count({
+    where: {
+      userId,
+      draft: true,
     },
   });
 }
@@ -227,6 +247,24 @@ function findById(id) {
     include: INCLUDE_MODELS,
     order: INCLUDE_ORDER,
   });
+}
+
+function publish(id) {
+  return Journey.update(
+    {
+      published: true,
+    },
+    { where: { id } },
+  );
+}
+
+function unpublish(id) {
+  return Journey.update(
+    {
+      published: false,
+    },
+    { where: { id } },
+  );
 }
 
 function create(journey) {
@@ -377,6 +415,20 @@ async function enrichJourneys(journeys, userId) {
   return journeysWithFavorites.map(journeyToFeedJourneyDTO);
 }
 
+function validateJourney(journey) {
+  const errors = {};
+
+  if (!journey.title) {
+    errors.title = 'Journey title is required';
+  }
+
+  if (!journey.startDate) {
+    errors.startDate = 'Journey start date is required';
+  }
+
+  return errors;
+}
+
 module.exports = {
   findAll,
   findAllByUser,
@@ -389,6 +441,10 @@ module.exports = {
   addUserProfileToJourney,
   addUserProfileToJourneys,
   findCountByUser,
+  findDraftCountByUser,
   journeyToFeedJourneyDTO,
   enrichJourneys,
+  validateJourney,
+  publish,
+  unpublish,
 };

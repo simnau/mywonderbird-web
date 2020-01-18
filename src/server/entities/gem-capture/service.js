@@ -52,7 +52,12 @@ async function updateGemCaptures(
     })
     .map(gemToDelete => gemToDelete.id);
   const gemCapturesToCreate = gemCaptureUpdates
-    .filter(gemCaptureUpdate => !gemCaptureUpdate.id)
+    .filter(
+      gemCaptureUpdate =>
+        !existingGemCaptures.find(
+          existingGemCapture => existingGemCapture.id === gemCaptureUpdate.id,
+        ),
+    )
     .map(gemCaptureUpdate => ({ ...gemCaptureUpdate, id: uuidv4(), gemId }));
   const gemCapturesToUpdate = gemCaptureUpdates.filter(
     gemCaptureUpdate =>

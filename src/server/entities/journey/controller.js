@@ -122,6 +122,109 @@ journeyRouter.get(
 );
 
 journeyRouter.get(
+  '/draft',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+    } = req;
+
+    const { journeys, total } = await service.findAllByUser(
+      id,
+      page,
+      pageSize,
+      { loadIncludes: true, draft: true },
+    );
+    const journeyDTOs = await service.enrichJourneys(journeys, id);
+
+    return res.send({ journeys: journeyDTOs, total });
+  }),
+);
+
+journeyRouter.get(
+  '/draft/count',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+    } = req;
+
+    const count = await service.findDraftCountByUser(id);
+
+    return res.send({ count });
+  }),
+);
+
+journeyRouter.post(
+  '/draft',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body,
+      user: { id },
+    } = req;
+
+    const existingJourney = await service.findById(body.id);
+
+    if (existingJourney) {
+      if (existingJourney.userId !== id || existingJourney.draft === false) {
+        const error = new Error('The journey already exists');
+        error.status = 400;
+
+        throw error;
+      } else {
+        const updatedJourney = await service.update(
+          existingJourney.id,
+          { ...body, draft: true },
+          existingJourney,
+        );
+
+        return res.send(updatedJourney);
+      }
+    }
+
+    const savedJourney = await service.create({
+      ...body,
+      userId: id,
+      creatorId: id,
+      draft: true,
+    });
+
+    return res.send(savedJourney);
+  }),
+);
+
+journeyRouter.post(
+  '/draft-status',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { journeyId },
+      user: { id: currentUserId, role },
+    } = req;
+
+    const journey = await service.findById(journeyId);
+
+    if (!journey) {
+      const error = new Error(`Journey with id ${journeyId} does not exist`);
+      error.status = 404;
+
+      throw error;
+    } else if (role !== ADMIN_ROLE && journey.userId !== currentUserId) {
+      const error = new Error('User is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    await service.update(journeyId, { draft: true }, journey);
+
+    return res.send({ message: 'The journey was moved to draft' });
+  }),
+);
+
+journeyRouter.get(
   '/:id',
   requireAuth,
   asyncHandler(async (req, res) => {
@@ -148,13 +251,40 @@ journeyRouter.post(
       body,
       user: { id },
     } = req;
+
+    const errors = service.validateJourney(body);
+
+    if (Object.keys(errors).length) {
+      return res.status(400).send(errors);
+    }
+
+    const existingJourney = await service.findById(body.id);
+
+    if (existingJourney) {
+      if (existingJourney.userId !== id || !existingJourney.draft) {
+        const error = new Error('The journey already exists');
+        error.status = 400;
+
+        throw error;
+      } else {
+        const updatedJourney = await service.update(
+          existingJourney.id,
+          { ...body, draft: false },
+          existingJourney,
+        );
+
+        return res.send(updatedJourney);
+      }
+    }
+
     const savedJourney = await service.create({
       ...body,
       userId: id,
       creatorId: id,
+      draft: false,
     });
 
-    res.send(savedJourney);
+    return res.send(savedJourney);
   }),
 );
 
@@ -201,7 +331,11 @@ journeyRouter.put(
       throw error;
     }
 
-    const updatedJourney = await service.update(id, body, journey);
+    const updatedJourney = await service.update(
+      id,
+      { ...body, draft: false },
+      journey,
+    );
 
     return res.send(updatedJourney);
   }),
@@ -218,8 +352,8 @@ journeyRouter.delete(
     const journey = await service.findById(id);
 
     if (!journey) {
-      return res.status(404).send({
-        error: `Journey with id ${id} not found`,
+      return res.send({
+        message: `Journey with id ${id} deleted`,
       });
     } else if (role !== ADMIN_ROLE && journey.userId !== currentUserId) {
       const error = new Error('User is not authorized to do this action');
@@ -232,6 +366,68 @@ journeyRouter.delete(
 
     return res.send({
       message: `Journey with id ${id} deleted`,
+    });
+  }),
+);
+
+journeyRouter.post(
+  '/publish',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { id },
+      user: { id: currentUserId, role },
+    } = req;
+
+    const journey = await service.findById(id);
+
+    if (!journey) {
+      const error = new Error(`Journey with id ${id} does not exist`);
+      error.status = 404;
+
+      throw error;
+    } else if (role !== ADMIN_ROLE && journey.userId !== currentUserId) {
+      const error = new Error('User is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    await service.publish(id);
+
+    return res.send({
+      message: `Journey with id ${id} published`,
+    });
+  }),
+);
+
+journeyRouter.post(
+  '/unpublish',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { id },
+      user: { id: currentUserId, role },
+    } = req;
+
+    const journey = await service.findById(id);
+
+    if (!journey) {
+      const error = new Error(`Journey with id ${id} does not exist`);
+      error.status = 404;
+
+      throw error;
+    } else if (role !== ADMIN_ROLE && journey.userId !== currentUserId) {
+      const error = new Error('User is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    await service.unpublish(id);
+
+    return res.send({
+      message: `Journey with id ${id} unpublished`,
     });
   }),
 );
