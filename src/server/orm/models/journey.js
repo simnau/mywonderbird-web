@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
 const { Day } = require('./day');
+const { JourneyComment } = require('./journey-comment');
 
 const FIELDS = {
   id: {
@@ -49,6 +50,14 @@ const Journey = sequelize.define('journeys', FIELDS);
 Journey.hasMany(Day, {
   foreignKey: 'journeyId',
   as: 'days',
+  onDelete: 'CASCADE',
+});
+Journey.hasMany(JourneyComment, {
+  foreignKey: 'journeyId',
+  as: 'comments',
+  onDelete: 'CASCADE',
+});
+JourneyComment.belongsTo(Journey, {
   onDelete: 'CASCADE',
 });
 Day.belongsTo(Journey, {

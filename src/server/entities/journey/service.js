@@ -13,6 +13,7 @@ const favoriteJourneyService = require('../favorite-journey/service');
 const { deleteFolder } = require('../../util/s3');
 const { findCoordinateBoundingBox } = require('../../util/geo');
 const { unique } = require('../../util/array');
+const journeyCommentService = require('../journey-comment/service');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
@@ -405,14 +406,33 @@ async function addIsFavoriteToJourneys(journeys, userId) {
   });
 }
 
+async function addCommentCountToJourneys(journeys) {
+  return Promise.all(
+    journeys.map(async journey => {
+      const journeyData = journey.toJSON ? journey.toJSON() : journey;
+      const commentCount = await journeyCommentService.countByJourneyId(
+        journeyData.id,
+      );
+
+      return {
+        ...journeyData,
+        commentCount,
+      };
+    }),
+  );
+}
+
 async function enrichJourneys(journeys, userId) {
   const journeysWithProfile = await addUserProfileToJourneys(journeys);
   const journeysWithFavorites = await addIsFavoriteToJourneys(
     journeysWithProfile,
     userId,
   );
+  const journeysWithCommentCount = await addCommentCountToJourneys(
+    journeysWithFavorites,
+  );
 
-  return journeysWithFavorites.map(journeyToFeedJourneyDTO);
+  return journeysWithCommentCount.map(journeyToFeedJourneyDTO);
 }
 
 function validateJourney(journey) {
