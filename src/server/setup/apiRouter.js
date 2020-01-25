@@ -10,6 +10,7 @@ const oauth = require('../entities/oauth/controller');
 const geo = require('../entities/geo/controller');
 const subscription = require('../entities/subscription/controller');
 const journeyComment = require('../entities/journey-comment/controller');
+const journeyLike = require('../entities/journey-like/controller');
 
 const apiRouter = Router();
 
@@ -23,5 +24,6 @@ apiRouter.use('/oauth', oauth);
 apiRouter.use('/geo', geo);
 apiRouter.use('/subscription', subscription);
 apiRouter.use('/journey-comments', journeyComment);
+apiRouter.use('/journey-likes', journeyLike);
 
 module.exports = apiRouter;

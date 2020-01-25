@@ -14,6 +14,7 @@ const { deleteFolder } = require('../../util/s3');
 const { findCoordinateBoundingBox } = require('../../util/geo');
 const { unique } = require('../../util/array');
 const journeyCommentService = require('../journey-comment/service');
+const journeyLikeService = require('../journey-like/service');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
@@ -406,6 +407,30 @@ async function addIsFavoriteToJourneys(journeys, userId) {
   });
 }
 
+async function addIsLikedToJourneys(journeys, userId) {
+  const journeyIds = journeys.map(journey => journey.id);
+  const likedJourneys = await journeyLikeService.findByJourneyIdsAndUserId(
+    journeyIds,
+    userId,
+  );
+  const likedJourneysByJourneyId = likedJourneys.reduce(
+    (result, likedJourney) => ({
+      ...result,
+      [likedJourney.journeyId]: likedJourney,
+    }),
+    {},
+  );
+
+  return journeys.map(journey => {
+    const likedJourney = likedJourneysByJourneyId[journey.id];
+
+    return {
+      ...journey,
+      isLiked: !!likedJourney,
+    };
+  });
+}
+
 async function addCommentCountToJourneys(journeys) {
   return Promise.all(
     journeys.map(async journey => {
@@ -422,17 +447,40 @@ async function addCommentCountToJourneys(journeys) {
   );
 }
 
+async function addLikeCountToJourneys(journeys) {
+  return Promise.all(
+    journeys.map(async journey => {
+      const journeyData = journey.toJSON ? journey.toJSON() : journey;
+      const likeCount = await journeyLikeService.countByJourneyId(
+        journeyData.id,
+      );
+
+      return {
+        ...journeyData,
+        likeCount,
+      };
+    }),
+  );
+}
+
 async function enrichJourneys(journeys, userId) {
   const journeysWithProfile = await addUserProfileToJourneys(journeys);
   const journeysWithFavorites = await addIsFavoriteToJourneys(
     journeysWithProfile,
     userId,
   );
-  const journeysWithCommentCount = await addCommentCountToJourneys(
+  const journeysWithLikes = await addIsLikedToJourneys(
     journeysWithFavorites,
+    userId,
+  );
+  const journeysWithCommentCount = await addCommentCountToJourneys(
+    journeysWithLikes,
+  );
+  const journeysWithLikeCount = await addLikeCountToJourneys(
+    journeysWithCommentCount,
   );
 
-  return journeysWithCommentCount.map(journeyToFeedJourneyDTO);
+  return journeysWithLikeCount.map(journeyToFeedJourneyDTO);
 }
 
 function validateJourney(journey) {
