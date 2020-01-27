@@ -50,6 +50,12 @@ function Header() {
       >
         Users
       </Link>
+      <Link
+        isActive={isActive('/admin/other', location.pathname)}
+        to="/admin/other"
+      >
+        Other
+      </Link>
       {isAuthenticated && <Button onClick={logout}>Logout</Button>}
       {!isAuthenticated && <Link to="/admin/login">Login</Link>}
     </HeaderContainer>

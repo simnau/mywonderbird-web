@@ -11,6 +11,8 @@ const geo = require('../entities/geo/controller');
 const subscription = require('../entities/subscription/controller');
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
+const tutorialStep = require('../entities/tutorial-step/controller');
+const userTutorialStep = require('../entities/user-tutorial-step/controller');
 
 const apiRouter = Router();
 
@@ -25,5 +27,7 @@ apiRouter.use('/geo', geo);
 apiRouter.use('/subscription', subscription);
 apiRouter.use('/journey-comments', journeyComment);
 apiRouter.use('/journey-likes', journeyLike);
+apiRouter.use('/tutorial-steps', tutorialStep);
+apiRouter.use('/user-tutorial-steps', userTutorialStep);
 
 module.exports = apiRouter;

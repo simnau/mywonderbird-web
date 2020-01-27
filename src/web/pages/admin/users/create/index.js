@@ -40,6 +40,7 @@ function CreateUser() {
           value={state.email}
           onChange={onFieldChange}
           type="email"
+          placeholder="Enter the user's email"
         />
         <Button variant="primary" type="submit">
           Create

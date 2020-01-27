@@ -25,26 +25,14 @@ const SectionHeading = styled.div`
   font-weight: bold;
 `;
 
-export default function Dashboard() {
+export default function Other() {
   return (
     <div>
-      <H3>Dashboard</H3>
+      <H3>Other</H3>
       <MainContainer>
         <ItemContainer>
-          <SectionHeading>Journeys</SectionHeading>
-          <Button variant="primary" as={Link} to="/admin/journeys">
-            View
-          </Button>
-        </ItemContainer>
-        <ItemContainer>
-          <SectionHeading>Users</SectionHeading>
-          <Button variant="primary" as={Link} to="/admin/users">
-            View
-          </Button>
-        </ItemContainer>
-        <ItemContainer>
-          <SectionHeading>Other</SectionHeading>
-          <Button variant="primary" as={Link} to="/admin/other">
+          <SectionHeading>Tutorial steps</SectionHeading>
+          <Button variant="primary" as={Link} to="/admin/other/tutorial-steps">
             View
           </Button>
         </ItemContainer>

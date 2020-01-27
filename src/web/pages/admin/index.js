@@ -12,6 +12,10 @@ import Users from './users';
 import CreateUser from './users/create';
 import UserJourneys from './users/journeys';
 import CreateEditUserJourney from './users/journeys/create-edit';
+import Other from './other';
+import TutorialSteps from './other/tutorial-steps';
+import CreateTutorialStep from './other/tutorial-steps/create';
+import EditTutorialStep from './other/tutorial-steps/edit';
 
 function Admin() {
   return (
@@ -19,6 +23,22 @@ function Admin() {
       <Header />
       <Switch>
         <Route exact path="/admin/dashboard" component={Home} />
+        <Route exact path="/admin/other" component={Other} />
+        <Route
+          exact
+          path="/admin/other/tutorial-steps"
+          component={TutorialSteps}
+        />
+        <Route
+          exact
+          path="/admin/other/tutorial-steps/create"
+          component={CreateTutorialStep}
+        />
+        <Route
+          exact
+          path="/admin/other/tutorial-steps/edit/:id"
+          component={EditTutorialStep}
+        />
         <Route
           exact
           path="/admin/journeys/create"

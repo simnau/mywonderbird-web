@@ -1,9 +1,9 @@
 import React from 'react';
-import Loader from 'react-loader-spinner';
+import LoaderSpinner from 'react-loader-spinner';
 
 import * as colors from '../constants/colors';
 
-function CustomLoader({
+function Loader({
   type = 'Oval',
   color = colors.primary,
   height = 64,
@@ -11,7 +11,7 @@ function CustomLoader({
   ...props
 }) {
   return (
-    <Loader
+    <LoaderSpinner
       {...props}
       type={type}
       color={color}
@@ -22,4 +22,4 @@ function CustomLoader({
   );
 }
 
-export default CustomLoader;
+export default Loader;
