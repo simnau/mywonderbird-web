@@ -17,7 +17,7 @@ import Loader from '../loader';
 
 const CaptureContainer = styled.div`
   display: grid;
-  grid-template-rows: 40px 200px 1fr 1fr;
+  grid-template-rows: 40px 293px 1fr 1fr;
   grid-row-gap: 8px;
   margin: 8px;
   width: auto;
@@ -31,16 +31,21 @@ const ActionContainer = styled.div`
   }
 `;
 
-const ImageContainer = styled.div`
+const ImagesContainer = styled.div`
   height: 100%;
   width: fit-content;
+`;
+
+const ImageContainer = styled.div`
+  height: 100%;
+  width: 300px;
 `;
 
 const Image = styled.img`
   display: block;
   width: 100%;
-  min-width: 300px;
   height: 100%;
+  object-fit: cover;
   user-select: none;
 `;
 
@@ -149,9 +154,11 @@ function GemCapturesForm({
                   <TrashCanIcon />
                 </OutlineButton>
               </ActionContainer>
-              <ImageContainer>
-                <Image src={gemCapture.url} draggable={false} />
-              </ImageContainer>
+              <ImagesContainer>
+                <ImageContainer>
+                  <Image src={gemCapture.url} draggable={false} />
+                </ImageContainer>
+              </ImagesContainer>
               <TextField
                 label="Title"
                 name="title"

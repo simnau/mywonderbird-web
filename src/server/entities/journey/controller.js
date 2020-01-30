@@ -297,6 +297,32 @@ journeyRouter.post(
       params: { userId },
       user: { id },
     } = req;
+
+    const errors = service.validateJourney(body);
+
+    if (Object.keys(errors).length) {
+      return res.status(400).send(errors);
+    }
+
+    const existingJourney = await service.findById(body.id);
+
+    if (existingJourney) {
+      if (existingJourney.userId !== id || !existingJourney.draft) {
+        const error = new Error('The journey already exists');
+        error.status = 400;
+
+        throw error;
+      } else {
+        const updatedJourney = await service.update(
+          existingJourney.id,
+          { ...body, draft: false, userId, creatorId: id },
+          existingJourney,
+        );
+
+        return res.send(updatedJourney);
+      }
+    }
+
     const savedJourney = await service.create({
       ...body,
       userId,
