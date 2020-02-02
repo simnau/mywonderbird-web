@@ -30,7 +30,8 @@ module.exports = {
   },
   mailerlite: {
     apiKey: 'MAILERLITE_API_KEY',
-    groupId: 'MAILERLITE_GROUP_ID',
+    webGroupId: 'MAILERLITE_WEB_GROUP_ID',
+    newsletterGroupId: 'MAILERLITE_NEWSLETTER_GROUP_ID',
   },
   segment: {
     writeKey: 'SEGMENT_WRITE_KEY',

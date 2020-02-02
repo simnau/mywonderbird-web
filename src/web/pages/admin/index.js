@@ -16,6 +16,8 @@ import Other from './other';
 import TutorialSteps from './other/tutorial-steps';
 import CreateTutorialStep from './other/tutorial-steps/create';
 import EditTutorialStep from './other/tutorial-steps/edit';
+import Terms from './other/terms';
+import CreateTerms from './other/terms/create';
 
 function Admin() {
   return (
@@ -39,6 +41,8 @@ function Admin() {
           path="/admin/other/tutorial-steps/edit/:id"
           component={EditTutorialStep}
         />
+        <Route exact path="/admin/other/terms" component={Terms} />
+        <Route exact path="/admin/other/terms/create" component={CreateTerms} />
         <Route
           exact
           path="/admin/journeys/create"

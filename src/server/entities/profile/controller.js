@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
+const subscriptionService = require('../subscription/service');
 
 const AVATAR_FOLDER = 'avatars';
 
@@ -62,6 +63,65 @@ router.post(
     );
 
     res.send({ images });
+  }),
+);
+
+router.post(
+  '/terms',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { acceptedTerms, acceptedNewsletter },
+      user: { id, email },
+    } = req;
+
+    if (!acceptedTerms) {
+      return res.status(422).send({ error: 'Terms cannot be unaccepted' });
+    }
+
+    const profileUpdate = {
+      acceptedTermsAt: new Date(),
+    };
+
+    if (acceptedNewsletter !== 'undefined') {
+      profileUpdate.acceptedNewsletter = acceptedNewsletter;
+
+      if (acceptedNewsletter) {
+        await subscriptionService.subscribeNewsletter(email);
+      } else {
+        await subscriptionService.unsubscribeNewsletter(email);
+      }
+    }
+
+    const profile = await service.createOrUpdateProfileByProviderId(
+      id,
+      profileUpdate,
+    );
+
+    res.send(profile);
+  }),
+);
+
+router.post(
+  '/communication',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { acceptedNewsletter },
+      user: { id, email },
+    } = req;
+
+    if (acceptedNewsletter) {
+      await subscriptionService.subscribeNewsletter(email);
+    } else {
+      await subscriptionService.unsubscribeNewsletter(email);
+    }
+
+    const profile = await service.createOrUpdateProfileByProviderId(id, {
+      acceptedNewsletter,
+    });
+
+    res.send(profile);
   }),
 );
 

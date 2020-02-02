@@ -20,6 +20,15 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: true,
   },
+  acceptedNewsletter: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  acceptedTermsAt: {
+    type: Sequelize.DATE,
+    defaultValue: null,
+  },
   providerId: {
     type: Sequelize.STRING,
     defaultValue: Sequelize.UUIDV4,

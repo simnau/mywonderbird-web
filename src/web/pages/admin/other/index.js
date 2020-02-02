@@ -36,6 +36,12 @@ export default function Other() {
             View
           </Button>
         </ItemContainer>
+        <ItemContainer>
+          <SectionHeading>Terms</SectionHeading>
+          <Button variant="primary" as={Link} to="/admin/other/terms">
+            View
+          </Button>
+        </ItemContainer>
       </MainContainer>
     </div>
   );
