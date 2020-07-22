@@ -137,6 +137,36 @@ async function findAllByUser(
   return { total, journeys };
 }
 
+async function findLastByUser(
+  userId,
+  { loadIncludes = false, published = false, draft = false } = {},
+) {
+  const where = { userId, draft };
+
+  if (published) {
+    where.published = published;
+  }
+
+  if (loadIncludes) {
+    const [lastJourney] = await Journey.findAll({
+      where,
+      order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+      include: INCLUDE_MODELS,
+      limit: 1,
+    });
+
+    return lastJourney.toJSON();
+  }
+
+  const [lastJourney] = await Journey.findAll({
+    where,
+    order: [['createdAt', 'DESC']],
+    limit: 1,
+  });
+
+  return lastJourney.toJSON();
+}
+
 async function findAllByIds(
   ids,
   page,
@@ -500,6 +530,7 @@ function validateJourney(journey) {
 module.exports = {
   findAll,
   findAllByUser,
+  findLastByUser,
   findAllByIds,
   findAllNotByUser,
   findById,

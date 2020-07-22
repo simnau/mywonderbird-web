@@ -38,6 +38,7 @@ Day.hasMany(Gem, {
   foreignKey: 'dayId',
   as: 'gems',
   onDelete: 'CASCADE',
+  allowNull: true,
 });
 Gem.belongsTo(Day, {
   onDelete: 'CASCADE',

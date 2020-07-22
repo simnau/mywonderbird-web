@@ -50,7 +50,12 @@ function update(gems, transaction) {
   );
 }
 
-async function updateDayGems(existingGems, gemUpdates = [], dayId, transaction) {
+async function updateDayGems(
+  existingGems,
+  gemUpdates = [],
+  dayId,
+  transaction,
+) {
   const gemsToDeleteIds = existingGems
     .filter(existingGem => {
       return !gemUpdates.find(gemUpdate => gemUpdate.id === existingGem.id);
@@ -80,6 +85,27 @@ async function updateDayGems(existingGems, gemUpdates = [], dayId, transaction) 
   ]);
 }
 
+async function findLastForJourney(journeyId) {
+  const [lastGem] = await Gem.findAll({
+    where: {
+      journeyId,
+    },
+    sort: [['sequenceNumber', 'DESC']],
+    limit: 1,
+  });
+
+  return lastGem;
+}
+
+async function create(gem, transaction = null) {
+  return Gem.create(gem, {
+    include: INCLUDE_MODELS,
+    transaction,
+  });
+}
+
 module.exports = {
   updateDayGems,
+  create,
+  findLastForJourney,
 };

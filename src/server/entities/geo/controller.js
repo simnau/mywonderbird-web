@@ -39,10 +39,21 @@ geoRouter.get(
   '/places/search',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { q } = req.query;
-    const result = await service.searchPlaces(q);
+    const { q, location } = req.query;
+    const result = await service.searchPlaces(q, location);
 
     res.send(result);
+  }),
+);
+
+geoRouter.get(
+  '/places/reverse-geocode',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { location } = req.query;
+    const result = await service.reverseGeocode(location);
+
+    res.send({ place: result });
   }),
 );
 

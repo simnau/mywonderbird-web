@@ -32,9 +32,17 @@ module.exports = {
     header: 'Authorization',
   },
   feed: {
-    maxImageCount: 4,
+    maxImageCount: 1,
   },
   mailerlite: {
     apiUrl: 'https://api.mailerlite.com/api/v2',
+  },
+  location: {
+    browse: {
+      distanceThreshold: 200,
+    },
+    geohash: {
+      precision: 7,
+    },
   },
 };

@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
 const { Day } = require('./day');
+const { Gem } = require('./gem');
 const { JourneyComment } = require('./journey-comment');
 
 const FIELDS = {
@@ -50,6 +51,11 @@ const Journey = sequelize.define('journeys', FIELDS);
 Journey.hasMany(Day, {
   foreignKey: 'journeyId',
   as: 'days',
+  onDelete: 'CASCADE',
+});
+Journey.hasMany(Gem, {
+  foreignKey: 'journeyId',
+  as: 'gems',
   onDelete: 'CASCADE',
 });
 Journey.hasMany(JourneyComment, {

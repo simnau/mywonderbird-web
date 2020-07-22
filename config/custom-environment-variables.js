@@ -36,9 +36,18 @@ module.exports = {
   segment: {
     writeKey: 'SEGMENT_WRITE_KEY',
   },
-  google: {
+  here: {
     maps: {
-      apiKey: 'GOOGLE_MAPS_API_KEY',
+      appId: 'HERE_MAPS_APP_ID',
+      apiKey: 'HERE_MAPS_API_KEY',
+    },
+  },
+  location: {
+    browse: {
+      distanceThreshold: 'LOCATION_BROWSE_DISTANCE_THRESHOLD',
+    },
+    geohash: {
+      precision: 'LOCATION_GEOHASH_PRECISION',
     },
   },
 };

@@ -83,7 +83,7 @@ router.post(
       acceptedTermsAt: new Date(),
     };
 
-    if (acceptedNewsletter !== 'undefined') {
+    if (typeof acceptedNewsletter !== 'undefined') {
       profileUpdate.acceptedNewsletter = acceptedNewsletter;
 
       if (acceptedNewsletter) {

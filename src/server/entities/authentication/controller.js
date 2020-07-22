@@ -27,7 +27,7 @@ authenticationRouter.post(
 
     const result = await service.confirm(email, code);
 
-    return res.send(result);
+    return res.send({ result });
   }),
 );
 

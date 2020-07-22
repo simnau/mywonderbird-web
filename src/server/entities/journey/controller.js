@@ -50,6 +50,20 @@ journeyRouter.get(
 );
 
 journeyRouter.get(
+  '/last',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+    } = req;
+    const lastJourney = await service.findLastByUser(id, { loadIncludes: true });
+    const journeyDTO = service.journeyToFeedJourneyDTO(lastJourney);
+
+    res.send({ journey: journeyDTO });
+  }),
+)
+
+journeyRouter.get(
   '/count',
   requireAuth,
   asyncHandler(async (req, res) => {
@@ -259,6 +273,7 @@ journeyRouter.post(
     }
 
     const existingJourney = await service.findById(body.id);
+    let savedJourney;
 
     if (existingJourney) {
       if (existingJourney.userId !== id || !existingJourney.draft) {
@@ -267,24 +282,25 @@ journeyRouter.post(
 
         throw error;
       } else {
-        const updatedJourney = await service.update(
+        savedJourney = await service.update(
           existingJourney.id,
           { ...body, draft: false },
           existingJourney,
         );
-
-        return res.send(updatedJourney);
       }
+    } else {
+      savedJourney = await service.create({
+        ...body,
+        userId: id,
+        creatorId: id,
+        draft: false,
+      });
     }
 
-    const savedJourney = await service.create({
-      ...body,
-      userId: id,
-      creatorId: id,
-      draft: false,
-    });
+    savedJourney = await service.findById(savedJourney.id);
+    const journeyDTO = service.journeyToFeedJourneyDTO(savedJourney.toJSON());
 
-    return res.send(savedJourney);
+    return res.send(journeyDTO);
   }),
 );
 

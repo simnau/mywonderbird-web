@@ -9,6 +9,7 @@ const authentication = require('../entities/authentication/controller');
 const oauth = require('../entities/oauth/controller');
 const geo = require('../entities/geo/controller');
 const subscription = require('../entities/subscription/controller');
+const picture = require('../entities/picture/controller');
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
 const tutorialStep = require('../entities/tutorial-step/controller');
@@ -16,6 +17,8 @@ const userTutorialStep = require('../entities/user-tutorial-step/controller');
 const terms = require('../entities/terms/controller');
 
 const apiRouter = Router();
+
+apiRouter.use('/pictures', picture);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);

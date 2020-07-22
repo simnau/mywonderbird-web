@@ -36,9 +36,17 @@ const FIELDS = {
   },
   dayId: {
     type: Sequelize.UUID,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'days',
+      key: 'id',
+    },
+  },
+  journeyId: {
+    type: Sequelize.UUID,
+    allowNull: true,
+    references: {
+      model: 'journeys',
       key: 'id',
     },
   },
