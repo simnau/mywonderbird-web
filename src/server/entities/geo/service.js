@@ -7,17 +7,38 @@ const {
 } = require('../../providers/location/here');
 const countryBoundaries = require('../../resources/countriy-boundaries');
 
-const countryDTOs = countries.map(country => ({
-  label: country.country,
-  value: country.iso3,
-}));
+const countryDtoByCodeMap = countries.reduce((result, country) => {
+  const uppercaseCode = country.iso3.toUpperCase();
+
+  return {
+    ...result,
+    [uppercaseCode]: {
+      label: country.country,
+      value: uppercaseCode,
+    },
+  };
+}, {});
+
+function getCountryDTOs() {
+  return Object.values(countryDtoByCodeMap);
+}
+
+function getLabelBy3LetterCountryCode(code) {
+  if (!code) {
+    throw new Error('Code is required');
+  }
+
+  const uppercaseCode = code.toUpperCase();
+
+  return countryDtoByCodeMap[uppercaseCode].label;
+}
 
 function getCountries() {
-  return countryDTOs;
+  return getCountryDTOs();
 }
 
 function searchCountries(query) {
-  return countryDTOs.filter(country =>
+  return getCountryDTOs().filter(country =>
     country.label.toLowerCase().startsWith(query.toLowerCase()),
   );
 }
@@ -55,6 +76,7 @@ async function reverseGeocode(location) {
 module.exports = {
   getCountries,
   searchCountries,
+  getLabelBy3LetterCountryCode,
   findBoundsBy3LetterCountryCode,
   reverseGeocode,
   searchPlaces,

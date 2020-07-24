@@ -2,7 +2,18 @@ const { Op } = require('sequelize');
 const uuidv4 = require('uuid/v4');
 
 const fileUploader = require('../../util/file-upload');
+const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
+const {
+  OLDER_DIRECTION,
+  NEWER_DIRECTION,
+} = require('../../constants/infinite-scroll');
+
+const INCLUDE_MODELS = [
+  {
+    model: Gem,
+  },
+];
 
 async function uploadFiles(files, folder) {
   const { images } = await fileUploader(files, folder);
@@ -74,7 +85,40 @@ async function updateGemCaptures(
   ]);
 }
 
+async function findFeedItems(lastDatetime, limit, direction = OLDER_DIRECTION) {
+  let where = {};
+  let order;
+
+  if (direction === NEWER_DIRECTION) {
+    if (lastDatetime) {
+      where = {
+        updatedAt: {
+          [Op.gt]: lastDatetime,
+        },
+      };
+    }
+    order = [['updatedAt', 'ASC']];
+  } else {
+    if (lastDatetime) {
+      where = {
+        updatedAt: {
+          [Op.lt]: lastDatetime,
+        },
+      };
+    }
+    order = [['updatedAt', 'DESC']];
+  }
+
+  return GemCapture.findAll({
+    where,
+    limit,
+    order,
+    include: INCLUDE_MODELS,
+  });
+}
+
 module.exports = {
   uploadFiles,
   updateGemCaptures,
+  findFeedItems,
 };

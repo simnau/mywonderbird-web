@@ -75,4 +75,5 @@ async function createFromGem(gem, location, userId, transaction = null) {
 
 module.exports = {
   createFromGem,
+  findByGeohash,
 };

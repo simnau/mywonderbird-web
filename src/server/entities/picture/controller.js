@@ -4,6 +4,10 @@ const asyncHandler = require('express-async-handler');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
 const journeyService = require('../journey/service');
+const {
+  OLDER_DIRECTION,
+  DEFAULT_LIMIT,
+} = require('../../constants/infinite-scroll');
 
 const pictureRouter = Router();
 
@@ -47,6 +51,28 @@ pictureRouter.post(
     const response = await service.uploadFiles(files, journeyId);
 
     res.send(response);
+  }),
+);
+
+pictureRouter.get(
+  '/feed',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: {
+        lastDatetime,
+        limit = DEFAULT_LIMIT,
+        direction = OLDER_DIRECTION,
+      },
+    } = req;
+
+    const feedItems = await service.findFeedItems(
+      lastDatetime,
+      limit,
+      direction,
+    );
+
+    res.send({ feedItems });
   }),
 );
 
