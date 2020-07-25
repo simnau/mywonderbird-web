@@ -2,7 +2,11 @@ const axios = require('axios');
 const config = require('config');
 const qs = require('qs');
 
-const { BROWSE_FULL_PATH, DISCOVER_FULL_PATH } = require('./urls');
+const {
+  BROWSE_FULL_PATH,
+  DISCOVER_FULL_PATH,
+  REVERSE_GEOCODE_FULL_PATH,
+} = require('./urls');
 const { CATEGORIES_STRING } = require('./categories');
 
 const SEARCH_LIMIT = 3;
@@ -63,7 +67,24 @@ async function locationToPlace(location) {
   return null;
 }
 
+async function locationToAddress(location) {
+  const queryParams = qs.stringify({
+    at: location,
+    apiKey: hereApiKey,
+    limit: 1,
+    lang: 'en-US',
+  });
+  const {
+    data: {
+      items: [placeAddress],
+    },
+  } = await axios.get(`${REVERSE_GEOCODE_FULL_PATH}?${queryParams}`);
+
+  return placeAddress;
+}
+
 module.exports = {
+  locationToAddress,
   locationToPlace,
   searchForPlaces,
   toDTO,

@@ -2,6 +2,7 @@ const { countries } = require('country-code-lookup');
 
 const {
   searchForPlaces: hereSearchForPlaces,
+  locationToAddress: hereLocationToAddress,
   locationToPlace: hereLocationToPlace,
   toDTO: hereToDTO,
 } = require('../../providers/location/here');
@@ -73,11 +74,18 @@ async function reverseGeocode(location) {
   return place ? hereToDTO(place) : null;
 }
 
+async function locationToAddress(location) {
+  const place = await hereLocationToAddress(location);
+
+  return place ? hereToDTO(place) : null;
+}
+
 module.exports = {
   getCountries,
   searchCountries,
   getLabelBy3LetterCountryCode,
   findBoundsBy3LetterCountryCode,
   reverseGeocode,
+  locationToAddress,
   searchPlaces,
 };
