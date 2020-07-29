@@ -50,4 +50,7 @@ module.exports = {
       precision: 'LOCATION_GEOHASH_PRECISION',
     },
   },
+  sentry: {
+    dsn: 'SENTRY_DSN',
+  },
 };

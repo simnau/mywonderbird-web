@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const config = require('config');
 const cors = require('cors');
+const Sentry = require('@sentry/node');
 
 const api = require('./apiRouter');
 const errorHandler = require('../middleware/error-handler');
@@ -18,6 +19,7 @@ const maxUploadSize = config.get('media.fileUpload.maxSize');
 const LANDING_PAGE_PATH = path.resolve('src', 'landing-page');
 const DIST_PATH = path.resolve('dist');
 
+app.use(Sentry.Handlers.requestHandler());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(
@@ -36,6 +38,7 @@ app.use('/api', api);
 app.use('/admin/*', serveStatic(DIST_PATH));
 app.use('/*', serveStatic(LANDING_PAGE_PATH));
 
+app.use(Sentry.Handlers.errorHandler());
 app.use(errorHandler);
 
 app.listen(port, () => {

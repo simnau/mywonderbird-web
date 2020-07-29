@@ -25,6 +25,7 @@
   "homepage": "https://github.com/simnau/mywonderbird-web#readme",
   "dependencies": {
     "@google/maps": "^1.0.2",
+    "@sentry/node": "^5.20.1",
     "amazon-cognito-identity-js": "^3.2.0",
     "analytics-node": "^3.4.0-beta.1",
     "aws-sdk": "^2.558.0",
