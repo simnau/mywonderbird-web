@@ -64,6 +64,7 @@ pictureRouter.get(
         limit = DEFAULT_LIMIT,
         direction = OLDER_DIRECTION,
       },
+      user: { id },
     } = req;
 
     const feedItems = await service.findFeedItems(
@@ -71,8 +72,9 @@ pictureRouter.get(
       limit,
       direction,
     );
+    const feedDto = await service.augmentFeed(feedItems, id);
 
-    res.send({ feedItems });
+    res.send({ feedItems: feedDto });
   }),
 );
 

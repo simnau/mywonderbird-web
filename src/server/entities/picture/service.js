@@ -1,10 +1,12 @@
+const sequelize = require('../../setup/sequelize');
+const { unique } = require('../../util/array');
 const { getGeohash } = require('../../util/geo');
 const fileUploader = require('../../util/file-upload');
 const gemService = require('../gem/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
-const sequelize = require('../../setup/sequelize');
+const likeService = require('../like/service');
 
 async function sharePicture(
   { title, imageUrl, location, creationDate },
@@ -66,7 +68,35 @@ async function findFeedItems(lastDatetime, limit, direction) {
     direction,
   );
 
-  return Promise.all(gemCaptures.map(toFeedDto));
+  return gemCaptures;
+}
+
+async function augmentFeed(gemCaptures, userId) {
+  const gemCaptureIds = unique(gemCaptures.map(gemCapture => gemCapture.id));
+  const likeCounts = await likeService.countByGemCaptureIds(gemCaptureIds);
+  const likesByUser = await likeService.findByGemCaptureIdsAndUserId(
+    gemCaptureIds,
+    userId,
+    { attributes: ['entityId'] },
+  );
+  const groupedUserLikes = likesByUser.reduce((result, item) => {
+    return {
+      ...result,
+      [item.entityId]: true,
+    };
+  }, {});
+
+  const withCounts = gemCaptures.map(gemCapture => {
+    const rawGemCapture = gemCapture.toJSON();
+
+    return {
+      ...rawGemCapture,
+      likeCount: likeCounts[gemCapture.id],
+      isLiked: groupedUserLikes[gemCapture.id] || false,
+    };
+  });
+
+  return Promise.all(withCounts.map(toFeedDto));
 }
 
 async function toFeedDto(feedItem) {
@@ -86,8 +116,8 @@ async function toFeedDto(feedItem) {
       ? geoService.getLabelBy3LetterCountryCode(place.countryCode)
       : null,
     updatedAt: feedItem.updatedAt,
-    likeCount: 0, //TODO
-    isLiked: false, // TODO
+    likeCount: feedItem.likeCount || 0,
+    isLiked: feedItem.isLiked,
     isBookmarked: false, // TODO
   };
 }
@@ -96,4 +126,5 @@ module.exports = {
   sharePicture,
   uploadFiles,
   findFeedItems,
+  augmentFeed,
 };
