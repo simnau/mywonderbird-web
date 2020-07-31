@@ -24,7 +24,15 @@ const FIELDS = {
   },
 };
 
-const Like = sequelize.define('likes', FIELDS);
+const Like = sequelize.define('likes', FIELDS, {
+  scopes: {
+    gemCapture: {
+      where: {
+        type: LIKE_TYPE_GEM_CAPTURE,
+      },
+    },
+  },
+});
 
 module.exports = {
   Like,

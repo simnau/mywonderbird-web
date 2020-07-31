@@ -11,52 +11,69 @@ function createGemCaptureLike({ userId, gemCaptureId: entityId }) {
 }
 
 function findyByUserIdAndGemCaptureId(userId, gemCaptureId) {
-  return Like.findOne({
+  return Like.scope('gemCapture').findOne({
     where: {
       userId,
       entityId: gemCaptureId,
-      type: LIKE_TYPE_GEM_CAPTURE,
     },
   });
 }
 
 function findByGemCaptureId(gemCaptureId) {
-  return Like.findAll({
+  return Like.scope('gemCapture').findAll({
     where: {
       entityId: gemCaptureId,
-      type: LIKE_TYPE_GEM_CAPTURE,
     },
     order: [['updatedAt', 'DESC']],
   });
 }
 
 function deleteByUserIdAndGemCaptureId(userId, gemCaptureId) {
-  return Like.destroy({
+  return Like.scope('gemCapture').destroy({
     where: {
       userId,
       entityId: gemCaptureId,
-      type: LIKE_TYPE_GEM_CAPTURE,
     },
     limit: 1,
   });
 }
 
-function countByGemCaptureId(gemCaptureId) {
-  return Like.count({
+function deleteByGemCaptureId(gemCaptureId) {
+  return Like.scope('gemCapture').destroy({
     where: {
       entityId: gemCaptureId,
-      type: LIKE_TYPE_GEM_CAPTURE,
+    },
+    limit: 1,
+  });
+}
+
+function deleteByGemCaptureIds(gemCaptureIds, { transaction = null }) {
+  return Like.destroy(
+    {
+      where: {
+        entityId: {
+          [Op.in]: gemCaptureIds,
+        },
+      },
+    },
+    { transaction },
+  );
+}
+
+function countByGemCaptureId(gemCaptureId) {
+  return Like.scope('gemCapture').count({
+    where: {
+      entityId: gemCaptureId,
     },
   });
 }
 
 async function countByGemCaptureIds(gemCaptureIds) {
-  const results = await Like.findAll({
+  const results = await Like.scope('gemCapture').findAll({
     where: {
       entityId: {
         [Op.in]: gemCaptureIds,
       },
-      type: LIKE_TYPE_GEM_CAPTURE,
     },
     group: ['entityId'],
     attributes: ['entityId', [fn('COUNT', 'entityId'), 'count']],
@@ -78,12 +95,11 @@ function findByGemCaptureIdsAndUserId(
   userId,
   { attributes = null },
 ) {
-  return Like.findAll({
+  return Like.scope('gemCapture').findAll({
     where: {
       entityId: {
         [Op.in]: gemCaptureIds,
       },
-      type: LIKE_TYPE_GEM_CAPTURE,
       userId,
     },
     attributes,
@@ -96,6 +112,8 @@ module.exports = {
   findByGemCaptureId,
   findByGemCaptureIdsAndUserId,
   deleteByUserIdAndGemCaptureId,
+  deleteByGemCaptureId,
+  deleteByGemCaptureIds,
   countByGemCaptureId,
   countByGemCaptureIds,
 };

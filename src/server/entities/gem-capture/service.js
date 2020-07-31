@@ -8,6 +8,7 @@ const {
   OLDER_DIRECTION,
   NEWER_DIRECTION,
 } = require('../../constants/infinite-scroll');
+const likeService = require('../like/service');
 
 const INCLUDE_MODELS = [
   {
@@ -23,7 +24,9 @@ async function uploadFiles(files, folder) {
   };
 }
 
-function deleteByIds(ids, transaction) {
+async function deleteByIds(ids, transaction) {
+  await likeService.deleteByGemCaptureIds(ids, { transaction });
+
   return GemCapture.destroy({
     where: {
       id: {
