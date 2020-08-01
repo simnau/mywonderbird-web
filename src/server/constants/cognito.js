@@ -5,8 +5,7 @@ const FORCE_CHANGE_PASSWORD_STATUS = 'FORCE_CHANGE_PASSWORD';
 
 const NOT_AUTHORIZED = 'NotAuthorizedException';
 const FORCE_CHANGE_PASSWORD = 'ForceChangePasswordException';
-const NOT_SIGNED_UP = 'NotSignedUpException';
-const ALREADY_SIGNED_UP = 'AlreadySignedUpException';
+const USERNAME_EXISTS = 'UsernameExistsException';
 
 module.exports = {
   CUSTOM_ATTRIBUTE_PREFIX,
@@ -14,6 +13,5 @@ module.exports = {
   FORCE_CHANGE_PASSWORD_STATUS,
   NOT_AUTHORIZED,
   FORCE_CHANGE_PASSWORD,
-  NOT_SIGNED_UP,
-  ALREADY_SIGNED_UP,
+  USERNAME_EXISTS,
 };

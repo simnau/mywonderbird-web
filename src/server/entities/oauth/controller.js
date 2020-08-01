@@ -27,15 +27,4 @@ oauthRouter.get(
   }),
 );
 
-oauthRouter.get(
-  '/register',
-  asyncHandler(async (req, res) => {
-    const { code, redirectUri } = req.query;
-
-    const registerResult = await service.register(code, redirectUri);
-
-    res.send(registerResult);
-  }),
-)
-
 module.exports = oauthRouter;

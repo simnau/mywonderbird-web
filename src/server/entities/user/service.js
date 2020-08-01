@@ -26,15 +26,10 @@ async function updateUserRole(userId, role) {
   return cognitoUtil.updateUserRole(userId, role);
 }
 
-async function markUserAsRegistered(userId) {
-  return cognitoUtil.markUserAsRegistered(userId);
-}
-
 module.exports = {
   getUsers,
   createUser,
   deleteUser,
   getUser,
   updateUserRole,
-  markUserAsRegistered,
 };

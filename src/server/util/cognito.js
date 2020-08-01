@@ -227,23 +227,6 @@ async function updateUserRole(userId, role) {
   return result;
 }
 
-async function markUserAsRegistered(userId) {
-  const result = await cognito
-    .adminUpdateUserAttributes({
-      UserAttributes: [
-        {
-          Name: `${CUSTOM_ATTRIBUTE_PREFIX}registered`,
-          Value: 'true',
-        },
-      ],
-      UserPoolId: poolId,
-      Username: userId,
-    })
-    .promise();
-
-  return result;
-}
-
 async function forgotPassword(email) {
   const result = await cognito
     .forgotPassword({
@@ -357,6 +340,5 @@ module.exports = {
   changePassword,
   forceChangePassword,
   updateUserRole,
-  markUserAsRegistered,
   createTemporaryPassword,
 };

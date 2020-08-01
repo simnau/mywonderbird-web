@@ -5,6 +5,7 @@ const segmentUtil = require('../../util/segment');
 const requireUnauth = require('../../middleware/require-unauth');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
+const { USERNAME_EXISTS } = require('../../constants/cognito');
 
 const authenticationRouter = Router();
 
@@ -12,10 +13,17 @@ authenticationRouter.post(
   '/register',
   requireUnauth,
   asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    const user = await service.register(email, password);
-    return res.send(user);
+      const user = await service.register(email, password);
+      return res.send(user);
+    } catch (e) {
+      if (e.code == USERNAME_EXISTS) {
+        e.status = 403;
+      }
+      throw e;
+    }
   }),
 );
 
