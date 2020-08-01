@@ -7,6 +7,7 @@ const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
 const likeService = require('../like/service');
+const bookmarkService = require('../bookmark/service');
 
 async function sharePicture(
   { title, imageUrl, location, creationDate },
@@ -73,18 +74,11 @@ async function findFeedItems(lastDatetime, limit, direction) {
 
 async function augmentFeed(gemCaptures, userId) {
   const gemCaptureIds = unique(gemCaptures.map(gemCapture => gemCapture.id));
-  const likeCounts = await likeService.countByGemCaptureIds(gemCaptureIds);
-  const likesByUser = await likeService.findByGemCaptureIdsAndUserId(
+  const { likeCounts, groupedUserLikes } = await getLikeStats(
     gemCaptureIds,
     userId,
-    { attributes: ['entityId'] },
   );
-  const groupedUserLikes = likesByUser.reduce((result, item) => {
-    return {
-      ...result,
-      [item.entityId]: true,
-    };
-  }, {});
+  const groupedUserBookmarks = await getBookmarkStats(gemCaptureIds, userId);
 
   const withCounts = gemCaptures.map(gemCapture => {
     const rawGemCapture = gemCapture.toJSON();
@@ -93,10 +87,48 @@ async function augmentFeed(gemCaptures, userId) {
       ...rawGemCapture,
       likeCount: likeCounts[gemCapture.id],
       isLiked: groupedUserLikes[gemCapture.id] || false,
+      isBookmarked: groupedUserBookmarks[gemCapture.id] || false,
     };
   });
 
   return Promise.all(withCounts.map(toFeedDto));
+}
+
+async function getLikeStats(gemCaptureIds, userId) {
+  const [likeCounts, likesByUser] = await Promise.all([
+    likeService.countByGemCaptureIds(gemCaptureIds),
+    likeService.findByGemCaptureIdsAndUserId(gemCaptureIds, userId, {
+      attributes: ['entityId'],
+    }),
+  ]);
+  const groupedUserLikes = likesByUser.reduce((result, item) => {
+    return {
+      ...result,
+      [item.entityId]: true,
+    };
+  }, {});
+
+  return {
+    likeCounts,
+    groupedUserLikes,
+  };
+}
+
+async function getBookmarkStats(gemCaptureIds, userId) {
+  const bookmarksByUser = await bookmarkService.findByGemCaptureIdsAndUserId(
+    gemCaptureIds,
+    userId,
+    {
+      attributes: ['entityId'],
+    },
+  );
+
+  return bookmarksByUser.reduce((result, item) => {
+    return {
+      ...result,
+      [item.entityId]: true,
+    };
+  }, {});
 }
 
 async function toFeedDto(feedItem) {
@@ -118,7 +150,7 @@ async function toFeedDto(feedItem) {
     updatedAt: feedItem.updatedAt,
     likeCount: feedItem.likeCount || 0,
     isLiked: feedItem.isLiked,
-    isBookmarked: false, // TODO
+    isBookmarked: feedItem.isBookmarked,
   };
 }
 
