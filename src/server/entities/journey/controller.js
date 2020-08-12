@@ -49,6 +49,29 @@ journeyRouter.get(
   }),
 );
 
+// TODO: make proper API versioning
+journeyRouter.get(
+  '/v2/my',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+    } = req;
+    const { total, journeys } = await service.findAllByUserV2(
+      id,
+      page,
+      pageSize,
+      {
+        loadIncludes: true,
+      },
+    );
+    const journeyDTOs = await service.enrichJourneysV2(journeys);
+
+    res.send({ total, journeys: journeyDTOs });
+  }),
+);
+
 journeyRouter.get(
   '/last',
   requireAuth,

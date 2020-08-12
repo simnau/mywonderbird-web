@@ -15,6 +15,9 @@ const { findCoordinateBoundingBox } = require('../../util/geo');
 const { unique } = require('../../util/array');
 const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
+const placeService = require('../place/service');
+const geoService = require('../geo/service');
+const { getGeohash } = require('../../util/geo');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
@@ -54,6 +57,29 @@ const INCLUDE_ORDER = [
     { model: Gem, as: 'gems' },
     { model: GemCapture, as: 'gemCaptures' },
     'sequenceNumber',
+    'ASC',
+  ],
+];
+
+const INCLUDE_MODELS_V2 = [
+  {
+    model: Gem,
+    as: 'gems',
+    include: [
+      {
+        model: GemCapture,
+        as: 'gemCaptures',
+      },
+    ],
+  },
+];
+
+const INCLUDE_ORDER_V2 = [
+  [{ model: Gem, as: 'gems' }, 'createdAt', 'ASC'],
+  [
+    { model: Gem, as: 'gems' },
+    { model: GemCapture, as: 'gemCaptures' },
+    'createdAt',
     'ASC',
   ],
 ];
@@ -119,6 +145,43 @@ async function findAllByUser(
         where,
         order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
         include: INCLUDE_MODELS,
+        offset,
+        limit,
+      }),
+    ]);
+
+    return { total, journeys };
+  }
+
+  const { count: total, rows: journeys } = await Journey.findAndCountAll({
+    where,
+    order: [['createdAt', 'DESC']],
+    offset,
+    limit,
+  });
+
+  return { total, journeys };
+}
+
+async function findAllByUserV2(
+  userId,
+  page,
+  pageSize,
+  { loadIncludes = false } = {},
+) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+  const where = { userId };
+
+  if (loadIncludes) {
+    const [total, journeys] = await Promise.all([
+      Journey.count({
+        where,
+      }),
+      Journey.findAll({
+        where,
+        order: [['createdAt', 'DESC'], ...INCLUDE_ORDER_V2],
+        include: INCLUDE_MODELS_V2,
         offset,
         limit,
       }),
@@ -513,6 +576,73 @@ async function enrichJourneys(journeys, userId) {
   return journeysWithLikeCount.map(journeyToFeedJourneyDTO);
 }
 
+async function enrichJourneysV2(journeys) {
+  const journeyDTOs = journeys.map(journeyToFeedJourneyDTOV2);
+  return addCountriesToJourneyDTOs(journeyDTOs);
+}
+
+function journeyToFeedJourneyDTOV2(journey) {
+  const rawJourney = journey.toJSON ? journey.toJSON() : journey;
+  const { gems, ...journeyData } = rawJourney;
+
+  const images = [];
+  const coordinates = [];
+
+  for (const gem of gems) {
+    for (const gemCapture of gem.gemCaptures) {
+      images.push(gemCapture.url);
+    }
+
+    coordinates.push({
+      id: gem.id,
+      lat: gem.lat,
+      lng: gem.lng,
+      type: 'gem',
+    });
+  }
+
+  const boundingBox = findCoordinateBoundingBox(coordinates);
+
+  return {
+    ...journeyData,
+    images,
+    coordinates,
+    boundingBox,
+  };
+}
+
+async function addCountriesToJourneyDTOs(journeyDTOs) {
+  const journeyFirstPointGeohashes = journeyDTOs.map(journeyDTO => {
+    const firstPoint = journeyDTO.coordinates.length
+      ? journeyDTO.coordinates[0]
+      : null;
+
+    if (!firstPoint) {
+      return null;
+    }
+
+    return getGeohash(firstPoint.lat, firstPoint.lng);
+  });
+
+  const journeyPlaces = await Promise.all(
+    journeyFirstPointGeohashes.map(
+      geohash => geohash && placeService.findByGeohash(geohash),
+    ),
+  );
+
+  return journeyDTOs.map((journeyDTO, index) => {
+    const place = journeyPlaces[index];
+
+    return {
+      ...journeyDTO,
+      country:
+        place &&
+        place.countryCode &&
+        geoService.getLabelBy3LetterCountryCode(place.countryCode),
+    };
+  });
+}
+
 function validateJourney(journey) {
   const errors = {};
 
@@ -530,6 +660,7 @@ function validateJourney(journey) {
 module.exports = {
   findAll,
   findAllByUser,
+  findAllByUserV2,
   findLastByUser,
   findAllByIds,
   findAllNotByUser,
@@ -543,6 +674,7 @@ module.exports = {
   findDraftCountByUser,
   journeyToFeedJourneyDTO,
   enrichJourneys,
+  enrichJourneysV2,
   validateJourney,
   publish,
   unpublish,
