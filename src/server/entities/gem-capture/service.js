@@ -120,8 +120,20 @@ async function findFeedItems(lastDatetime, limit, direction = OLDER_DIRECTION) {
   });
 }
 
+function findByIds(ids) {
+  return GemCapture.findAll({
+    where: {
+      id: {
+        [Op.in]: ids,
+      },
+    },
+    include: INCLUDE_MODELS,
+  });
+}
+
 module.exports = {
   uploadFiles,
   updateGemCaptures,
   findFeedItems,
+  findByIds,
 };

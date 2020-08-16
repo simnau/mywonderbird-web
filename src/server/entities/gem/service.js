@@ -90,7 +90,7 @@ async function findLastForJourney(journeyId) {
     where: {
       journeyId,
     },
-    sort: [['sequenceNumber', 'DESC']],
+    order: [['sequenceNumber', 'DESC']],
     limit: 1,
   });
 

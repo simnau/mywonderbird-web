@@ -6,6 +6,25 @@ const service = require('./service');
 
 const bookmarkRouter = Router();
 
+bookmarkRouter.get(
+  '/gem-captures',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { page, pageSize },
+      user: { id: userId },
+    } = req;
+
+    const bookmarks = await service.findGemCaptureBookmarks(
+      userId,
+      page,
+      pageSize,
+    );
+
+    res.send({ bookmarks });
+  }),
+);
+
 bookmarkRouter.post(
   '/gem-captures',
   requireAuth,
