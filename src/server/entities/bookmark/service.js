@@ -1,14 +1,12 @@
 const { Op } = require('sequelize');
 
 const { indexBy } = require('../../util/array');
-const { getGeohash } = require('../../util/geo');
 const {
   Bookmark,
   BOOKMARK_TYPE_GEM_CAPTURE,
 } = require('../../orm/models/bookmark');
 const gemCaptureService = require('../gem-capture/service');
-const placeService = require('../place/service');
-const geoService = require('../geo/service');
+const gemService = require('../gem/service');
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -33,21 +31,13 @@ async function findGemCaptureBookmarks(
   return Promise.all(
     userBookmarks.map(async bookmark => {
       const gemCapture = gemCapturesById[bookmark.entityId];
-      let place;
-
-      // TODO Optimize this so it's done with one database request
-      if (gemCapture.gem) {
-        const geohash = getGeohash(gemCapture.gem.lat, gemCapture.gem.lng);
-        place = await placeService.findByGeohash(geohash);
-      }
+      const country = await gemService.getGemCountry(gemCapture.gem);
 
       return {
         id: bookmark.id,
         gemCaptureId: bookmark.entityId,
         title: gemCapture.title,
-        country: place
-          ? geoService.getLabelBy3LetterCountryCode(place.countryCode)
-          : null,
+        country,
         imageUrl: gemCapture.url,
         location: {
           lat: gemCapture.gem.lat,

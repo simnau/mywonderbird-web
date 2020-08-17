@@ -17,6 +17,7 @@ const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
+const gemService = require('../gem/service');
 const { getGeohash } = require('../../util/geo');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
@@ -597,6 +598,7 @@ function journeyToFeedJourneyDTOV2(journey) {
       id: gem.id,
       lat: gem.lat,
       lng: gem.lng,
+      countryCode: gem.countryCode,
       type: 'gem',
     });
   }
@@ -612,33 +614,26 @@ function journeyToFeedJourneyDTOV2(journey) {
 }
 
 async function addCountriesToJourneyDTOs(journeyDTOs) {
-  const journeyFirstPointGeohashes = journeyDTOs.map(journeyDTO => {
-    const firstPoint = journeyDTO.coordinates.length
-      ? journeyDTO.coordinates[0]
-      : null;
+  const journeyCountries = await Promise.all(
+    journeyDTOs.map(journeyDTO => {
+      const firstPoint = journeyDTO.coordinates.length
+        ? journeyDTO.coordinates[0]
+        : null;
 
-    if (!firstPoint) {
-      return null;
-    }
+      if (!firstPoint) {
+        return null;
+      }
 
-    return getGeohash(firstPoint.lat, firstPoint.lng);
-  });
-
-  const journeyPlaces = await Promise.all(
-    journeyFirstPointGeohashes.map(
-      geohash => geohash && placeService.findByGeohash(geohash),
-    ),
+      return gemService.getGemCountry(firstPoint);
+    }),
   );
 
   return journeyDTOs.map((journeyDTO, index) => {
-    const place = journeyPlaces[index];
+    const country = journeyCountries[index];
 
     return {
       ...journeyDTO,
-      country:
-        place &&
-        place.countryCode &&
-        geoService.getLabelBy3LetterCountryCode(place.countryCode),
+      country,
     };
   });
 }

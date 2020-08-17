@@ -4,6 +4,9 @@ const uuidv4 = require('uuid/v4');
 const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const gemCaptureService = require('../gem-capture/service');
+const placeService = require('../place/service');
+const geoService = require('../geo/service');
+const { getGeohash } = require('../../util/geo');
 
 const INCLUDE_MODELS = [
   {
@@ -104,8 +107,40 @@ async function create(gem, transaction = null) {
   });
 }
 
+async function update(id, updateObject, transaction = null) {
+  return Gem.update(updateObject, {
+    where: {
+      id,
+    },
+    transaction,
+  });
+}
+
+async function getGemCountry(gem) {
+  if (gem.countryCode) {
+    return geoService.getLabelBy3LetterCountryCode(gem.countryCode);
+  }
+
+  let place;
+
+  if (gem) {
+    const geohash = getGeohash(gem.lat, gem.lng);
+    place = await placeService.findByGeohash(geohash);
+  }
+
+  if (!place) {
+    return null;
+  }
+
+  await update(gem.id, { countryCode: place.countryCode });
+
+  return geoService.getLabelBy3LetterCountryCode(place.countryCode);
+}
+
 module.exports = {
   updateDayGems,
   create,
+  update,
   findLastForJourney,
+  getGemCountry,
 };

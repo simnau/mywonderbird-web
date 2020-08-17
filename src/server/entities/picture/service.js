@@ -20,6 +20,7 @@ async function sharePicture(
 
   const gem = {
     title,
+    countryCode: location.countryCode,
     lat: location.lat,
     lng: location.lng,
     sequenceNumber,
@@ -132,21 +133,13 @@ async function getBookmarkStats(gemCaptureIds, userId) {
 }
 
 async function toFeedDto(feedItem) {
-  let place;
-
-  // TODO Optimize this so it's done with one database request
-  if (feedItem.gem) {
-    const geohash = getGeohash(feedItem.gem.lat, feedItem.gem.lng);
-    place = await placeService.findByGeohash(geohash);
-  }
+  const country = await gemService.getGemCountry(feedItem.gem);
 
   return {
     id: feedItem.id,
     imageUrl: feedItem.url,
     title: feedItem.gem ? feedItem.gem.title : feedItem.title,
-    country: place
-      ? geoService.getLabelBy3LetterCountryCode(place.countryCode)
-      : null,
+    country,
     updatedAt: feedItem.updatedAt,
     likeCount: feedItem.likeCount || 0,
     isLiked: feedItem.isLiked,

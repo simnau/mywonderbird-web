@@ -17,6 +17,10 @@ const FIELDS = {
     type: Sequelize.TEXT,
     allowNull: true,
   },
+  countryCode: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   lat: {
     type: Sequelize.FLOAT,
     allowNull: false,
