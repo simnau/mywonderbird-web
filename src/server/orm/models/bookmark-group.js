@@ -1,8 +1,7 @@
 const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
-
-const BOOKMARK_TYPE_GEM_CAPTURE = 10;
+const { Bookmark, BOOKMARK_TYPE_GEM_CAPTURE } = require('./bookmark');
 
 const FIELDS = {
   id: {
@@ -10,8 +9,8 @@ const FIELDS = {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
   },
-  entityId: {
-    type: Sequelize.UUID,
+  title: {
+    type: Sequelize.STRING,
     allowNull: false,
   },
   userId: {
@@ -22,18 +21,9 @@ const FIELDS = {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
-  bookmarkGroupId: {
-    type: Sequelize.UUID,
-    allowNull: true,
-    references: {
-      model: 'bookmarkGroups',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-  },
 };
 
-const Bookmark = sequelize.define('bookmarks', FIELDS, {
+const BookmarkGroup = sequelize.define('bookmarkGroups', FIELDS, {
   scopes: {
     gemCapture: {
       where: {
@@ -43,8 +33,14 @@ const Bookmark = sequelize.define('bookmarks', FIELDS, {
   },
 });
 
+BookmarkGroup.hasMany(Bookmark, {
+  foreignKey: 'bookmarkGroupId',
+  as: 'bookmarks',
+  onDelete: 'CASCADE',
+});
+
 module.exports = {
-  Bookmark,
+  BookmarkGroup,
   FIELDS,
   BOOKMARK_TYPE_GEM_CAPTURE,
 };

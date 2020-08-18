@@ -48,10 +48,15 @@ async function findGemCaptureBookmarks(
   );
 }
 
-function createGemCaptureBookmark({ userId, gemCaptureId: entityId }) {
+function createGemCaptureBookmark({
+  userId,
+  gemCaptureId: entityId,
+  bookmarkGroupId,
+}) {
   return Bookmark.create({
     userId,
     entityId,
+    bookmarkGroupId,
     type: BOOKMARK_TYPE_GEM_CAPTURE,
   });
 }

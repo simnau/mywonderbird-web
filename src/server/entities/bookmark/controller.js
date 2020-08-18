@@ -30,13 +30,14 @@ bookmarkRouter.post(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      body: { gemCaptureId },
+      body: { gemCaptureId, bookmarkGroupId },
       user: { id: userId },
     } = req;
 
     const result = await service.createGemCaptureBookmark({
       userId,
       gemCaptureId,
+      bookmarkGroupId,
     });
 
     res.send(result);

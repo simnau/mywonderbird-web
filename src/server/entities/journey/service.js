@@ -15,10 +15,7 @@ const { findCoordinateBoundingBox } = require('../../util/geo');
 const { unique } = require('../../util/array');
 const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
-const placeService = require('../place/service');
-const geoService = require('../geo/service');
 const gemService = require('../gem/service');
-const { getGeohash } = require('../../util/geo');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
