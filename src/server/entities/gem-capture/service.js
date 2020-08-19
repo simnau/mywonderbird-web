@@ -120,6 +120,10 @@ async function findFeedItems(lastDatetime, limit, direction = OLDER_DIRECTION) {
   });
 }
 
+function findById(id) {
+  return GemCapture.findByPk(id);
+}
+
 function findByIds(ids) {
   return GemCapture.findAll({
     where: {
@@ -135,5 +139,6 @@ module.exports = {
   uploadFiles,
   updateGemCaptures,
   findFeedItems,
+  findById,
   findByIds,
 };

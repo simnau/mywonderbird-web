@@ -3,6 +3,7 @@ const {
   BOOKMARK_TYPE_GEM_CAPTURE,
 } = require('../../orm/models/bookmark');
 const { BookmarkGroup } = require('../../orm/models/bookmark-group');
+const gemCaptureService = require('../gem-capture/service');
 
 const GEM_CAPTURE_INCLUDE_MODELS = [
   {
@@ -20,14 +21,28 @@ async function findGemCaptureBookmarkGroups(userId) {
     order: [['updatedAt', 'DESC']],
   });
 
-  return bookmarkGroups.map(bookmarkGroup => {
-    const { bookmarks, ...rawBookmarkGroup } = bookmarkGroup.toJSON();
+  return Promise.all(
+    bookmarkGroups.map(async bookmarkGroup => {
+      const { bookmarks, ...rawBookmarkGroup } = bookmarkGroup.toJSON();
+      const [bookmark] = bookmarks;
+      let imageUrl;
 
-    return {
-      ...rawBookmarkGroup,
-      bookmarkCount: bookmarks.length,
-    };
-  });
+      // TODO: do this in one batch rather than one by one
+      if (bookmark) {
+        const gemCapture = await gemCaptureService.findById(bookmark.entityId);
+
+        if (gemCapture) {
+          imageUrl = gemCapture.url;
+        }
+      }
+
+      return {
+        ...rawBookmarkGroup,
+        bookmarkCount: bookmarks.length,
+        imageUrl,
+      };
+    }),
+  );
 }
 
 async function findyById(id) {
