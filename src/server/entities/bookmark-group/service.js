@@ -1,8 +1,10 @@
+const sequelize = require('../../setup/sequelize');
 const {
   Bookmark,
   BOOKMARK_TYPE_GEM_CAPTURE,
 } = require('../../orm/models/bookmark');
 const { BookmarkGroup } = require('../../orm/models/bookmark-group');
+const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
 
 const GEM_CAPTURE_INCLUDE_MODELS = [
@@ -12,18 +14,39 @@ const GEM_CAPTURE_INCLUDE_MODELS = [
   },
 ];
 
+const INCLUDE_ORDER = [
+  [{ model: Bookmark, as: 'bookmarks' }, 'createdAt', 'ASC'],
+];
+
+const DEFAULT_GEM_CAPTURE_BOOKMARK_GROUP = {
+  id: null,
+  title: 'All other',
+};
+
 async function findGemCaptureBookmarkGroups(userId) {
-  const bookmarkGroups = await BookmarkGroup.scope('gemCapture').findAll({
+  let bookmarkGroups = await BookmarkGroup.scope('gemCapture').findAll({
     where: {
       userId,
     },
     include: GEM_CAPTURE_INCLUDE_MODELS,
-    order: [['updatedAt', 'DESC']],
+    order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER],
   });
+
+  const defaultGroupBookmarks = await bookmarkService.findByUserIdAndBookmarkGroupId(
+    userId,
+    null,
+  );
+
+  bookmarkGroups = [
+    { ...DEFAULT_GEM_CAPTURE_BOOKMARK_GROUP, bookmarks: defaultGroupBookmarks },
+    ...bookmarkGroups,
+  ];
 
   return Promise.all(
     bookmarkGroups.map(async bookmarkGroup => {
-      const { bookmarks, ...rawBookmarkGroup } = bookmarkGroup.toJSON();
+      const { bookmarks, ...rawBookmarkGroup } = bookmarkGroup.toJSON
+        ? bookmarkGroup.toJSON()
+        : bookmarkGroup;
       const [bookmark] = bookmarks;
       let imageUrl;
 
@@ -63,10 +86,14 @@ async function createGemCaptureBookmarkGroup({ userId, title }) {
 }
 
 async function deleteById(id) {
-  return BookmarkGroup.destroy({
-    where: {
-      id,
-    },
+  return sequelize.transaction(async transaction => {
+    await bookmarkService.deleteByBookmarkGroupId(id, { transaction });
+    return BookmarkGroup.destroy({
+      where: {
+        id,
+      },
+      transaction,
+    });
   });
 }
 

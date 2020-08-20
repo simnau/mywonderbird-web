@@ -11,12 +11,13 @@ bookmarkRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      query: { page, pageSize },
+      query: { page, pageSize, bookmarkGroupId },
       user: { id: userId },
     } = req;
 
     const bookmarks = await service.findGemCaptureBookmarks(
       userId,
+      bookmarkGroupId,
       page,
       pageSize,
     );

@@ -39,7 +39,7 @@ bookmarkGroupRouter.post(
 );
 
 bookmarkGroupRouter.delete(
-  '/gem-captures/:bookmarkGroupId',
+  '/:bookmarkGroupId',
   requireAuth,
   asyncHandler(async (req, res) => {
     const {

@@ -12,12 +12,14 @@ const DEFAULT_PAGE_SIZE = 20;
 
 async function findGemCaptureBookmarks(
   userId,
+  bookmarkGroupId,
   page = 0,
   pageSize = DEFAULT_PAGE_SIZE,
 ) {
   const userBookmarks = await Bookmark.scope('gemCapture').findAll({
     where: {
       userId,
+      bookmarkGroupId: bookmarkGroupId || null,
     },
     offset: page * pageSize,
     limit: pageSize,
@@ -80,6 +82,18 @@ function deleteByUserIdAndGemCaptureId(userId, gemCaptureId) {
   });
 }
 
+async function deleteByBookmarkGroupId(
+  bookmarkGroupId,
+  { transaction = null } = {},
+) {
+  return Bookmark.destroy({
+    where: {
+      bookmarkGroupId,
+    },
+    transaction,
+  });
+}
+
 function findByGemCaptureIdsAndUserId(
   gemCaptureIds,
   userId,
@@ -96,10 +110,21 @@ function findByGemCaptureIdsAndUserId(
   });
 }
 
+function findByUserIdAndBookmarkGroupId(userId, bookmarkGroupId) {
+  return Bookmark.scope('gemCapture').findAll({
+    where: {
+      bookmarkGroupId,
+      userId,
+    },
+  });
+}
+
 module.exports = {
   findGemCaptureBookmarks,
   createGemCaptureBookmark,
   findyByUserIdAndGemCaptureId,
   findByGemCaptureIdsAndUserId,
+  findByUserIdAndBookmarkGroupId,
   deleteByUserIdAndGemCaptureId,
+  deleteByBookmarkGroupId,
 };
