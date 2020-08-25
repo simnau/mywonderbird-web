@@ -23,7 +23,8 @@ async function createOrUpdateProfileByProviderId(providerId, profileData) {
   const existingProfile = await findProfileByProviderId(providerId);
 
   if (existingProfile) {
-    return existingProfile.update(profileData);
+    await existingProfile.update(profileData);
+    return findProfileByProviderId(providerId);
   } else {
     return createProfile(providerId, profileData);
   }

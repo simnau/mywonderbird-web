@@ -43,9 +43,12 @@ router.post(
       user: { id },
       body,
     } = req;
-    await service.createOrUpdateProfileByProviderId(id, body);
+    const updatedProfile = await service.createOrUpdateProfileByProviderId(
+      id,
+      body,
+    );
 
-    res.send({ succes: true });
+    res.send(updatedProfile);
   }),
 );
 
