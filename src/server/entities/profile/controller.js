@@ -4,8 +4,7 @@ const asyncHandler = require('express-async-handler');
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
 const subscriptionService = require('../subscription/service');
-
-const AVATAR_FOLDER = 'avatars';
+const { AVATAR_FOLDER } = require('../../constants/s3');
 
 const router = Router();
 
@@ -35,6 +34,7 @@ router.get(
   }),
 );
 
+// TODO: remove when no longer used in the old app (Ionic)
 router.post(
   '/',
   requireAuth,
@@ -53,6 +53,39 @@ router.post(
 );
 
 router.post(
+  '/v2',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+      body: { username },
+      files,
+    } = req;
+
+    const profileUpdate = {
+      username,
+    };
+
+    if (files && Object.entries(files).length) {
+      const {
+        images: [avatarUrl],
+      } = await service.uploadAvatar(files, `${AVATAR_FOLDER}/${id}`);
+      await service.deletePreviousAvatar(id);
+
+      profileUpdate.avatarUrl = avatarUrl;
+    }
+
+    const updatedProfile = await service.createOrUpdateProfileByProviderId(
+      id,
+      profileUpdate,
+    );
+
+    res.send(updatedProfile);
+  }),
+);
+
+// TODO: remove when no longer used in the old app (Ionic)
+router.post(
   '/avatar',
   requireAuth,
   asyncHandler(async (req, res) => {
@@ -60,10 +93,12 @@ router.post(
       user: { id },
       files,
     } = req;
+
     const { images } = await service.uploadAvatar(
       files,
       `${AVATAR_FOLDER}/${id}`,
     );
+    await service.deletePreviousAvatar(id);
 
     res.send({ images });
   }),

@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
 
+const { AVATAR_FOLDER } = require('../../constants/s3');
+const { userAvatarUrl, deleteFile } = require('../../util/s3');
 const fileUploader = require('../../util/file-upload');
 const { Profile } = require('../../orm/models/profile');
 
@@ -30,8 +32,21 @@ async function createOrUpdateProfileByProviderId(providerId, profileData) {
   }
 }
 
+async function deletePreviousAvatar(userId) {
+  const userProfile = await findProfileByProviderId(userId);
+
+  if (!userProfile.avatarUrl) {
+    return;
+  }
+
+  const imageName = userProfile.avatarUrl.substring(userProfile.avatarUrl.lastIndexOf('/') + 1);
+  const avatarFile = userAvatarUrl(AVATAR_FOLDER, userId, imageName);
+
+  await deleteFile(avatarFile);
+}
+
 async function uploadAvatar(files, folder) {
-  const { images } = await fileUploader(files, folder, true);
+  const { images } = await fileUploader(files, folder);
 
   return {
     images,
@@ -75,4 +90,5 @@ module.exports = {
   createProfile,
   createOrUpdateProfileByProviderId,
   uploadAvatar,
+  deletePreviousAvatar,
 };

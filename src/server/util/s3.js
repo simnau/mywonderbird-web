@@ -30,10 +30,23 @@ async function deleteFolder(folder) {
   if (listedObjects.IsTruncated) {
     await emptyS3Directory(bucket, dir);
   }
+}
 
-  return;
+async function deleteFile(filePath) {
+  const deleteParams = {
+    Bucket: bucketName,
+    Key: filePath,
+  };
+
+  await s3.deleteObject(deleteParams).promise();
+}
+
+function userAvatarUrl(avatarFolder, userId, filename) {
+  return `${avatarFolder}/${userId}/${filename}`;
 }
 
 module.exports = {
   deleteFolder,
+  deleteFile,
+  userAvatarUrl,
 };
