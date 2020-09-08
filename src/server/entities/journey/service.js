@@ -335,7 +335,11 @@ async function findAllNotByUser(
   return { total, journeys };
 }
 
-function findById(id) {
+function findById(id, { includeModels = true } = {}) {
+  if (!includeModels) {
+    return Journey.findByPk(id);
+  }
+
   return Journey.findByPk(id, {
     include: INCLUDE_MODELS,
     order: INCLUDE_ORDER,

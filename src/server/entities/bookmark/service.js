@@ -97,7 +97,7 @@ async function deleteByBookmarkGroupId(
 function findByGemCaptureIdsAndUserId(
   gemCaptureIds,
   userId,
-  { attributes = null },
+  { attributes = null } = {},
 ) {
   return Bookmark.scope('gemCapture').findAll({
     where: {
@@ -110,12 +110,17 @@ function findByGemCaptureIdsAndUserId(
   });
 }
 
-function findByUserIdAndBookmarkGroupId(userId, bookmarkGroupId) {
+function findByUserIdAndBookmarkGroupId(
+  userId,
+  bookmarkGroupId,
+  { attributes = null } = {},
+) {
   return Bookmark.scope('gemCapture').findAll({
     where: {
       bookmarkGroupId,
       userId,
     },
+    attributes: attributes,
   });
 }
 

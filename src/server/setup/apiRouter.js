@@ -13,6 +13,7 @@ const picture = require('../entities/picture/controller');
 const like = require('../entities/like/controller');
 const bookmark = require('../entities/bookmark/controller');
 const bookmarkGroups = require('../entities/bookmark-group/controller');
+const suggestions = require('../entities/suggestion/controller');
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
 const tutorialStep = require('../entities/tutorial-step/controller');
@@ -25,6 +26,7 @@ apiRouter.use('/pictures', picture);
 apiRouter.use('/likes', like);
 apiRouter.use('/bookmarks', bookmark);
 apiRouter.use('/bookmark-groups', bookmarkGroups);
+apiRouter.use('/suggestions', suggestions);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);
