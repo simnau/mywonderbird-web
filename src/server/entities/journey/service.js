@@ -16,6 +16,7 @@ const { unique } = require('../../util/array');
 const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
 const gemService = require('../gem/service');
+const geoService = require('../geo/service');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
@@ -346,6 +347,17 @@ function findById(id, { includeModels = true } = {}) {
   });
 }
 
+function findByIdV2(id, { includeModels = true } = {}) {
+  if (!includeModels) {
+    return Journey.findByPk(id);
+  }
+
+  return Journey.findByPk(id, {
+    include: INCLUDE_MODELS_V2,
+    order: INCLUDE_ORDER_V2,
+  });
+}
+
 function publish(id) {
   return Journey.update(
     {
@@ -614,6 +626,47 @@ function journeyToFeedJourneyDTOV2(journey) {
   };
 }
 
+function journeyToJourneyDTOV2(journey) {
+  const rawJourney = journey.toJSON ? journey.toJSON() : journey;
+  const { gems, title: name, ...journeyData } = rawJourney;
+  let journeyImageUrl;
+  let journeyCountry;
+
+  const locations = gems.map(gem => {
+    const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
+
+    const imageUrl = gem.gemCaptures.length ? gem.gemCaptures[0].url : null;
+
+    if (!journeyImageUrl && imageUrl) {
+      journeyImageUrl = imageUrl;
+    }
+
+    if (!journeyCountry && country) {
+      journeyCountry = country;
+    }
+
+    return {
+      id: gem.id,
+      name: gem.title,
+      countryCode: gem.countryCode,
+      country,
+      imageUrl,
+      location: {
+        lat: gem.lat,
+        lng: gem.lng,
+      },
+    };
+  });
+
+  return {
+    ...journeyData,
+    name,
+    country: journeyCountry,
+    imageUrl: journeyImageUrl,
+    locations,
+  };
+}
+
 async function addCountriesToJourneyDTOs(journeyDTOs) {
   const journeyCountries = await Promise.all(
     journeyDTOs.map(journeyDTO => {
@@ -661,6 +714,7 @@ module.exports = {
   findAllByIds,
   findAllNotByUser,
   findById,
+  findByIdV2,
   create,
   update,
   delete: del,
@@ -669,6 +723,7 @@ module.exports = {
   findCountByUser,
   findDraftCountByUser,
   journeyToFeedJourneyDTO,
+  journeyToJourneyDTOV2,
   enrichJourneys,
   enrichJourneysV2,
   validateJourney,

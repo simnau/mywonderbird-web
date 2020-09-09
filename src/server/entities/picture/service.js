@@ -137,6 +137,7 @@ async function toFeedDto(feedItem) {
 
   return {
     id: feedItem.id,
+    journeyId: feedItem.gem ? feedItem.gem.journeyId : null,
     imageUrl: feedItem.url,
     title: feedItem.gem ? feedItem.gem.title : feedItem.title,
     country,

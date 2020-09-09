@@ -79,12 +79,14 @@ journeyRouter.get(
     const {
       user: { id },
     } = req;
-    const lastJourney = await service.findLastByUser(id, { loadIncludes: true });
+    const lastJourney = await service.findLastByUser(id, {
+      loadIncludes: true,
+    });
     const journeyDTO = service.journeyToFeedJourneyDTO(lastJourney);
 
     res.send({ journey: journeyDTO });
   }),
-)
+);
 
 journeyRouter.get(
   '/count',
@@ -258,6 +260,25 @@ journeyRouter.post(
     await service.update(journeyId, { draft: true }, journey);
 
     return res.send({ message: 'The journey was moved to draft' });
+  }),
+);
+
+journeyRouter.get(
+  '/v2/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const journey = await service.findByIdV2(id);
+
+    if (!journey) {
+      return res.status(404).send({
+        error: `Journey with id ${id} not found`,
+      });
+    }
+
+    const journeyDTO = await service.journeyToJourneyDTOV2(journey);
+
+    return res.send({ journey: journeyDTO });
   }),
 );
 
