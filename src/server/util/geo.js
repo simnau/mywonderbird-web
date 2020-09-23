@@ -1,6 +1,6 @@
-import Geohash from 'latlon-geohash';
-import { getBoundingBox } from 'geolocation-utils';
-import config from 'config';
+const geohash = require('ngeohash');
+const { getBoundingBox } = require('geolocation-utils');
+const config = require('config');
 
 const GEOHASH_PRECISION = config.get('location.geohash.precision');
 
@@ -9,7 +9,7 @@ function findCoordinateBoundingBox(coordinates) {
 }
 
 function getGeohash(lat, lng) {
-  return Geohash.encode(lat, lng, GEOHASH_PRECISION);
+  return geohash.encode(lat, lng, GEOHASH_PRECISION);
 }
 
 module.exports = {
