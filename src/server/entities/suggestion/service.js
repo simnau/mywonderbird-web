@@ -1,5 +1,6 @@
 const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
+const placeService = require('../place/service');
 const geoService = require('../geo/service');
 
 async function suggestJourney(userId, bookmarkGroupId) {
@@ -45,6 +46,66 @@ function toLocation(gemCapture) {
   };
 }
 
+async function suggestLocations(userId, { country }) {
+  const places = await placeService.findByCountryCode(country);
+
+  return places;
+}
+
+function toSuggestedLocationDTO(location) {
+  const country = geoService.getLabelBy3LetterCountryCode(location.countryCode);
+
+  return {
+    id: location.id,
+    name: location.title,
+    country,
+    countryCode: location.countryCode,
+    lat: location.lat,
+    lng: location.lng,
+    images: location.placeImages.map(toSuggestedLocationImageDTO),
+  };
+}
+
+function toSuggestedLocationImageDTO(locationImage) {
+  return {
+    id: locationImage.id,
+    name: locationImage.title,
+    url: locationImage.url,
+  };
+}
+
+async function suggestJourneyByLocations(userId, locationIds) {
+  const locations = await placeService.findByIds(locationIds);
+  const locationDTOs = locations.map(toSuggestedLocationDTO);
+  const country = findLocationsCountry(locationDTOs);
+  const imageUrl = findLocationsImageUrl(locationDTOs);
+
+  return {
+    country,
+    imageUrl,
+    locations: locationDTOs,
+  };
+}
+
+function findLocationsCountry(locationDTOs) {
+  const locationWithCountry = locationDTOs.find(
+    locationDTO => !!locationDTO.country,
+  );
+
+  return locationWithCountry && locationWithCountry.country;
+}
+
+function findLocationsImageUrl(locationDTOs) {
+  const locationWithImages = locationDTOs.find(
+    locationDTO => !!locationDTO.images.length,
+  );
+
+  return locationWithImages && locationWithImages.images[0].url;
+}
+
 module.exports = {
   suggestJourney,
+  suggestLocations,
+  toSuggestedLocationDTO,
+  suggestJourneyByLocations,
 };

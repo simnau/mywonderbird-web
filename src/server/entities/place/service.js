@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { getGeohash } = require('../../util/geo');
 const { Place } = require('../../orm/models/place');
 const { PlaceImage } = require('../../orm/models/place-image');
@@ -18,6 +20,7 @@ function findByGeohash(geohash) {
     },
   });
 }
+const MAX_LOCATIONS_TO_SUGGEST = 40;
 
 async function createImagesForExisting(
   place,
@@ -95,7 +98,31 @@ async function createFromGem(gem, location, userId, transaction = null) {
   }
 }
 
+async function findByCountryCode(countryCode) {
+  return Place.findAll({
+    where: {
+      countryCode,
+    },
+    include: INCLUDE_MODELS,
+    limit: MAX_LOCATIONS_TO_SUGGEST,
+    order: [['updatedAt', 'DESC']],
+  });
+}
+
+async function findByIds(ids) {
+  return Place.findAll({
+    where: {
+      id: {
+        [Op.in]: ids,
+      },
+    },
+    include: INCLUDE_MODELS,
+  });
+}
+
 module.exports = {
   createFromGem,
   findByGeohash,
+  findByCountryCode,
+  findByIds,
 };
