@@ -15,7 +15,18 @@ function indexBy(array, key) {
   }, {});
 }
 
+function flatMap(array, mapFunction) {
+  if (!array) {
+    return [];
+  }
+
+  return array
+    .map(mapFunction)
+    .reduce((result, items) => result.concat(items), []);
+}
+
 module.exports = {
   unique,
   indexBy,
+  flatMap,
 };

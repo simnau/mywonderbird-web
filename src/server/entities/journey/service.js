@@ -628,7 +628,7 @@ function journeyToFeedJourneyDTOV2(journey) {
 
 function journeyToJourneyDTOV2(journey) {
   const rawJourney = journey.toJSON ? journey.toJSON() : journey;
-  const { gems, title: name, ...journeyData } = rawJourney;
+  const { gems, ...journeyData } = rawJourney;
   let journeyImageUrl;
   let journeyCountry;
 
@@ -660,7 +660,6 @@ function journeyToJourneyDTOV2(journey) {
 
   return {
     ...journeyData,
-    name,
     country: journeyCountry,
     imageUrl: journeyImageUrl,
     locations,

@@ -81,7 +81,7 @@ async function suggestJourneyByLocations(userId, locationIds) {
   const imageUrl = findLocationsImageUrl(locationDTOs);
 
   return {
-    country,
+    ...country,
     imageUrl,
     locations: locationDTOs,
   };
@@ -92,7 +92,17 @@ function findLocationsCountry(locationDTOs) {
     locationDTO => !!locationDTO.country,
   );
 
-  return locationWithCountry && locationWithCountry.country;
+  if (!locationWithCountry) {
+    return {
+      country: null,
+      countryCode: null,
+    };
+  }
+
+  return {
+    country: locationWithCountry.country,
+    countryCode: locationWithCountry.countryCode,
+  };
 }
 
 function findLocationsImageUrl(locationDTOs) {
