@@ -4,10 +4,11 @@ WORKDIR /usr/src/app
 
 COPY . .
 
+RUN apk add python make gcc g++
 RUN npm install && \
-  npm run build:web && \ 
+  npm run build:web && \
   rm -rf ./src/web && \
   npm prune --production
 
 
-CMD ["npm", "run", "start:server"] 
+CMD ["npm", "run", "start:server"]

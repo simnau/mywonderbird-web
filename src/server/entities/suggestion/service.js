@@ -2,6 +2,7 @@ const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
+const { findLocationOrder } = require('../../util/geo');
 
 async function suggestJourney(userId, bookmarkGroupId) {
   const bookmarks = await bookmarkService.findByUserIdAndBookmarkGroupId(
@@ -76,7 +77,8 @@ function toSuggestedLocationImageDTO(locationImage) {
 
 async function suggestJourneyByLocations(userId, locationIds) {
   const locations = await placeService.findByIds(locationIds);
-  const locationDTOs = locations.map(toSuggestedLocationDTO);
+  const sortedLocations = await sortLocationsByDistance(locations);
+  const locationDTOs = sortedLocations.map(toSuggestedLocationDTO);
   const country = findLocationsCountry(locationDTOs);
   const imageUrl = findLocationsImageUrl(locationDTOs);
 
@@ -111,6 +113,11 @@ function findLocationsImageUrl(locationDTOs) {
   );
 
   return locationWithImages && locationWithImages.images[0].url;
+}
+
+async function sortLocationsByDistance(locations) {
+  const locationOrder = await findLocationOrder(locations);
+  return locationOrder.map(locationIndex => locations[locationIndex]);
 }
 
 module.exports = {
