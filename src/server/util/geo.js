@@ -16,7 +16,7 @@ function getGeohash(lat, lng) {
 async function findLocationOrder(locations) {
   const distancesMatrix = createDistancesMatrix(locations);
 
-  const result = await tspsolver.solveTsp(distancesMatrix, true, {});
+  const result = await tspsolver.solveTsp(distancesMatrix, false, {});
 
   return result;
 }
