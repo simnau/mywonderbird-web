@@ -43,9 +43,7 @@ router.post(
       body: { trip, qValues },
     } = req;
 
-
-    // TODO change these this boy to actual number from request
-    const locationCount = 2;
+    const locationCount = Number(qValues.locationCount);
 
     let currentIndex = 0;
     let dayIndex = 0;
