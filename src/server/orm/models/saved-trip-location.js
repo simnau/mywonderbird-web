@@ -36,6 +36,9 @@ const FIELDS = {
   visitedAt: {
     type: Sequelize.DATE,
   },
+  dayIndex: {
+    type: Sequelize.INTEGER,
+  }
 };
 
 const SavedTripLocation = sequelize.define('savedTripLocations', FIELDS);
