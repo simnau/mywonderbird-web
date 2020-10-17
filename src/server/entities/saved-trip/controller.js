@@ -40,7 +40,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const {
       user: { id },
-      body: trip,
+      body: { trip, qValues },
     } = req;
 
 
