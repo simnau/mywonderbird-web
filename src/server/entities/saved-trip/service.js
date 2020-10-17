@@ -107,6 +107,7 @@ async function toTripLocationDTOs(savedTripLocations) {
       imageUrl: images.length ? images[0] : null,
       skipped: savedTripLocation.skipped,
       visitedAt: savedTripLocation.visitedAt,
+      dayIndex: savedTripLocation.dayIndex,
       location: {
         lat: place.lat,
         lng: place.lng,
