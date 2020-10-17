@@ -16,6 +16,7 @@ const bookmarkGroups = require('../entities/bookmark-group/controller');
 const suggestions = require('../entities/suggestion/controller');
 const savedTrips = require('../entities/saved-trip/controller');
 const search = require('../entities/search/controller');
+const tag = require('../entities/tag/controller');
 
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
@@ -32,6 +33,7 @@ apiRouter.use('/bookmark-groups', bookmarkGroups);
 apiRouter.use('/suggestions', suggestions);
 apiRouter.use('/saved-trips', savedTrips);
 apiRouter.use('/search', search);
+apiRouter.use('/tags', tag);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);

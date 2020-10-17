@@ -26,7 +26,7 @@ const FIELDS = {
 
 const PlaceTag = sequelize.define('placeTags', FIELDS);
 
-PlaceTag.hasOne(Tag, {
+Tag.hasOne(PlaceTag, {
   foreignKey: 'tagId',
   as: 'tag'
 });
