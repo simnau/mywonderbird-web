@@ -7,8 +7,13 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       placeId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false,
+        references: {
+          model: 'places',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
       },
       tagId: {
         type: Sequelize.UUID,

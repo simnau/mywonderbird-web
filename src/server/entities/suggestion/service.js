@@ -47,8 +47,8 @@ function toLocation(gemCapture) {
   };
 }
 
-async function suggestLocations(userId, { country }) {
-  const places = await placeService.findByCountryCode(country);
+async function suggestLocations(userId, response) {
+  const places = await placeService.findPlacesByQuestionnaire(response);
 
   return places;
 }

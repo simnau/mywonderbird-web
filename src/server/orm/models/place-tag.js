@@ -10,8 +10,13 @@ const FIELDS = {
     defaultValue: Sequelize.UUIDV4,
   },
   placeId: {
-    type: Sequelize.STRING,
+    type: Sequelize.UUID,
     allowNull: false,
+    references: {
+      model: 'places',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
   },
   tagId: {
     type: Sequelize.UUID,
@@ -28,7 +33,7 @@ const PlaceTag = sequelize.define('placeTags', FIELDS);
 
 Tag.hasOne(PlaceTag, {
   foreignKey: 'tagId',
-  as: 'tag'
+  as: 'tag',
 });
 
 module.exports = {

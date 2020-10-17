@@ -3,6 +3,8 @@ const { Op } = require('sequelize');
 const { getGeohash } = require('../../util/geo');
 const { Place } = require('../../orm/models/place');
 const { PlaceImage } = require('../../orm/models/place-image');
+const { PlaceTag } = require('../../orm/models/place-tag');
+const { Tag } = require('../../orm/models/tag');
 const placeImageService = require('../place-image/service');
 const geoService = require('../geo/service');
 
@@ -109,6 +111,40 @@ async function findByCountryCode(countryCode) {
   });
 }
 
+async function findPlacesByQuestionnaire(params) {
+  const tagIds = (await Tag.findAll({
+    where: {
+      code: {
+        [Op.in]: params.types,
+      },
+    },
+  })).map(tag => tag.id);
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+    {
+      model: PlaceTag,
+      as: 'placeTags',
+      where: {
+        tagId: {
+          [Op.in]: tagIds,
+        },
+      },
+    },
+  ];
+
+  return Place.findAll({
+    where: {
+      countryCode: params.country,
+    },
+    include,
+    limit: MAX_LOCATIONS_TO_SUGGEST,
+    order: [['updatedAt', 'DESC']],
+  });
+}
+
 async function findByIds(ids) {
   return Place.findAll({
     where: {
@@ -124,5 +160,6 @@ module.exports = {
   createFromGem,
   findByGeohash,
   findByCountryCode,
+  findPlacesByQuestionnaire,
   findByIds,
 };

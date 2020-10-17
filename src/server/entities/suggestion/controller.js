@@ -19,10 +19,12 @@ suggestionRouter.get(
         locationCount,
         travelerCount,
         travelingWithChildren,
+        types,
       },
       user: { id },
     } = req;
 
+    const typeArray = types.substring(1, types.length - 1).split(/,\s/);
     const suggestedLocations = await service.suggestLocations(id, {
       country,
       start,
@@ -31,6 +33,7 @@ suggestionRouter.get(
       locationCount,
       travelerCount,
       travelingWithChildren,
+      types: typeArray,
     });
     const suggestedLocationDTOs = suggestedLocations.map(
       service.toSuggestedLocationDTO,
