@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
 const { PlaceImage } = require('./place-image');
+const { PlaceTag } = require('./place-tag');
 
 const FIELDS = {
   id: {
@@ -38,7 +39,15 @@ Place.hasMany(PlaceImage, {
   as: 'placeImages',
   onDelete: 'CASCADE',
 });
+Place.hasMany(PlaceTag, {
+  foreignKey: 'placeId',
+  as: 'placeTags',
+  onDelete: 'CASCADE',
+});
 PlaceImage.belongsTo(Place, {
+  onDelete: 'CASCADE',
+});
+PlaceTag.belongsTo(Place, {
   onDelete: 'CASCADE',
 });
 

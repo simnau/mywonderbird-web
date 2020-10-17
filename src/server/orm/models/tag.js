@@ -12,32 +12,19 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  url: {
-    type: Sequelize.TEXT,
-    allowNull: false,
-  },
-  userId: {
+  code: {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  placeId: {
-    type: Sequelize.UUID,
+  imageUrl: {
+    type: Sequelize.STRING,
     allowNull: false,
-    references: {
-      model: 'places',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-  },
-  gemCaptureId: {
-    type: Sequelize.UUID,
-    allowNull: true,
   },
 };
 
-const PlaceImage = sequelize.define('placeImages', FIELDS);
+const Tag = sequelize.define('tags', FIELDS);
 
 module.exports = {
-  PlaceImage,
+  Tag,
   FIELDS,
 };

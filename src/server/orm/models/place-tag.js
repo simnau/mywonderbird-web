@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
+const { Tag } = require('./tag');
 
 const FIELDS = {
   id: {
@@ -8,36 +9,29 @@ const FIELDS = {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
   },
-  title: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  url: {
-    type: Sequelize.TEXT,
-    allowNull: false,
-  },
-  userId: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
   placeId: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  tagId: {
     type: Sequelize.UUID,
     allowNull: false,
     references: {
-      model: 'places',
+      model: 'tags',
       key: 'id',
     },
     onDelete: 'CASCADE',
   },
-  gemCaptureId: {
-    type: Sequelize.UUID,
-    allowNull: true,
-  },
 };
 
-const PlaceImage = sequelize.define('placeImages', FIELDS);
+const PlaceTag = sequelize.define('placeTags', FIELDS);
+
+PlaceTag.hasOne(Tag, {
+  foreignKey: 'tagId',
+  as: 'tag'
+});
 
 module.exports = {
-  PlaceImage,
+  PlaceTag,
   FIELDS,
 };

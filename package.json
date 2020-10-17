@@ -11,6 +11,7 @@
     "start:web:dev": "webpack-dev-server --config ./config/webpack.config.dev.js --mode development",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:prod": "sequelize db:migrate",
+    "seed": "npx sequelize-cli db:seed:all",
     "prettier": "prettier --write src/**/*.js"
   },
   "repository": {
