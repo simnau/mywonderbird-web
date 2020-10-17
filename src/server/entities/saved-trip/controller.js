@@ -42,6 +42,32 @@ router.post(
       user: { id },
       body: trip,
     } = req;
+
+
+    // TODO change these this boy to actual number from request
+    const locationCount = 2;
+
+    let currentIndex = 0;
+    let dayIndex = 0;
+    trip.savedTripLocations = trip.savedTripLocations.map((location) => {
+      if (currentIndex < locationCount) {
+
+        const updatedLocation = {
+          ...location,
+          dayIndex: dayIndex,
+        };
+        currentIndex++;
+        return updatedLocation;
+      }
+      currentIndex = 1;
+      dayIndex++;
+
+      return {
+        ...location,
+        dayIndex: dayIndex,
+      }
+    });
+
     const savedTrip = await service.create(trip, id);
     const savedTripDTO = await service.toTripDTO(savedTrip);
 
