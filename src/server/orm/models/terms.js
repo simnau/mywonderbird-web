@@ -22,7 +22,6 @@ const FIELDS = {
   },
 };
 
-
 const Terms = sequelize.define('terms', FIELDS);
 
 module.exports = {
