@@ -31,6 +31,12 @@ export default function Dashboard() {
       <H3>Dashboard</H3>
       <MainContainer>
         <ItemContainer>
+          <SectionHeading>Places</SectionHeading>
+          <Button variant="primary" as={Link} to="/admin/places">
+            View
+          </Button>
+        </ItemContainer>
+        <ItemContainer>
           <SectionHeading>Journeys</SectionHeading>
           <Button variant="primary" as={Link} to="/admin/journeys">
             View

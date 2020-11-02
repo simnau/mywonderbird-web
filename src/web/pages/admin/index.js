@@ -19,6 +19,7 @@ import CreateTutorialStep from './other/tutorial-steps/create';
 import EditTutorialStep from './other/tutorial-steps/edit';
 import Terms from './other/terms';
 import CreateTerms from './other/terms/create';
+import Places from './places';
 
 function Admin() {
   return (
@@ -74,6 +75,8 @@ function Admin() {
           path="/admin/users/:userId/journeys/:journeyId/edit"
           component={CreateEditUserJourney}
         />
+
+        <Route exact path="/admin/places" component={Places} />
       </Switch>
     </>
   );

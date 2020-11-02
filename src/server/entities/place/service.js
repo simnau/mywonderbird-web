@@ -7,6 +7,8 @@ const { PlaceTag } = require('../../orm/models/place-tag');
 const { Tag } = require('../../orm/models/tag');
 const placeImageService = require('../place-image/service');
 const geoService = require('../geo/service');
+const tagService = require('../tag/service');
+const { unique, flatMap, indexBy } = require('../../util/array');
 
 const INCLUDE_MODELS = [
   {
@@ -156,10 +158,57 @@ async function findByIds(ids) {
   });
 }
 
+async function findAllPaginated({ page, pageSize }) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize;
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+    {
+      model: PlaceTag,
+      as: 'placeTags',
+    },
+  ];
+
+  const { count: total, rows: places } = await Place.findAndCountAll({
+    include,
+    offset,
+    limit,
+    order: [['updatedAt', 'DESC']],
+  });
+
+  return { places, total };
+}
+
+async function toDTOs(places) {
+  const tagIds = unique(
+    flatMap(places, place => place.placeTags.map(tag => tag.tagId)),
+  );
+  const tags = await tagService.findByIds(tagIds);
+  const tagsById = indexBy(tags, 'id');
+
+  return places.map(place => {
+    return {
+      ...place.toJSON ? place.toJSON() : place,
+      country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
+      placeTags: place.placeTags.map((placeTag) => {
+        return {
+          ...placeTag.toJSON ? placeTag.toJSON() : placeTag,
+          tag: tagsById[placeTag.tagId],
+        };
+      }),
+    };
+  });
+}
+
 module.exports = {
   createFromGem,
   findByGeohash,
   findByCountryCode,
   findPlacesByQuestionnaire,
   findByIds,
+  findAllPaginated,
+  toDTOs,
 };
