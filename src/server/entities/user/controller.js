@@ -56,15 +56,15 @@ router.post(
 );
 
 router.put(
-  '/:email',
+  '/:userId',
   requireRole(ADMIN_ROLE),
   asyncHandler(async (req, res) => {
     const {
-      params: { email },
+      params: { userId },
       body: { role },
     } = req;
 
-    const updatedUser = await service.updateUser(email, { role });
+    const updatedUser = await service.updateUser(userId, { role });
 
     res.send(updatedUser);
   }),

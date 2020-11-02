@@ -14,8 +14,8 @@ async function createUser(email) {
   return cognitoUtil.createUser(email);
 }
 
-async function updateUser(email, updateData) {
-  return cognitoUtil.updateUser(email, updateData);
+async function updateUser(userId, updateData) {
+  return cognitoUtil.updateUser(userId, updateData);
 }
 
 async function deleteUser(userId) {

@@ -142,7 +142,7 @@ async function createUser(email) {
   return userToObject(createdUser, 'Attributes');
 }
 
-async function updateUser(email, { role }) {
+async function updateUser(userId, { role }) {
   const attributeList = [
     {
       Name: ROLE_ATTRIBUTE,
@@ -152,7 +152,7 @@ async function updateUser(email, { role }) {
 
   const result = await cognito.adminUpdateUserAttributes({
     UserPoolId: poolId,
-    Username: email,
+    Username: userId,
     UserAttributes: attributeList,
   }).promise();
 

@@ -30,9 +30,9 @@ function EditUser() {
     state[event.target.name] = event.target.value;
   };
 
-  const updateUser = async (event) => {
+  const updateUser = async event => {
     event.preventDefault();
-    await put(`/api/users/${state.email}`, { role: state.role });
+    await put(`/api/users/${userId}`, { role: state.role });
     history.push('/admin/users');
   };
 
@@ -87,6 +87,9 @@ function EditUser() {
             color: !state.type ? 'gray' : 'black',
           }}
         >
+          <option value="" style={{ color: 'gray' }}>
+            Select a role...
+          </option>
           {state.roles.map(role => {
             return (
               <option key={role} value={role} style={{ color: 'black' }}>
@@ -111,7 +114,7 @@ function EditUser() {
         />
         {roleSelector()}
         <Button variant="primary" type="submit">
-          Create
+          Update
         </Button>
       </Form>
     );
