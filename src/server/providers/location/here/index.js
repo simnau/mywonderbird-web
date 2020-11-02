@@ -67,6 +67,30 @@ async function locationToPlace(location) {
   return null;
 }
 
+async function locationToCountryCode(location) {
+  const queryParams = qs.stringify({
+    at: location,
+    apiKey: hereApiKey,
+    limit: 1,
+    lang: 'en-US',
+    level: 'country',
+    locationattributes: 'address',
+    mode: 'retrieveAddresses',
+  });
+
+  const {
+    data: {
+      items: [place],
+    },
+  } = await axios.get(`${REVERSE_GEOCODE_FULL_PATH}?${queryParams}`);
+
+  if (!place) {
+    return null;
+  }
+
+  return place.address.countryCode;
+}
+
 async function locationToAddress(location) {
   const queryParams = qs.stringify({
     at: location,
@@ -85,6 +109,7 @@ async function locationToAddress(location) {
 
 module.exports = {
   locationToAddress,
+  locationToCountryCode,
   locationToPlace,
   searchForPlaces,
   toDTO,

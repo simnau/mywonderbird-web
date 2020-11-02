@@ -57,4 +57,16 @@ geoRouter.get(
   }),
 );
 
+geoRouter.get(
+  '/places/country',
+  asyncHandler(async (req, res) => {
+    const {
+      query: { location },
+    } = req;
+    const country = await service.locationCountry(location);
+
+    res.send(country);
+  }),
+);
+
 module.exports = geoRouter;

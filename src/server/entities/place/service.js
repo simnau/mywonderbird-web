@@ -182,6 +182,41 @@ async function findAllPaginated({ page, pageSize }) {
   return { places, total };
 }
 
+async function createFull(place) {
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+    {
+      model: PlaceTag,
+      as: 'placeTags',
+    },
+  ];
+  const { lat, lng } = place;
+  const geohash = getGeohash(lat, lng);
+  const existingPlace = await findByGeohash(geohash);
+
+  if (existingPlace) {
+    return existingPlace;
+  }
+
+  return Place.create({
+    ...place,
+    geohash,
+  }, {
+    include,
+  });
+}
+
+async function deleteById(id) {
+  return Place.destroy({
+    where: {
+      id,
+    },
+  });
+}
+
 async function toDTOs(places) {
   const tagIds = unique(
     flatMap(places, place => place.placeTags.map(tag => tag.tagId)),
@@ -191,11 +226,11 @@ async function toDTOs(places) {
 
   return places.map(place => {
     return {
-      ...place.toJSON ? place.toJSON() : place,
+      ...(place.toJSON ? place.toJSON() : place),
       country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
-      placeTags: place.placeTags.map((placeTag) => {
+      placeTags: place.placeTags.map(placeTag => {
         return {
-          ...placeTag.toJSON ? placeTag.toJSON() : placeTag,
+          ...(placeTag.toJSON ? placeTag.toJSON() : placeTag),
           tag: tagsById[placeTag.tagId],
         };
       }),
@@ -204,11 +239,13 @@ async function toDTOs(places) {
 }
 
 module.exports = {
+  createFull,
   createFromGem,
   findByGeohash,
   findByCountryCode,
   findPlacesByQuestionnaire,
   findByIds,
   findAllPaginated,
+  deleteById,
   toDTOs,
 };

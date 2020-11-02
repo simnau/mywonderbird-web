@@ -3,6 +3,7 @@ const { countries } = require('country-code-lookup');
 const {
   searchForPlaces: hereSearchForPlaces,
   locationToAddress: hereLocationToAddress,
+  locationToCountryCode: hereLocationCountry,
   locationToPlace: hereLocationToPlace,
   toDTO: hereToDTO,
 } = require('../../providers/location/here');
@@ -80,12 +81,28 @@ async function locationToAddress(location) {
   return place ? hereToDTO(place) : null;
 }
 
+async function locationCountry(location) {
+  const countryCode = await hereLocationCountry(location);
+
+  if (!countryCode) {
+    return null;
+  }
+
+  const country = getLabelBy3LetterCountryCode(countryCode);
+
+  return {
+    country,
+    countryCode,
+  };
+}
+
 module.exports = {
   getCountries,
   searchCountries,
   getLabelBy3LetterCountryCode,
   findBoundsBy3LetterCountryCode,
   reverseGeocode,
+  locationCountry,
   locationToAddress,
   searchPlaces,
 };
