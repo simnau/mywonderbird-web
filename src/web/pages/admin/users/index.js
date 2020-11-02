@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { observer, useObservable } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import { get, del } from '../../../util/fetch';
 import { Button, OutlineButton } from '../../../components/button';
@@ -31,7 +31,9 @@ const ListRow = styled.div`
 
 const ListActionContainer = styled.div`
   display: grid;
-  grid-row-gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 8px;
+  // grid-row-gap: 8px;
 `;
 
 const LoadMoreContainer = styled.div`
@@ -62,6 +64,7 @@ function Users() {
     state.users = state.users.concat(data.users);
     state.paginationToken = data.paginationToken;
   };
+  const history = useHistory();
 
   const loadUsers = async () => {
     state.isLoading = true;
@@ -81,7 +84,11 @@ function Users() {
     state.isLoading = false;
   };
 
-  const deleteUser = async userId => {
+  const onEdit = userId => {
+    history.push(`/admin/users/${userId}`);
+  };
+
+  const onDelete = async userId => {
     await del(`/api/users/${userId}`);
     state.users = [];
     state.paginationToken = null;
@@ -100,28 +107,12 @@ function Users() {
         </ListHeader>
         {state.users.map(user => {
           return (
-            <ListRow key={user.id}>
-              <div>{user.id}</div>
-              <div>{user.email}</div>
-              <div>{user.role}</div>
-              <ListActionContainer>
-                <OutlineButton
-                  as={Link}
-                  variant="primary"
-                  to={`/admin/users/${user.id}/journeys`}
-                >
-                  View Journeys
-                </OutlineButton>
-                {user.role !== 'ADMIN' && (
-                  <OutlineButton
-                    variant="danger"
-                    onClick={() => deleteUser(user.id)}
-                  >
-                    Delete
-                  </OutlineButton>
-                )}
-              </ListActionContainer>
-            </ListRow>
+            <Row
+              key={user.id}
+              user={user}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           );
         })}
         {!state.isLoading && !state.users.length && (
@@ -146,6 +137,33 @@ function Users() {
         Create User
       </Button>
     </div>
+  );
+}
+
+function Row({ user, onDelete, onEdit }) {
+  return (
+    <ListRow>
+      <div>{user.id}</div>
+      <div>{user.email}</div>
+      <div>{user.role}</div>
+      <ListActionContainer>
+        <OutlineButton
+          as={Link}
+          variant="default"
+          to={`/admin/users/${user.id}/journeys`}
+        >
+          View Journeys
+        </OutlineButton>
+        <OutlineButton variant="primary" onClick={() => onEdit(user.id)}>
+          Edit
+        </OutlineButton>
+        {user.role !== 'ADMIN' && (
+          <OutlineButton variant="danger" onClick={() => onDelete(user.id)}>
+            Delete
+          </OutlineButton>
+        )}
+      </ListActionContainer>
+    </ListRow>
   );
 }
 

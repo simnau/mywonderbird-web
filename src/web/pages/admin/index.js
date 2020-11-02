@@ -10,6 +10,7 @@ import CreateEditJourney from './journeys/create-edit';
 import ViewJourney from './journeys/view';
 import Users from './users';
 import CreateUser from './users/create';
+import EditUser from './users/edit';
 import UserJourneys from './users/journeys';
 import CreateEditUserJourney from './users/journeys/create-edit';
 import Other from './other';
@@ -57,6 +58,7 @@ function Admin() {
         <Route exact path="/admin/journeys" component={Journeys} />
         <Route exact path="/admin/users" component={Users} />
         <Route exact path="/admin/users/create" component={CreateUser} />
+        <Route exact path="/admin/users/:userId" component={EditUser} />
         <Route
           exact
           path="/admin/users/:userId/journeys"

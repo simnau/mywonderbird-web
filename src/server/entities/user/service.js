@@ -14,6 +14,10 @@ async function createUser(email) {
   return cognitoUtil.createUser(email);
 }
 
+async function updateUser(email, updateData) {
+  return cognitoUtil.updateUser(email, updateData);
+}
+
 async function deleteUser(userId) {
   return cognitoUtil.deleteUser(userId);
 }
@@ -29,6 +33,7 @@ async function updateUserRole(userId, role) {
 module.exports = {
   getUsers,
   createUser,
+  updateUser,
   deleteUser,
   getUser,
   updateUserRole,

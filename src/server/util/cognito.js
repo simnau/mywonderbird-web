@@ -142,6 +142,23 @@ async function createUser(email) {
   return userToObject(createdUser, 'Attributes');
 }
 
+async function updateUser(email, { role }) {
+  const attributeList = [
+    {
+      Name: ROLE_ATTRIBUTE,
+      Value: role,
+    },
+  ];
+
+  const result = await cognito.adminUpdateUserAttributes({
+    UserPoolId: poolId,
+    Username: email,
+    UserAttributes: attributeList,
+  }).promise();
+
+  return result;
+}
+
 async function deleteUser(userId) {
   const user = await getUser(userId);
 
@@ -332,6 +349,7 @@ module.exports = {
   getUser,
   registerUser,
   createUser,
+  updateUser,
   deleteUser,
   authenticateUser,
   listUsers,
