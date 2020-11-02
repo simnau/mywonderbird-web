@@ -72,7 +72,7 @@ function PlaceListItem({ place, deletePlace, editLink }) {
         <div style={{ display: 'grid', gridRowGap: 8, alignSelf: 'start' }}>
           <Button variant="primary" as={Link} to={editLink}>
             Edit
-          </Button>s
+          </Button>
           <Button variant="danger" onClick={onDelete}>
             Delete
           </Button>
