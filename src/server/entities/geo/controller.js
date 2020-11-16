@@ -39,7 +39,7 @@ geoRouter.get(
   '/places/search',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { q, location } = req.query;
+    const { q, location = '0,0' } = req.query;
     const result = await service.searchPlaces(q, location);
 
     res.send(result);

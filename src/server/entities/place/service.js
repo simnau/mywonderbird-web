@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 
+const sequelize = require('../../setup/sequelize');
 const { getGeohash } = require('../../util/geo');
 const { Place } = require('../../orm/models/place');
 const { PlaceImage } = require('../../orm/models/place-image');
@@ -8,6 +9,7 @@ const { Tag } = require('../../orm/models/tag');
 const placeImageService = require('../place-image/service');
 const geoService = require('../geo/service');
 const tagService = require('../tag/service');
+const placeTagService = require('../place-tag/service');
 const { unique, flatMap, indexBy } = require('../../util/array');
 
 const INCLUDE_MODELS = [
@@ -147,6 +149,23 @@ async function findPlacesByQuestionnaire(params) {
   });
 }
 
+async function findById(id) {
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+    {
+      model: PlaceTag,
+      as: 'placeTags',
+    },
+  ];
+
+  return Place.findByPk(id, {
+    include,
+  });
+}
+
 async function findByIds(ids) {
   return Place.findAll({
     where: {
@@ -201,11 +220,52 @@ async function createFull(place) {
     return existingPlace;
   }
 
-  return Place.create({
-    ...place,
-    geohash,
-  }, {
-    include,
+  return Place.create(
+    {
+      ...place,
+      geohash,
+    },
+    {
+      include,
+    },
+  );
+}
+
+async function update(id, place) {
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+    {
+      model: PlaceTag,
+      as: 'placeTags',
+    },
+  ];
+  const { lat, lng } = place;
+  const geohash = getGeohash(lat, lng);
+  const geohashPlace = await findByGeohash(geohash);
+
+  if (geohashPlace && geohashPlace.id !== id) {
+    throw new Error('Place already exists');
+  }
+
+  const existingPlace = await findById(id);
+
+  return sequelize.transaction(async transaction => {
+    await placeImageService.updateAll(id, place.placeImages, existingPlace.placeImages, {
+      transaction,
+    });
+    await placeTagService.updateAll(id, place.placeTags, existingPlace.placeTags, {
+      transaction,
+    });
+    return existingPlace.update({
+      ...place,
+      geohash,
+    }, {
+      include,
+      transaction,
+    });
   });
 }
 
@@ -238,14 +298,34 @@ async function toDTOs(places) {
   });
 }
 
+async function toDTO(place) {
+  const tagIds = place.placeTags.map(tag => tag.tagId);
+  const tags = await tagService.findByIds(tagIds);
+  const tagsById = indexBy(tags, 'id');
+
+  return {
+    ...(place.toJSON ? place.toJSON() : place),
+    country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
+    placeTags: place.placeTags.map(placeTag => {
+      return {
+        ...(placeTag.toJSON ? placeTag.toJSON() : placeTag),
+        tag: tagsById[placeTag.tagId],
+      };
+    }),
+  };
+}
+
 module.exports = {
   createFull,
   createFromGem,
   findByGeohash,
   findByCountryCode,
   findPlacesByQuestionnaire,
+  findById,
   findByIds,
   findAllPaginated,
   deleteById,
+  update,
   toDTOs,
+  toDTO,
 };

@@ -17,7 +17,7 @@ function FileSelectButton({ multiple = false, children, onSelect, ...props }) {
 
   return (
     <>
-      <OutlineButton {...props} onClick={onClick}>
+      <OutlineButton type="button" {...props} onClick={onClick}>
         {children}
       </OutlineButton>
       <input

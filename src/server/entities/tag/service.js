@@ -16,7 +16,12 @@ async function findByIds(ids) {
   });
 }
 
+async function findById(id) {
+  return Tag.findByPk(id);
+}
+
 module.exports = {
   findAll,
   findByIds,
+  findById,
 };

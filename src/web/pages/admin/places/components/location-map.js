@@ -2,8 +2,8 @@ import React from 'react';
 import { Marker } from 'react-mapbox-gl';
 import { useObservable, observer } from 'mobx-react-lite';
 
-import ImageMarker from '../../../../../components/image-marker';
-import Map from '../../../../../components/mapbox';
+import ImageMarker from '../../../../components/image-marker';
+import Map from '../../../../components/mapbox';
 
 function LocationMap({ onClick, location }) {
   const state = useObservable({
@@ -22,6 +22,7 @@ function LocationMap({ onClick, location }) {
       containerStyle={{
         height: '100%',
         width: '100%',
+        cursor: 'pointer',
       }}
       onClick={onClick}
       zoom={state.zoom}

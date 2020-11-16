@@ -21,6 +21,7 @@ import Terms from './other/terms';
 import CreateTerms from './other/terms/create';
 import Places from './places';
 import CreatePlace from './places/create';
+import EditPlace from './places/edit';
 
 function Admin() {
   return (
@@ -79,6 +80,7 @@ function Admin() {
 
         <Route exact path="/admin/places" component={Places} />
         <Route exact path="/admin/places/create" component={CreatePlace} />
+        <Route exact path="/admin/places/:id/edit" component={EditPlace} />
       </Switch>
     </>
   );
