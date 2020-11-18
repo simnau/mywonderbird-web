@@ -262,6 +262,7 @@ async function createFromCSVData(csvPlace, userId) {
   const {
     title,
     location,
+    source,
     country_code,
     tags: tagsString,
     image_urls,
@@ -301,6 +302,7 @@ async function createFromCSVData(csvPlace, userId) {
     title,
     lat,
     lng,
+    source,
     countryCode: country_code,
     placeTags,
   };

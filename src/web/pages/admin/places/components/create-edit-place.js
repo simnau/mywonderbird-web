@@ -33,6 +33,7 @@ function CreateEditPlace({ id }) {
     lng: null,
     lat: null,
     country: null,
+    source: null,
     tags: [],
     selectedTags: [],
     images: [],
@@ -74,6 +75,7 @@ function CreateEditPlace({ id }) {
           label: placeTag.tag.title,
         }));
         state.images = place.placeImages;
+        state.source = place.source;
       }
     };
 
@@ -96,6 +98,7 @@ function CreateEditPlace({ id }) {
     formData.append('lat', state.lat);
     formData.append('lng', state.lng);
     formData.append('countryCode', state.country.countryCode);
+    formData.append('source', state.source);
     formData.append(
       'placeTags',
       JSON.stringify(
@@ -124,6 +127,7 @@ function CreateEditPlace({ id }) {
     formData.append('lat', state.lat);
     formData.append('lng', state.lng);
     formData.append('countryCode', state.country.countryCode);
+    formData.append('source', state.source);
     formData.append(
       'placeTags',
       JSON.stringify(
@@ -184,6 +188,10 @@ function CreateEditPlace({ id }) {
 
   const onChangeTag = newValue => {
     state.selectedTags = newValue;
+  };
+
+  const onFieldChange = event => {
+    state[event.target.name] = event.target.value;
   };
 
   const onTitleChange = value => {
@@ -294,6 +302,13 @@ function CreateEditPlace({ id }) {
             value={countryText}
             type="text"
             disabled
+          />
+          <TextField
+            label="Source"
+            name="source"
+            value={state.source}
+            type="text"
+            onChange={onFieldChange}
           />
           <div>
             <div

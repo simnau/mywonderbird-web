@@ -30,6 +30,10 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  source: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
 };
 
 const Place = sequelize.define('places', FIELDS);

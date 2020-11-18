@@ -61,6 +61,10 @@ function PlaceListItem({ place, deletePlace, editLink }) {
             <span>{`${place.lat}, ${place.lng}`}</span>
           </FieldContainer>
           <FieldContainer>
+            <Label>Source</Label>
+            <span>{place.source || '-'}</span>
+          </FieldContainer>
+          <FieldContainer>
             <Label>Tags</Label>
             <span>
               {place.placeTags
