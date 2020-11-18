@@ -15,7 +15,20 @@ async function uploadFile(files, folder, useOriginalFilename = false) {
     throw new Error(`Unknown file uploader with type ${fileUploaderType}`);
   }
 
-  return fileUploader(files, folder, useOriginalFilename);
+  return fileUploader.uploadFiles(files, folder, useOriginalFilename);
 }
 
-module.exports = uploadFile;
+async function uploadFileArray(files, folder) {
+  const fileUploader = fileUploaderMapping[fileUploaderType];
+
+  if (!fileUploader) {
+    throw new Error(`Unknown file uploader with type ${fileUploaderType}`);
+  }
+
+  return fileUploader.uploadFileArray(files, folder);
+}
+
+module.exports = {
+  uploadFile,
+  uploadFileArray,
+};

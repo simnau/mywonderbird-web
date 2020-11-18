@@ -2,7 +2,13 @@ import React, { useRef } from 'react';
 
 import { OutlineButton } from './button';
 
-function FileSelectButton({ multiple = false, children, onSelect, ...props }) {
+function FileSelectButton({
+  multiple = false,
+  children,
+  onSelect,
+  accept = ['.jpeg', '.jpg', '.png'],
+  ...props
+}) {
   const imageInputRef = useRef();
 
   const onClick = () => {
@@ -27,7 +33,7 @@ function FileSelectButton({ multiple = false, children, onSelect, ...props }) {
         value=""
         onChange={onSelectFiles}
         multiple={multiple}
-        accept=".jpeg,.jpg,.png"
+        accept={accept.join(',')}
       />
     </>
   );

@@ -2,7 +2,9 @@ const { Op } = require('sequelize');
 
 const { AVATAR_FOLDER } = require('../../constants/s3');
 const { userAvatarUrl, deleteFile } = require('../../util/s3');
-const fileUploader = require('../../util/file-upload');
+const {
+  uploadFile,
+} = require('../../util/file-upload');
 const { Profile } = require('../../orm/models/profile');
 
 async function findProfileById(id) {
@@ -46,7 +48,7 @@ async function deletePreviousAvatar(userId) {
 }
 
 async function uploadAvatar(files, folder) {
-  const { images } = await fileUploader(files, folder);
+  const { images } = await uploadFile(files, folder);
 
   return {
     images,

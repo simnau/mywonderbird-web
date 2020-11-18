@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 
 const { ADMIN_ROLE } = require('../../constants/roles');
 const { getPlaceImagesDirectory } = require('../../util/file');
-const fileUploader = require('../../util/file-upload');
+const { uploadFile } = require('../../util/file-upload');
 const requireAuth = require('../../middleware/require-auth');
 const requireRole = require('../../middleware/require-role');
 const service = require('./service');
@@ -69,7 +69,7 @@ placeRouter.post(
     };
 
     const createdPlace = await service.createFull(place);
-    const { images } = await fileUploader(
+    const { images } = await uploadFile(
       files,
       getPlaceImagesDirectory(createdPlace.id),
     );
@@ -80,6 +80,32 @@ placeRouter.post(
 
     res.send({
       place: createdPlace,
+    });
+  }),
+);
+
+placeRouter.post(
+  '/csv',
+  requireRole(ADMIN_ROLE),
+  asyncHandler(async (req, res) => {
+    const {
+      files,
+      user: { id: userId },
+    } = req;
+    const fileArray = Object.values(files);
+
+    if (!fileArray.length) {
+      return res.send({
+        message: 'Success',
+      });
+    }
+
+    const [file] = fileArray;
+
+    await service.createFromCSV(file, userId);
+
+    res.send({
+      message: 'Success',
     });
   }),
 );
@@ -103,10 +129,7 @@ placeRouter.put(
 
     const updatedPlace = await service.update(id, place);
     if (files) {
-      const { images } = await fileUploader(
-        files,
-        getPlaceImagesDirectory(id),
-      );
+      const { images } = await uploadFile(files, getPlaceImagesDirectory(id));
       await placeImageService.createForPlace(
         id,
         images.map(image => ({ url: image, title: body.title, userId })),

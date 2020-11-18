@@ -16,6 +16,16 @@ async function findByIds(ids) {
   });
 }
 
+async function findByCodes(codes) {
+  return Tag.findAll({
+    where: {
+      code: {
+        [Op.in]: codes,
+      },
+    },
+  });
+}
+
 async function findById(id) {
   return Tag.findByPk(id);
 }
@@ -23,5 +33,6 @@ async function findById(id) {
 module.exports = {
   findAll,
   findByIds,
+  findByCodes,
   findById,
 };

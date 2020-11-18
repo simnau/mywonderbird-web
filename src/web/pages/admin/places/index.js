@@ -3,9 +3,10 @@ import { useObservable, observer } from 'mobx-react-lite';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { get, del } from '../../../util/fetch';
+import { get, del, post } from '../../../util/fetch';
 import PlaceListItem from './components/place-list-item';
-import { Button } from '../../../components/button';
+import { Button, OutlineButton } from '../../../components/button';
+import FileSelectButton from '../../../components/file-select-button';
 import { H3, H4 } from '../../../components/typography';
 import { CenteredContainer } from '../../../components/layout/containers';
 import Loader from '../../../components/loader';
@@ -59,6 +60,16 @@ function PlacesPage() {
     state.page = page;
   };
 
+  const onSelectCSV = async files => {
+    const formData = new FormData();
+    Object.values(files).forEach(file => {
+      formData.append(file.name, file);
+    });
+
+    await post('/api/places/csv', formData);
+    loadPlaces();
+  };
+
   const deletePlace = async id => {
     await del(`/api/places/${id}`);
     loadPlaces();
@@ -68,9 +79,23 @@ function PlacesPage() {
     <PlacesContainer>
       <HeaderContainer>
         <H3>Places</H3>
-        <Button variant="primary" as={Link} to="/admin/places/create">
-          Create place
-        </Button>
+        <div
+          style={{
+            display: 'flex',
+          }}
+        >
+          <Button
+            variant="primary"
+            as={Link}
+            to="/admin/places/create"
+            style={{ marginRight: 8 }}
+          >
+            Create place
+          </Button>
+          <FileSelectButton onSelect={onSelectCSV} accept={['.csv']}>
+            Create from CSV
+          </FileSelectButton>
+        </div>
       </HeaderContainer>
       {state.isLoading && (
         <CenteredContainer>

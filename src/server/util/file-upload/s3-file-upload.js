@@ -35,4 +35,32 @@ async function uploadFiles(files, folder, useOriginalFilename = false) {
   };
 }
 
-module.exports = uploadFiles;
+async function uploadFileArray(fileBuffers, folder) {
+  const images = [];
+
+  for (const fileBuffer of fileBuffers) {
+    const imageType = fileType(fileBuffer);
+    const filename = `${uuidv4()}.${imageType.ext}`;
+    const fullFilename = `${folder}/${filename}`;
+
+    const params = {
+      Bucket: bucketName,
+      Key: fullFilename,
+      Body: fileBuffer,
+      ContentType: imageType.mime,
+    };
+
+    const imageUploadData = await s3.upload(params).promise();
+
+    images.push(imageUploadData.Location);
+  }
+
+  return {
+    images,
+  };
+}
+
+module.exports = {
+  uploadFiles,
+  uploadFileArray,
+};

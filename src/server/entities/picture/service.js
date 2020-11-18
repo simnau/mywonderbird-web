@@ -1,7 +1,9 @@
 const sequelize = require('../../setup/sequelize');
 const { unique } = require('../../util/array');
 const { getGeohash } = require('../../util/geo');
-const fileUploader = require('../../util/file-upload');
+const {
+  uploadFile,
+} = require('../../util/file-upload');
 const gemService = require('../gem/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
@@ -56,7 +58,7 @@ async function sharePicture(
 }
 
 async function uploadFiles(files, folder) {
-  const { images } = await fileUploader(files, folder);
+  const { images } = await uploadFile(files, folder);
 
   return {
     images,

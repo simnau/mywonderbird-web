@@ -1,7 +1,9 @@
 const { Op } = require('sequelize');
 const uuidv4 = require('uuid/v4');
 
-const fileUploader = require('../../util/file-upload');
+const {
+  uploadFile,
+} = require('../../util/file-upload');
 const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const {
@@ -17,7 +19,7 @@ const INCLUDE_MODELS = [
 ];
 
 async function uploadFiles(files, folder) {
-  const { images } = await fileUploader(files, folder);
+  const { images } = await uploadFile(files, folder);
 
   return {
     images,

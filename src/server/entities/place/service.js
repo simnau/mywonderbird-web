@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
+const axios = require('axios');
 
+const { uploadFileArray } = require('../../util/file-upload');
 const sequelize = require('../../setup/sequelize');
 const { getGeohash } = require('../../util/geo');
 const { Place } = require('../../orm/models/place');
@@ -11,6 +13,9 @@ const geoService = require('../geo/service');
 const tagService = require('../tag/service');
 const placeTagService = require('../place-tag/service');
 const { unique, flatMap, indexBy } = require('../../util/array');
+const { getPlaceImagesDirectory } = require('../../util/file');
+const { Readable } = require('stream');
+const csv = require('csv-parser');
 
 const INCLUDE_MODELS = [
   {
@@ -231,6 +236,108 @@ async function createFull(place) {
   );
 }
 
+async function createFromCSV(csvFile, userId) {
+  const stream = new Readable({ read() {} });
+
+  stream.push(csvFile.data);
+  stream.push(null);
+
+  const promises = [];
+
+  await new Promise((resolve, reject) => {
+    stream
+      .pipe(csv())
+      .on('data', data => {
+        promises.push(createFromCSVData(data, userId));
+      })
+      .on('error', error => reject(error))
+      .on('end', async () => {
+        await Promise.all(promises);
+        resolve();
+      });
+  });
+}
+
+async function createFromCSVData(csvPlace, userId) {
+  const {
+    title,
+    location,
+    country_code,
+    tags: tagsString,
+    image_urls,
+  } = csvPlace;
+
+  const [lat, lng] = location.split(';');
+
+  const geohash = getGeohash(lat, lng);
+
+  const existingPlace = await findByGeohash(geohash);
+
+  if (existingPlace) {
+    return;
+  }
+
+  const tagCodes = tagsString.split(';');
+  const imageUrls = image_urls.split(';');
+
+  const tags = await tagService.findByCodes(tagCodes);
+  const tagsByCode = indexBy(tags, 'code');
+
+  const placeTags = [];
+
+  for (const tagCode of tagCodes) {
+    const tag = tagsByCode[tagCode];
+
+    if (!tag) {
+      continue;
+    }
+
+    placeTags.push({
+      tagId: tag.id,
+    });
+  }
+
+  const place = {
+    title,
+    lat,
+    lng,
+    countryCode: country_code,
+    placeTags,
+  };
+
+  const createdPlace = await createFull(place);
+  await createPlaceImagesFromImageUrls(
+    imageUrls,
+    createdPlace.id,
+    userId,
+    title,
+  );
+
+  return createdPlace;
+}
+
+async function createPlaceImagesFromImageUrls(imageUrls, placeId, userId, title) {
+  const imageBuffers = await Promise.all(
+    imageUrls.map(async imageUrl => {
+      const response = await axios({
+        method: 'get',
+        url: imageUrl,
+        responseType: 'arraybuffer',
+      });
+
+      return response.data;
+    }),
+  );
+  const { images } = await uploadFileArray(
+    imageBuffers,
+    getPlaceImagesDirectory(placeId),
+  );
+  await placeImageService.createForPlace(
+    placeId,
+    images.map(image => ({ url: image, title, userId })),
+  );
+}
+
 async function update(id, place) {
   const include = [
     {
@@ -253,19 +360,32 @@ async function update(id, place) {
   const existingPlace = await findById(id);
 
   return sequelize.transaction(async transaction => {
-    await placeImageService.updateAll(id, place.placeImages, existingPlace.placeImages, {
-      transaction,
-    });
-    await placeTagService.updateAll(id, place.placeTags, existingPlace.placeTags, {
-      transaction,
-    });
-    return existingPlace.update({
-      ...place,
-      geohash,
-    }, {
-      include,
-      transaction,
-    });
+    await placeImageService.updateAll(
+      id,
+      place.placeImages,
+      existingPlace.placeImages,
+      {
+        transaction,
+      },
+    );
+    await placeTagService.updateAll(
+      id,
+      place.placeTags,
+      existingPlace.placeTags,
+      {
+        transaction,
+      },
+    );
+    return existingPlace.update(
+      {
+        ...place,
+        geohash,
+      },
+      {
+        include,
+        transaction,
+      },
+    );
   });
 }
 
@@ -317,6 +437,8 @@ async function toDTO(place) {
 
 module.exports = {
   createFull,
+  createFromCSV,
+  createFromCSVData,
   createFromGem,
   findByGeohash,
   findByCountryCode,
