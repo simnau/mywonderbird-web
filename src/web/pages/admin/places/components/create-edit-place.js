@@ -33,7 +33,7 @@ function CreateEditPlace({ id }) {
     lng: null,
     lat: null,
     country: null,
-    source: null,
+    source: '',
     tags: [],
     selectedTags: [],
     images: [],
@@ -111,11 +111,7 @@ function CreateEditPlace({ id }) {
       formData.append(file.file.name, file.file);
     });
 
-    await post('/api/places', formData, null, {
-      headers: {
-        'content-type': 'multipart/form-data',
-      },
-    });
+    await post('/api/places', formData);
     history.push('/admin/places');
   };
 
@@ -309,6 +305,7 @@ function CreateEditPlace({ id }) {
             value={state.source}
             type="text"
             onChange={onFieldChange}
+            placeholder="Place source"
           />
           <div>
             <div

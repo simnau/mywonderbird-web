@@ -19,9 +19,14 @@ import CreateTutorialStep from './other/tutorial-steps/create';
 import EditTutorialStep from './other/tutorial-steps/edit';
 import Terms from './other/terms';
 import CreateTerms from './other/terms/create';
+
 import Places from './places';
 import CreatePlace from './places/create';
 import EditPlace from './places/edit';
+
+import Tags from './tags';
+import CreateTag from './tags/create';
+import EditTag from './tags/edit';
 
 function Admin() {
   return (
@@ -81,6 +86,10 @@ function Admin() {
         <Route exact path="/admin/places" component={Places} />
         <Route exact path="/admin/places/create" component={CreatePlace} />
         <Route exact path="/admin/places/:id/edit" component={EditPlace} />
+
+        <Route exact path="/admin/tags" component={Tags} />
+        <Route exact path="/admin/tags/create" component={CreateTag} />
+        <Route exact path="/admin/tags/:id/edit" component={EditTag} />
       </Switch>
     </>
   );

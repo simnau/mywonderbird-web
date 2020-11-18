@@ -45,6 +45,12 @@ function Header() {
         Places
       </Link>
       <Link
+        isActive={isActive('/admin/tags', location.pathname)}
+        to="/admin/tags"
+      >
+        Tags
+      </Link>
+      <Link
         isActive={isActive('/admin/journeys', location.pathname)}
         to="/admin/journeys"
       >

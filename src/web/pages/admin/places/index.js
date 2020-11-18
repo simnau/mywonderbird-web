@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { get, del, post } from '../../../util/fetch';
 import PlaceListItem from './components/place-list-item';
-import { Button, OutlineButton } from '../../../components/button';
+import { Button } from '../../../components/button';
 import FileSelectButton from '../../../components/file-select-button';
 import { H3, H4 } from '../../../components/typography';
 import { CenteredContainer } from '../../../components/layout/containers';
