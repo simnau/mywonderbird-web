@@ -75,7 +75,7 @@ function CreateEditPlace({ id }) {
           label: placeTag.tag.title,
         }));
         state.images = place.placeImages;
-        state.source = place.source;
+        state.source = place.source || '';
       }
     };
 

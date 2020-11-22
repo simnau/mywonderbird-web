@@ -23,9 +23,9 @@ async function createForPlace(placeId, images) {
   );
 }
 
-async function updateAll(placeId, updateTags, existingTags, { transaction }) {
-  const placesToDelete = existingTags.filter(existingTag =>
-    updateTags.every(updateTag => updateTag.tagId !== existingTag.tagId),
+async function updateAll(placeId, updateImages, existingImages, { transaction }) {
+  const placesToDelete = existingImages.filter(existingImage =>
+    updateImages.every(updateImage => updateImage.id !== existingImage.id),
   );
 
   for (const placeToDelete of placesToDelete) {
