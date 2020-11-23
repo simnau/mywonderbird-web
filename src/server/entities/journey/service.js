@@ -210,23 +210,21 @@ async function findLastByUser(
   }
 
   if (loadIncludes) {
-    const [lastJourney] = await Journey.findAll({
+    const lastJourney = await Journey.findOne({
       where,
-      order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
-      include: INCLUDE_MODELS,
-      limit: 1,
+      order: [['createdAt', 'DESC'], ...INCLUDE_ORDER_V2],
+      include: INCLUDE_MODELS_V2,
     });
 
-    return lastJourney.toJSON();
+    return lastJourney ? lastJourney.toJSON() : null;
   }
 
-  const [lastJourney] = await Journey.findAll({
+  const lastJourney = await Journey.findOne({
     where,
     order: [['createdAt', 'DESC']],
-    limit: 1,
   });
 
-  return lastJourney.toJSON();
+  return lastJourney ? lastJourney.toJSON() : null;
 }
 
 async function findAllByIds(
@@ -628,7 +626,7 @@ function journeyToFeedJourneyDTOV2(journey) {
 
 function journeyToJourneyDTOV2(journey) {
   const rawJourney = journey.toJSON ? journey.toJSON() : journey;
-  const { gems, ...journeyData } = rawJourney;
+  const { gems = [], ...journeyData } = rawJourney;
   let journeyImageUrl;
   let journeyCountry;
 

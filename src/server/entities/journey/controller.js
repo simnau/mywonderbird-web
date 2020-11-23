@@ -82,7 +82,16 @@ journeyRouter.get(
     const lastJourney = await service.findLastByUser(id, {
       loadIncludes: true,
     });
-    const journeyDTO = service.journeyToFeedJourneyDTO(lastJourney);
+
+    if (!lastJourney) {
+      const error = new Error(
+        `The user with id ${id} does not have any journeys`,
+      );
+      error.status = 404;
+      throw error;
+    }
+
+    const journeyDTO = service.journeyToJourneyDTOV2(lastJourney);
 
     res.send({ journey: journeyDTO });
   }),
