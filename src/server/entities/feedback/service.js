@@ -9,6 +9,9 @@ let transporter = nodemailer.createTransport({
     user: 'mywonderbirduser@yahoo.com',
     pass: 'rpfbfmnfgendfdlr',
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 let MailGenerator = new Mailgen({
