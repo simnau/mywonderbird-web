@@ -196,12 +196,13 @@ async function findAllPaginated({ page, pageSize }) {
     },
   ];
 
-  const { count: total, rows: places } = await Place.findAndCountAll({
+  const places = await Place.findAll({
     include,
     offset,
     limit,
     order: [['updatedAt', 'DESC']],
   });
+  const total = await Place.count();
 
   return { places, total };
 }
