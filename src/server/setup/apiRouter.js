@@ -24,6 +24,7 @@ const journeyLike = require('../entities/journey-like/controller');
 const tutorialStep = require('../entities/tutorial-step/controller');
 const userTutorialStep = require('../entities/user-tutorial-step/controller');
 const terms = require('../entities/terms/controller');
+const feedback = require('../entities/feedback/controller');
 
 const apiRouter = Router();
 
@@ -51,5 +52,6 @@ apiRouter.use('/journey-likes', journeyLike);
 apiRouter.use('/tutorial-steps', tutorialStep);
 apiRouter.use('/user-tutorial-steps', userTutorialStep);
 apiRouter.use('/terms', terms);
+apiRouter.use('/feedback', feedback);
 
 module.exports = apiRouter;
