@@ -26,6 +26,18 @@ geoRouter.get(
 );
 
 geoRouter.get(
+  '/countries/:code',
+  asyncHandler(async (req, res) => {
+    const {
+      params: { code },
+    } = req;
+    const country = service.findByCode(code);
+
+    res.send({ country });
+  }),
+);
+
+geoRouter.get(
   '/country-boundaries/:code',
   asyncHandler(async (req, res) => {
     const { code } = req.params;

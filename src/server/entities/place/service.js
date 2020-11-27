@@ -182,9 +182,31 @@ async function findByIds(ids) {
   });
 }
 
-async function findAllPaginated({ page, pageSize }) {
+async function findAllPaginated({ page, pageSize, q, countryCode, tags }) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
+
+  const tagWhere = {};
+  const where = {};
+
+  if (q) {
+    where.title = {
+      [Op.iLike]: `%${q}%`,
+    };
+  }
+
+  if (countryCode) {
+    where.countryCode = countryCode;
+  }
+
+  if (tags) {
+    const tagIds = (await tagService.findByCodes(tags)).map(tag => tag.id);
+
+    tagWhere.tagId = {
+      [Op.in]: tagIds,
+    };
+  }
+
   const include = [
     {
       model: PlaceImage,
@@ -193,16 +215,18 @@ async function findAllPaginated({ page, pageSize }) {
     {
       model: PlaceTag,
       as: 'placeTags',
+      where: tagWhere,
     },
   ];
 
   const places = await Place.findAll({
+    where,
     include,
     offset,
     limit,
     order: [['updatedAt', 'DESC']],
   });
-  const total = await Place.count();
+  const total = await Place.count({ where });
 
   return { places, total };
 }
@@ -319,7 +343,12 @@ async function createFromCSVData(csvPlace, userId) {
   return createdPlace;
 }
 
-async function createPlaceImagesFromImageUrls(imageUrls, placeId, userId, title) {
+async function createPlaceImagesFromImageUrls(
+  imageUrls,
+  placeId,
+  userId,
+  title,
+) {
   const imageBuffers = await Promise.all(
     imageUrls.map(async imageUrl => {
       const response = await axios({

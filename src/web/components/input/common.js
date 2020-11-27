@@ -14,7 +14,7 @@ export const inputStyle = css`
   font-size: 14px;
   line-height: 22px;
   color: gray;
-  padding: 4px 8px;
+  padding: 7px 8px;
 
   transition: border-color 100ms linear;
 

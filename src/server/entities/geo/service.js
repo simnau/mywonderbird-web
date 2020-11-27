@@ -45,6 +45,14 @@ function searchCountries(query) {
   );
 }
 
+function findByCode(code) {
+  if (!code) {
+    return null;
+  }
+
+  return countryDtoByCodeMap[code.toUpperCase()];
+}
+
 function findBoundsBy3LetterCountryCode(code) {
   if (!code) {
     throw new Error('Code is required');
@@ -99,6 +107,7 @@ async function locationCountry(location) {
 module.exports = {
   getCountries,
   searchCountries,
+  findByCode,
   getLabelBy3LetterCountryCode,
   findBoundsBy3LetterCountryCode,
   reverseGeocode,

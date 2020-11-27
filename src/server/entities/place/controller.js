@@ -19,12 +19,21 @@ placeRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+      query: {
+        page = 1,
+        pageSize = DEFAULT_PAGE_SIZE,
+        q,
+        countryCode,
+        tags,
+      },
     } = req;
 
     const { places, total } = await service.findAllPaginated({
       page,
       pageSize,
+      q,
+      countryCode,
+      tags,
     });
 
     const placeDTOs = await service.toDTOs(places);
