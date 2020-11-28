@@ -1,3 +1,5 @@
+const shuffle = require('shuffle-array');
+
 const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
@@ -50,7 +52,7 @@ function toLocation(gemCapture) {
 async function suggestLocations(userId, response) {
   const places = await placeService.findPlacesByQuestionnaire(response);
 
-  return places;
+  return shuffle(places);
 }
 
 function toSuggestedLocationDTO(location) {

@@ -8,7 +8,6 @@ const requireAuth = require('../../middleware/require-auth');
 const requireRole = require('../../middleware/require-role');
 const service = require('./service');
 const placeImageService = require('../place-image/service');
-const { deleteFolder } = require('../../util/s3');
 
 const placeRouter = Router();
 
@@ -172,7 +171,6 @@ placeRouter.delete(
     } = req;
 
     await service.deleteById(id);
-    await deleteFolder(getPlaceImagesDirectory(id));
 
     res.send({
       message: 'Place successfully deleted',

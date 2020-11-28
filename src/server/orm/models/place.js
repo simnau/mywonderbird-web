@@ -34,6 +34,9 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: true,
   },
+  deletedAt: {
+    type: Sequelize.DATE,
+  },
 };
 
 const Place = sequelize.define('places', FIELDS);

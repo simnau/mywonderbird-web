@@ -199,12 +199,34 @@ class PlacesPage extends React.Component {
     });
 
     await post('/api/places/csv', formData);
-    this.loadPlaces();
+
+    const {
+      page,
+      filters: { country, search, selectedTags },
+    } = this.observableState;
+
+    this.loadPlaces({
+      page,
+      countryCode: country ? country.value : null,
+      q: search,
+      tags: selectedTags,
+    });
   };
 
   deletePlace = async id => {
     await del(`/api/places/${id}`);
-    this.loadPlaces();
+
+    const {
+      page,
+      filters: { country, search, selectedTags },
+    } = this.observableState;
+
+    this.loadPlaces({
+      page,
+      countryCode: country ? country.value : null,
+      q: search,
+      tags: selectedTags,
+    });
   };
 
   findCountryByCode = async code => {

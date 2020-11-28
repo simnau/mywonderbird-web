@@ -16,6 +16,10 @@ const { unique, flatMap, indexBy } = require('../../util/array');
 const { getPlaceImagesDirectory } = require('../../util/file');
 const { Readable } = require('stream');
 const csv = require('csv-parser');
+const {
+  VILNIUS_BOTTOM_RIGHT,
+  VILNIUS_TOP_LEFT,
+} = require('../../constants/coordinates');
 
 const INCLUDE_MODELS = [
   {
@@ -24,16 +28,23 @@ const INCLUDE_MODELS = [
   },
 ];
 
-function findByGeohash(geohash) {
-  return Place.findOne({
-    where: {
-      geohash: {
-        [Op.iLike]: `${geohash}%`,
-      },
+// const MAX_LOCATIONS_TO_SUGGEST = 40;
+
+function findByGeohash(geohash, { includeDeleted = false } = {}) {
+  const where = {
+    geohash: {
+      [Op.iLike]: `${geohash}%`,
     },
+  };
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
+
+  return Place.findOne({
+    where,
   });
 }
-const MAX_LOCATIONS_TO_SUGGEST = 40;
 
 async function createImagesForExisting(
   place,
@@ -111,18 +122,10 @@ async function createFromGem(gem, location, userId, transaction = null) {
   }
 }
 
-async function findByCountryCode(countryCode) {
-  return Place.findAll({
-    where: {
-      countryCode,
-    },
-    include: INCLUDE_MODELS,
-    limit: MAX_LOCATIONS_TO_SUGGEST,
-    order: [['updatedAt', 'DESC']],
-  });
-}
-
-async function findPlacesByQuestionnaire(params) {
+async function findPlacesByQuestionnaire(
+  params,
+  { includeDeleted = false } = {},
+) {
   const tagIds = (await Tag.findAll({
     where: {
       code: {
@@ -146,12 +149,22 @@ async function findPlacesByQuestionnaire(params) {
     },
   ];
 
+  let where = {
+    countryCode: params.country,
+  };
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
+
+  where = addTemporaryPlaceFilters(where);
+
   return Place.findAll({
-    where: {
-      countryCode: params.country,
-    },
+    where,
     include,
-    limit: MAX_LOCATIONS_TO_SUGGEST,
+    // TODO: Add in some sort of limit when we figure out how to randomize the list from the database
+    // while allowing proper pagination
+    // limit: MAX_LOCATIONS_TO_SUGGEST,
     order: [['updatedAt', 'DESC']],
   });
 }
@@ -173,24 +186,33 @@ async function findById(id) {
   });
 }
 
-async function findByLocation({ lat, lng }) {
+async function findByLocation({ lat, lng }, { includeDeleted = false } = {}) {
   const geohash = getGeohash(lat, lng);
 
-  return findByGeohash(geohash);
+  return findByGeohash(geohash, { includeDeleted });
 }
 
-async function findByIds(ids) {
-  return Place.findAll({
-    where: {
-      id: {
-        [Op.in]: ids,
-      },
+async function findByIds(ids, { includeDeleted = false } = {}) {
+  const where = {
+    id: {
+      [Op.in]: ids,
     },
+  };
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
+
+  return Place.findAll({
+    where,
     include: INCLUDE_MODELS,
   });
 }
 
-async function findAllPaginated({ page, pageSize, q, countryCode, tags }) {
+async function findAllPaginated(
+  { page, pageSize, q, countryCode, tags },
+  { includeDeleted = false } = {},
+) {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
 
@@ -205,6 +227,10 @@ async function findAllPaginated({ page, pageSize, q, countryCode, tags }) {
 
   if (countryCode) {
     where.countryCode = countryCode;
+  }
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
   }
 
   if (tags) {
@@ -431,12 +457,18 @@ async function update(id, place) {
   });
 }
 
+// Not actually deleting the place in case it was used in a Saved Trip
 async function deleteById(id) {
-  return Place.destroy({
-    where: {
-      id,
+  return Place.update(
+    {
+      deletedAt: new Date(),
     },
-  });
+    {
+      where: {
+        id,
+      },
+    },
+  );
 }
 
 async function toDTOs(places) {
@@ -477,13 +509,25 @@ async function toDTO(place) {
   };
 }
 
+// Temporary filters to only select locations from Vilnius
+function addTemporaryPlaceFilters(where) {
+  return {
+    ...where,
+    lat: {
+      [Op.between]: [VILNIUS_BOTTOM_RIGHT.lat, VILNIUS_TOP_LEFT.lat],
+    },
+    lng: {
+      [Op.between]: [VILNIUS_TOP_LEFT.lng, VILNIUS_BOTTOM_RIGHT.lng],
+    },
+  };
+}
+
 module.exports = {
   createFull,
   createFromCSV,
   createFromCSVData,
   createFromGem,
   findByGeohash,
-  findByCountryCode,
   findPlacesByQuestionnaire,
   findById,
   findByLocation,
