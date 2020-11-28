@@ -99,14 +99,16 @@ function CreateEditPlace({ id }) {
     formData.append('lng', state.lng);
     formData.append('countryCode', state.country.countryCode);
     formData.append('source', state.source);
-    formData.append(
-      'placeTags',
-      JSON.stringify(
-        state.selectedTags.map(tag => ({
-          tagId: tag.value,
-        })),
-      ),
-    );
+    if (state.selectedTags && state.selectedTags.length) {
+      formData.append(
+        'placeTags',
+        JSON.stringify(
+          state.selectedTags.map(tag => ({
+            tagId: tag.value,
+          })),
+        ),
+      );
+    }
     state.images.forEach(file => {
       formData.append(file.file.name, file.file);
     });
@@ -124,17 +126,20 @@ function CreateEditPlace({ id }) {
     formData.append('lng', state.lng);
     formData.append('countryCode', state.country.countryCode);
     formData.append('source', state.source);
-    formData.append(
-      'placeTags',
-      JSON.stringify(
-        state.selectedTags.map(tag => ({
-          tagId: tag.value,
-        })),
-      ),
-    );
 
-    const newImages = state.images.filter((image) => image.isNew);
-    const oldImages = state.images.filter((image) => !image.isNew);
+    if (state.selectedTags && state.selectedTags.length) {
+      formData.append(
+        'placeTags',
+        JSON.stringify(
+          state.selectedTags.map(tag => ({
+            tagId: tag.value,
+          })),
+        ),
+      );
+    }
+
+    const newImages = state.images.filter(image => image.isNew);
+    const oldImages = state.images.filter(image => !image.isNew);
 
     formData.append('placeImages', JSON.stringify(oldImages));
     newImages.forEach(file => {

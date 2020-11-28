@@ -215,7 +215,7 @@ async function findAllPaginated({ page, pageSize, q, countryCode, tags }) {
     {
       model: PlaceTag,
       as: 'placeTags',
-      where: tagWhere,
+      where: Object.keys(tagWhere).length ? tagWhere : null,
     },
   ];
 

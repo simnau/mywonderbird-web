@@ -74,7 +74,7 @@ placeRouter.post(
 
     const place = {
       ...body,
-      placeTags: JSON.parse(placeTags),
+      placeTags: placeTags ? JSON.parse(placeTags) : [],
     };
 
     const createdPlace = await service.createFull(place);
@@ -132,8 +132,8 @@ placeRouter.put(
 
     const place = {
       ...body,
-      placeTags: JSON.parse(placeTags),
-      placeImages: JSON.parse(placeImages),
+      placeTags: placeTags ? JSON.parse(placeTags) : [],
+      placeImages: placeImages ? JSON.parse(placeImages) : [],
     };
 
     const updatedPlace = await service.update(id, place);

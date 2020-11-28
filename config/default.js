@@ -42,7 +42,7 @@ module.exports = {
       distanceThreshold: 200,
     },
     geohash: {
-      precision: 7,
+      precision: 9,
     },
   },
 };
