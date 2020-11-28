@@ -19,13 +19,7 @@ placeRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      query: {
-        page = 1,
-        pageSize = DEFAULT_PAGE_SIZE,
-        q,
-        countryCode,
-        tags,
-      },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE, q, countryCode, tags },
     } = req;
 
     const { places, total } = await service.findAllPaginated({
@@ -41,6 +35,22 @@ placeRouter.get(
     res.send({
       places: placeDTOs,
       total,
+    });
+  }),
+);
+
+placeRouter.get(
+  '/location',
+  requireRole(ADMIN_ROLE),
+  asyncHandler(async (req, res) => {
+    const {
+      query: { lat, lng },
+    } = req;
+
+    const place = await service.findByLocation({ lat, lng });
+
+    res.send({
+      place,
     });
   }),
 );
@@ -78,14 +88,16 @@ placeRouter.post(
     };
 
     const createdPlace = await service.createFull(place);
-    const { images } = await uploadFile(
-      files,
-      getPlaceImagesDirectory(createdPlace.id),
-    );
-    await placeImageService.createForPlace(
-      createdPlace.id,
-      images.map(image => ({ url: image, title: body.title, userId })),
-    );
+    if (files) {
+      const { images } = await uploadFile(
+        files,
+        getPlaceImagesDirectory(createdPlace.id),
+      );
+      await placeImageService.createForPlace(
+        createdPlace.id,
+        images.map(image => ({ url: image, title: body.title, userId })),
+      );
+    }
 
     res.send({
       place: createdPlace,

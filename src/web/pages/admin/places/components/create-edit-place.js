@@ -8,7 +8,7 @@ import debouncePromise from 'debounce-promise';
 
 import { getResizedImages } from '../../../../util/image';
 import { get, post, put } from '../../../../util/fetch';
-import { H3 } from '../../../../components/typography';
+import { H3, H4 } from '../../../../components/typography';
 import { Button } from '../../../../components/button';
 import { TextField } from '../../../../components/input';
 import { CenteredContainer } from '../../../../components/layout/containers';
@@ -38,6 +38,7 @@ function CreateEditPlace({ id }) {
     selectedTags: [],
     images: [],
     isLoading: true,
+    existingPlace: null,
   });
   const history = useHistory();
 
@@ -185,6 +186,7 @@ function CreateEditPlace({ id }) {
     }
 
     state.country = countryInfo;
+    findExistingLocation();
   };
 
   const onChangeTag = newValue => {
@@ -206,6 +208,7 @@ function CreateEditPlace({ id }) {
     if (value.location) {
       state.lat = value.location.lat;
       state.lng = value.location.lng;
+      findExistingLocation();
     }
 
     state.titleObject = value;
@@ -246,6 +249,23 @@ function CreateEditPlace({ id }) {
 
   const debouncedFindPlaces = debouncePromise(findPlaces, 300);
 
+  const findExistingLocation = async () => {
+    try {
+      if (!state.lat && !state.lng) {
+        return;
+      }
+
+      const { data } = await get('/api/places/location', {
+        lat: state.lat,
+        lng: state.lng,
+      });
+
+      state.existingPlace = data.place;
+    } catch (e) {
+      state.existingPlace = null;
+    }
+  };
+
   const locationText =
     state.lat && state.lng
       ? `${state.lat}, ${state.lng}`
@@ -255,23 +275,33 @@ function CreateEditPlace({ id }) {
     : 'No location selected';
   const location =
     state.lat && state.lng ? { lat: state.lat, lng: state.lng } : null;
+  const placeExists =
+    !!state.existingPlace && (!id || state.existingPlace.id !== id);
 
-  const loader = () => {
+  if (state.isLoading) {
     return (
       <CenteredContainer height="400px">
         <Loader />
       </CenteredContainer>
     );
-  };
-
-  if (state.isLoading) {
-    return loader();
   }
 
   return (
     <RootContainer>
       <div>
         <H3>{id ? 'Edit place' : 'Create place'}</H3>
+        {placeExists && (
+          <div
+            style={{
+              backgroundColor: '#ff6666',
+              padding: 8,
+              margin: 8,
+              border: '1px solid red',
+            }}
+          >
+            <H4 style={{ color: 'white' }}>Place already exists</H4>
+          </div>
+        )}
         <Form onSubmit={id ? editPlace : createPlace}>
           <div>
             <div
@@ -336,7 +366,7 @@ function CreateEditPlace({ id }) {
             onImagesSelected={onImagesSelected}
             onRemoveImage={onRemoveImage}
           />
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" disabled={placeExists}>
             Save
           </Button>
         </Form>

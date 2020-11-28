@@ -27,7 +27,9 @@ const INCLUDE_MODELS = [
 function findByGeohash(geohash) {
   return Place.findOne({
     where: {
-      geohash,
+      geohash: {
+        [Op.iLike]: `${geohash}%`,
+      },
     },
   });
 }
@@ -171,6 +173,12 @@ async function findById(id) {
   });
 }
 
+async function findByLocation({ lat, lng }) {
+  const geohash = getGeohash(lat, lng);
+
+  return findByGeohash(geohash);
+}
+
 async function findByIds(ids) {
   return Place.findAll({
     where: {
@@ -247,7 +255,9 @@ async function createFull(place) {
   const existingPlace = await findByGeohash(geohash);
 
   if (existingPlace) {
-    return existingPlace;
+    const error = new Error('Place already exists');
+    error.status = 409;
+    throw error;
   }
 
   return Place.create(
@@ -476,6 +486,7 @@ module.exports = {
   findByCountryCode,
   findPlacesByQuestionnaire,
   findById,
+  findByLocation,
   findByIds,
   findAllPaginated,
   deleteById,
