@@ -91,7 +91,7 @@ async function toTripLocationDTOs(savedTripLocations) {
   const placeIds = savedTripLocations.map(
     savedTripLocation => savedTripLocation.placeId,
   );
-  const places = await placeService.findByIds(placeIds);
+  const places = await placeService.findByIds(placeIds, { includeDeleted: true });
   const placeMap = indexBy(places, 'id');
 
   return savedTripLocations.map(savedTripLocation => {
