@@ -58,6 +58,7 @@ Journey.hasMany(Gem, {
   as: 'gems',
   onDelete: 'CASCADE',
 });
+Gem.belongsTo(Journey);
 Journey.hasMany(JourneyComment, {
   foreignKey: 'journeyId',
   as: 'comments',

@@ -1,15 +1,12 @@
 const sequelize = require('../../setup/sequelize');
-const { unique } = require('../../util/array');
-const { getGeohash } = require('../../util/geo');
-const {
-  uploadFile,
-} = require('../../util/file-upload');
+const { unique, indexBy } = require('../../util/array');
+const { uploadFile } = require('../../util/file-upload');
 const gemService = require('../gem/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
-const geoService = require('../geo/service');
 const likeService = require('../like/service');
 const bookmarkService = require('../bookmark/service');
+const profileService = require('../profile/service');
 
 async function sharePicture(
   { title, imageUrl, location, creationDate },
@@ -82,19 +79,25 @@ async function augmentFeed(gemCaptures, userId) {
     userId,
   );
   const groupedUserBookmarks = await getBookmarkStats(gemCaptureIds, userId);
+  const groupedProfiles = await getUserProfiles(gemCaptures);
 
-  const withCounts = gemCaptures.map(gemCapture => {
+  const augmented = gemCaptures.map(gemCapture => {
     const rawGemCapture = gemCapture.toJSON();
+    const rawUser = groupedProfiles[gemCapture.gem.journey.userId]
+      ? groupedProfiles[gemCapture.gem.journey.userId].toJSON()
+      : null;
 
     return {
       ...rawGemCapture,
       likeCount: likeCounts[gemCapture.id],
       isLiked: groupedUserLikes[gemCapture.id] || false,
       isBookmarked: groupedUserBookmarks[gemCapture.id] || false,
+      userId: gemCapture.gem.journey.userId,
+      userAvatarUrl: rawUser && rawUser.avatarUrl,
     };
   });
 
-  return Promise.all(withCounts.map(toFeedDto));
+  return Promise.all(augmented.map(toFeedDto));
 }
 
 async function getLikeStats(gemCaptureIds, userId) {
@@ -134,6 +137,18 @@ async function getBookmarkStats(gemCaptureIds, userId) {
   }, {});
 }
 
+async function getUserProfiles(gemCaptures) {
+  const userIds = unique(
+    gemCaptures.map(gemCapture => {
+      return gemCapture.gem.journey.userId;
+    }),
+  );
+
+  const profiles = await profileService.findProfilesByProviderIds(userIds);
+
+  return indexBy(profiles, 'providerId');
+}
+
 async function toFeedDto(feedItem) {
   const country = await gemService.getGemCountry(feedItem.gem);
 
@@ -147,6 +162,8 @@ async function toFeedDto(feedItem) {
     likeCount: feedItem.likeCount || 0,
     isLiked: feedItem.isLiked,
     isBookmarked: feedItem.isBookmarked,
+    userId: feedItem.userId,
+    userAvatarUrl: feedItem.userAvatarUrl,
   };
 }
 

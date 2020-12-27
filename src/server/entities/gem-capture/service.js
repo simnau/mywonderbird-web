@@ -1,10 +1,9 @@
 const { Op } = require('sequelize');
 const uuidv4 = require('uuid/v4');
 
-const {
-  uploadFile,
-} = require('../../util/file-upload');
+const { uploadFile } = require('../../util/file-upload');
 const { Gem } = require('../../orm/models/gem');
+const { Journey } = require('../../orm/models/journey');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const {
   OLDER_DIRECTION,
@@ -15,6 +14,11 @@ const likeService = require('../like/service');
 const INCLUDE_MODELS = [
   {
     model: Gem,
+    include: [
+      {
+        model: Journey,
+      },
+    ],
   },
 ];
 
