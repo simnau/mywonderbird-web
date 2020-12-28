@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { SavedTrip } = require('../../orm/models/saved-trip');
 const { SavedTripLocation } = require('../../orm/models/saved-trip-location');
 const geoService = require('../geo/service');
@@ -23,6 +25,19 @@ async function findAllByUser(userId) {
   return SavedTrip.findAll({
     where: {
       userId,
+    },
+    include: INCLUDE_MODELS,
+    order: INCLUDE_ORDER,
+  });
+}
+
+async function findAllFinishedByUser(userId) {
+  return SavedTrip.findAll({
+    where: {
+      userId,
+      finishedAt: {
+        [Op.ne]: null,
+      },
     },
     include: INCLUDE_MODELS,
     order: INCLUDE_ORDER,
@@ -91,7 +106,9 @@ async function toTripLocationDTOs(savedTripLocations) {
   const placeIds = savedTripLocations.map(
     savedTripLocation => savedTripLocation.placeId,
   );
-  const places = await placeService.findByIds(placeIds, { includeDeleted: true });
+  const places = await placeService.findByIds(placeIds, {
+    includeDeleted: true,
+  });
   const placeMap = indexBy(places, 'id');
 
   return savedTripLocations.map(savedTripLocation => {
@@ -165,6 +182,7 @@ async function endTrip(id) {
 
 module.exports = {
   findAllByUser,
+  findAllFinishedByUser,
   create,
   findById,
   destroy,

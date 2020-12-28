@@ -73,6 +73,28 @@ journeyRouter.get(
 );
 
 journeyRouter.get(
+  '/users/:userId',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { userId },
+      query: { page = 1, pageSize = DEFAULT_PAGE_SIZE },
+    } = req;
+    const { total, journeys } = await service.findAllByUserV2(
+      userId,
+      page,
+      pageSize,
+      {
+        loadIncludes: true,
+      },
+    );
+    const journeyDTOs = await service.enrichJourneysV2(journeys);
+
+    res.send({ total, journeys: journeyDTOs });
+  }),
+);
+
+journeyRouter.get(
   '/last',
   requireAuth,
   asyncHandler(async (req, res) => {

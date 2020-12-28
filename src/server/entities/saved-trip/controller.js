@@ -21,6 +21,20 @@ router.get(
 );
 
 router.get(
+  '/users/:userId',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { userId },
+    } = req;
+    const savedTrips = await service.findAllFinishedByUser(userId);
+    const savedTripDTOs = await Promise.all(savedTrips.map(service.toTripDTO));
+
+    res.send({ trips: savedTripDTOs });
+  }),
+);
+
+router.get(
   '/:id',
   requireAuth,
   asyncHandler(async (req, res) => {
