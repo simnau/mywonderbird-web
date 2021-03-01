@@ -17,8 +17,8 @@ const { getPlaceImagesDirectory } = require('../../util/file');
 const { Readable } = require('stream');
 const csv = require('csv-parser');
 const {
-  VILNIUS_BOTTOM_RIGHT,
-  VILNIUS_TOP_LEFT,
+  LITHUANIA_BOTTOM_RIGHT,
+  LITHUANIA_TOP_LEFT,
 } = require('../../constants/coordinates');
 
 const INCLUDE_MODELS = [
@@ -509,15 +509,15 @@ async function toDTO(place) {
   };
 }
 
-// Temporary filters to only select locations from Vilnius
+// Temporary filters to only select locations from Lithuania
 function addTemporaryPlaceFilters(where) {
   return {
     ...where,
     lat: {
-      [Op.between]: [VILNIUS_BOTTOM_RIGHT.lat, VILNIUS_TOP_LEFT.lat],
+      [Op.between]: [LITHUANIA_BOTTOM_RIGHT.lat, LITHUANIA_TOP_LEFT.lat],
     },
     lng: {
-      [Op.between]: [VILNIUS_TOP_LEFT.lng, VILNIUS_BOTTOM_RIGHT.lng],
+      [Op.between]: [LITHUANIA_TOP_LEFT.lng, LITHUANIA_BOTTOM_RIGHT.lng],
     },
   };
 }
