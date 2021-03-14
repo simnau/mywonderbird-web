@@ -122,6 +122,58 @@ async function createFromGem(gem, location, userId, transaction = null) {
   }
 }
 
+async function findPlacesPaginated(
+  { page, pageSize, tags },
+  { includeDeleted = false } = {},
+) {
+  const include = [
+    {
+      model: PlaceImage,
+      as: 'placeImages',
+    },
+  ];
+
+  if (tags && tags.length) {
+    const tagsForCodes = await Tag.findAll({
+      where: {
+        code: {
+          [Op.in]: tags,
+        },
+      },
+      attributes: ['id'],
+    })
+    const tagIds = tagsForCodes.map(tag => tag.id);
+
+    if (tagIds.length) {
+      include.push({
+        model: PlaceTag,
+        as: 'placeTags',
+        where: {
+          tagId: {
+            [Op.in]: tagIds,
+          },
+        },
+      });
+    }
+  }
+
+  const where = addTemporaryPlaceFilters({});
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
+
+  const result = await Place.findAll({
+    where,
+    include,
+    offset: page * pageSize,
+    limit: pageSize,
+    order: [['createdAt', 'DESC']],
+  });
+
+  return result;
+}
+
 async function findPlacesByQuestionnaire(
   params,
   { includeDeleted = false } = {},
@@ -537,4 +589,6 @@ module.exports = {
   update,
   toDTOs,
   toDTO,
+
+  findPlacesPaginated,
 };

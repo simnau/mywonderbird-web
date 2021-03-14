@@ -6,6 +6,8 @@ const placeService = require('../place/service');
 const geoService = require('../geo/service');
 const { findLocationOrder } = require('../../util/geo');
 
+const DEFAULT_LOCATIONS_PER_PAGE = 10;
+
 async function suggestJourney(userId, bookmarkGroupId) {
   const bookmarks = await bookmarkService.findByUserIdAndBookmarkGroupId(
     userId,
@@ -53,6 +55,20 @@ async function suggestLocations(userId, response) {
   const places = await placeService.findPlacesByQuestionnaire(response);
 
   return shuffle(places);
+}
+
+async function suggestLocationsPaginated(userId, {
+  page = 0,
+  pageSize = DEFAULT_LOCATIONS_PER_PAGE,
+  tags = [],
+}) {
+  const places = await placeService.findPlacesPaginated({
+    page,
+    pageSize,
+    tags,
+  });
+
+  return places;
 }
 
 function toSuggestedLocationDTO(location) {
@@ -127,4 +143,7 @@ module.exports = {
   suggestLocations,
   toSuggestedLocationDTO,
   suggestJourneyByLocations,
+
+  suggestLocationsPaginated,
+  DEFAULT_LOCATIONS_PER_PAGE,
 };

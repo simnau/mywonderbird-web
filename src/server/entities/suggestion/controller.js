@@ -7,6 +7,28 @@ const service = require('./service');
 const suggestionRouter = Router();
 
 suggestionRouter.get(
+  '/locations/paginated',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { page = 0, pageSize = service.DEFAULT_LOCATIONS_PER_PAGE, tags = [] },
+      user: { id },
+    } = req;
+
+    const suggestedLocations = await service.suggestLocationsPaginated(id, {
+      page,
+      pageSize,
+      tags: Array.isArray(tags) ? tags : [tags],
+    });
+    const suggestedLocationDTOs = suggestedLocations.map(
+      service.toSuggestedLocationDTO,
+    );
+
+    res.send({ locations: suggestedLocationDTOs });
+  }),
+);
+
+suggestionRouter.get(
   '/locations',
   requireAuth,
   asyncHandler(async (req, res) => {
