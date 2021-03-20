@@ -11,7 +11,15 @@ suggestionRouter.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      query: { page = 0, pageSize = service.DEFAULT_LOCATIONS_PER_PAGE, tags = [] },
+      query: {
+        page = 0,
+        pageSize = service.DEFAULT_LOCATIONS_PER_PAGE,
+        tags = [],
+        latMin,
+        latMax,
+        lngMin,
+        lngMax,
+      },
       user: { id },
     } = req;
 
@@ -19,6 +27,10 @@ suggestionRouter.get(
       page,
       pageSize,
       tags: Array.isArray(tags) ? tags : [tags],
+      latMin,
+      latMax,
+      lngMin,
+      lngMax,
     });
     const suggestedLocationDTOs = suggestedLocations.map(
       service.toSuggestedLocationDTO,

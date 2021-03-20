@@ -57,15 +57,26 @@ async function suggestLocations(userId, response) {
   return shuffle(places);
 }
 
-async function suggestLocationsPaginated(userId, {
-  page = 0,
-  pageSize = DEFAULT_LOCATIONS_PER_PAGE,
-  tags = [],
-}) {
+async function suggestLocationsPaginated(
+  userId,
+  {
+    page = 0,
+    pageSize = DEFAULT_LOCATIONS_PER_PAGE,
+    tags = [],
+    latMin,
+    latMax,
+    lngMin,
+    lngMax,
+  },
+) {
   const places = await placeService.findPlacesPaginated({
     page,
     pageSize,
     tags,
+    latMin,
+    latMax,
+    lngMin,
+    lngMax,
   });
 
   return places;

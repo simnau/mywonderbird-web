@@ -123,7 +123,7 @@ async function createFromGem(gem, location, userId, transaction = null) {
 }
 
 async function findPlacesPaginated(
-  { page, pageSize, tags },
+  { page, pageSize, tags, latMin, latMax, lngMin, lngMax },
   { includeDeleted = false } = {},
 ) {
   const include = [
@@ -141,7 +141,7 @@ async function findPlacesPaginated(
         },
       },
       attributes: ['id'],
-    })
+    });
     const tagIds = tagsForCodes.map(tag => tag.id);
 
     if (tagIds.length) {
@@ -157,7 +157,15 @@ async function findPlacesPaginated(
     }
   }
 
-  const where = addTemporaryPlaceFilters({});
+  const where = addPlaceFilters(
+    {},
+    {
+      latMin,
+      latMax,
+      lngMin,
+      lngMax,
+    },
+  );
 
   if (!includeDeleted) {
     where.deletedAt = null;
@@ -209,7 +217,7 @@ async function findPlacesByQuestionnaire(
     where.deletedAt = null;
   }
 
-  where = addTemporaryPlaceFilters(where);
+  where = addPlaceFilters(where);
 
   return Place.findAll({
     where,
@@ -561,8 +569,19 @@ async function toDTO(place) {
   };
 }
 
-// Temporary filters to only select locations from Lithuania
-function addTemporaryPlaceFilters(where) {
+function addPlaceFilters(where, { latMin, latMax, lngMin, lngMax } = {}) {
+  if (latMin && latMax && lngMin && lngMax) {
+    return {
+      ...where,
+      lat: {
+        [Op.between]: [latMin, latMax],
+      },
+      lng: {
+        [Op.between]: [lngMin, lngMax],
+      },
+    };
+  }
+
   return {
     ...where,
     lat: {
