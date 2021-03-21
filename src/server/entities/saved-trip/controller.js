@@ -57,13 +57,20 @@ router.post(
       body: { trip, qValues },
     } = req;
 
-    const locationCount = Number(qValues.locationCount);
+    const locationCount = qValues && Number(qValues.locationCount);
 
     let currentIndex = 0;
     let dayIndex = 0;
-    trip.savedTripLocations = trip.savedTripLocations.map((location) => {
-      if (currentIndex < locationCount) {
 
+    trip.savedTripLocations = trip.savedTripLocations.map(location => {
+      if (!locationCount) {
+        return {
+          ...location,
+          dayIndex: 0,
+        };
+      }
+
+      if (currentIndex < locationCount) {
         const updatedLocation = {
           ...location,
           dayIndex: dayIndex,
@@ -76,8 +83,8 @@ router.post(
 
       return {
         ...location,
-        dayIndex: dayIndex,
-      }
+        dayIndex,
+      };
     });
 
     const savedTrip = await service.create(trip, id);
