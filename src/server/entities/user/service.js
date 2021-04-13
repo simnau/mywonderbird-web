@@ -1,4 +1,6 @@
-const cognitoUtil = require('../../util/cognito');
+const sequelize = require('../../setup/sequelize');
+const firebaseUtil = require('../../util/firebase');
+const profileService = require('../profile/service');
 
 const DEFAULT_GET_USERS_LIMIT = 20;
 
@@ -7,27 +9,34 @@ async function getUsers(
   paginationToken,
   filter,
 ) {
-  return cognitoUtil.listUsers(limit, paginationToken, filter);
+  return firebaseUtil.listUsers({ limit, paginationToken });
 }
 
 async function createUser(email) {
-  return cognitoUtil.createUser(email);
+  return firebaseUtil.createUser({ email });
 }
 
 async function updateUser(userId, updateData) {
-  return cognitoUtil.updateUser(userId, updateData);
+  return profileService.createOrUpdateProfileByProviderId(userId, updateData);
 }
 
 async function deleteUser(userId) {
-  return cognitoUtil.deleteUser(userId);
+  const t = await sequelize.transaction();
+
+  try {
+    await profileService.deleteProfile({ id: userId }, { transaction: t });
+    return firebaseUtil.deleteUser({ id: userId });
+  } catch (e) {
+    await t.rollback();
+  }
 }
 
 async function getUser(userId) {
-  return cognitoUtil.getUser(userId);
+  return firebaseUtil.getUser({ id: userId });
 }
 
 async function updateUserRole(userId, role) {
-  return cognitoUtil.updateUserRole(userId, role);
+  return profileService.updateRole({ id: userId, role });
 }
 
 module.exports = {

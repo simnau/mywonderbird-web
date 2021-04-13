@@ -1,53 +1,43 @@
 import { action, observable } from 'mobx';
+import firebase from 'firebase/app';
 
-import { get, post } from '../../util/fetch';
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '../../constants/auth';
+import { get } from '../../util/fetch';
+import {
+  AUTHENTICATION_STATUSES,
+} from '../../constants/auth';
 
 export default class AuthModel {
-  @observable isAuthenticated = false;
+  @observable authenticationStatus = AUTHENTICATION_STATUSES.UNKNOWN;
   @observable role = 'GUEST';
 
   @action
   login = async ({ email, password }) => {
-    const result = await post('/api/auth/login', { email, password });
-
-    if (result.status !== 200) {
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+    } catch (e) {
       throw new Error('Unable to login');
-    } else {
-      this.isAuthenticated = true;
+    }
+  };
+
+  @action
+  logout = async () => {
+    await firebase.auth().signOut();
+  };
+
+  @action
+  onAuth = async () => {
+    try {
+      const result = await get('/api/auth/me');
+
       this.role = result.data.role;
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
-      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreshToken);
+      this.authenticationStatus = AUTHENTICATION_STATUSES.AUTHENTICATED;
+    } catch (e) {
+      throw new Error('There was an auth error');
     }
   };
 
-  @action
-  reauthenticateFromStorage = async () => {
-    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-
-    if (accessToken) {
-      try {
-        const result = await get('/api/auth/me');
-
-        if (result.status !== 200) {
-          throw new Error('Unable to get user data');
-        } else {
-          this.isAuthenticated = true;
-          this.role = result.data.role;
-        }
-      } catch (e) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-      }
-    }
-  };
-
-  @action
-  logout = () => {
-    this.isAuthenticated = false;
+  @action onUnauth = () => {
+    this.authenticationStatus = AUTHENTICATION_STATUSES.UNAUTHENTICATED;
     this.role = null;
-
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
   };
 }

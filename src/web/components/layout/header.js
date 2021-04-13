@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 
+import { AUTHENTICATION_STATUSES } from '../../constants/auth';
 import AuthContext from '../../contexts/auth';
 import Link from '../link';
 import { Button } from '../button';
@@ -27,7 +28,7 @@ function isActive(path, location, exact = false) {
 }
 
 function Header() {
-  const { isAuthenticated, logout } = useContext(AuthContext);
+  const { authenticationStatus, logout } = useContext(AuthContext);
   const location = useLocation();
 
   return (
@@ -68,8 +69,12 @@ function Header() {
       >
         Other
       </Link>
-      {isAuthenticated && <Button onClick={logout}>Logout</Button>}
-      {!isAuthenticated && <Link to="/admin/login">Login</Link>}
+      {authenticationStatus === AUTHENTICATION_STATUSES.AUTHENTICATED && (
+        <Button onClick={logout}>Logout</Button>
+      )}
+      {AUTHENTICATION_STATUSES === AUTHENTICATION_STATUSES.UNAUTHENTICATED && (
+        <Link to="/admin/login">Login</Link>
+      )}
     </HeaderContainer>
   );
 }

@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 
+const { USER_ROLE } = require('../../constants/roles');
 const sequelize = require('../../setup/sequelize');
 
 const FIELDS = {
@@ -34,6 +35,11 @@ const FIELDS = {
     defaultValue: Sequelize.UUIDV4,
     allowNull: false,
     unique: true,
+  },
+  role: {
+    type: Sequelize.STRING,
+    defaultValue: USER_ROLE,
+    allowNull: false,
   },
 };
 

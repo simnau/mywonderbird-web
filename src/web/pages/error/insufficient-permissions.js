@@ -8,8 +8,8 @@ function InsufficientPermissions() {
   const { logout } = useContext(AuthContext);
   const history = useHistory();
 
-  const relogin = () => {
-    logout();
+  const relogin = async () => {
+    await logout();
     history.push('/admin/login');
   };
 

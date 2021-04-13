@@ -2,22 +2,23 @@ import React, { useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 
+import { AUTHENTICATION_STATUSES } from '../constants/auth';
 import AuthContext from '../contexts/auth';
 
 function hasRole(Component, expectedRole) {
   const HasRoleGuard = props => {
-    const { isAuthenticated, role } = useContext(AuthContext);
+    const { authenticationStatus, role } = useContext(AuthContext);
     const history = useHistory();
 
     useEffect(() => {
-      if (!isAuthenticated) {
+      if (authenticationStatus !== AUTHENTICATION_STATUSES.AUTHENTICATED) {
         return history.replace('/admin/login');
       }
 
       if (role !== expectedRole) {
         return history.replace('/admin/insufficient-permissions');
       }
-    }, [isAuthenticated, role]);
+    }, [authenticationStatus, role]);
 
     return <Component {...props} />;
   };

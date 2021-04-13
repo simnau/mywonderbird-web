@@ -8,6 +8,7 @@ import createStore from './store';
 import App from './app';
 import AuthContext from './contexts/auth';
 import authModel from './setup/authModel';
+import initFirebase from './setup/firebase';
 
 import 'reset-css';
 
@@ -16,7 +17,7 @@ ReactModal.setAppElement('#app');
 const store = createStore();
 
 async function init() {
-  await authModel.reauthenticateFromStorage();
+  initFirebase();
 
   ReactDOM.render(
     <AuthContext.Provider value={authModel}>

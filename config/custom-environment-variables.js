@@ -42,6 +42,9 @@ module.exports = {
       apiKey: 'HERE_MAPS_API_KEY',
     },
   },
+  google: {
+    serviceKey: 'GOOGLE_SERVICE_KEY',
+  },
   location: {
     browse: {
       distanceThreshold: 'LOCATION_BROWSE_DISTANCE_THRESHOLD',

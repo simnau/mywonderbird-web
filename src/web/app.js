@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import { ResponsiveContainer } from './components/container';
+import AuthContext from './contexts/auth';
+import { AUTHENTICATION_STATUSES } from './constants/auth';
 import Admin from './pages/admin';
 import Login from './pages/auth/login';
 
@@ -21,7 +24,13 @@ const RootContainer = styled.div`
   }
 `;
 
-export default function App() {
+function App() {
+  const { authenticationStatus } = useContext(AuthContext);
+
+  if (authenticationStatus === AUTHENTICATION_STATUSES.UNKNOWN) {
+    return <div>Loading... Please wait</div>;
+  }
+
   return (
     <RootContainer>
       <ResponsiveContainer>
@@ -38,3 +47,5 @@ export default function App() {
     </RootContainer>
   );
 }
+
+export default observer(App);

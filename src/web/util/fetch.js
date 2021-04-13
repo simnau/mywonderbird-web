@@ -1,5 +1,6 @@
 import axios from 'axios';
 import qs from 'qs';
+import firebase from 'firebase/app';
 
 import { REFRESH_TOKEN_URL } from '../constants/urls';
 import {
@@ -13,9 +14,14 @@ function paramsSerializer(params) {
   return qs.stringify(params, { arrayFormat: 'brackets' });
 }
 
-export function getAuthorizationHeaders() {
-  const authorization = localStorage.getItem(ACCESS_TOKEN_KEY);
-  return authorization ? { [AUTHORIZATION_HEADER]: authorization } : {};
+export async function getAuthorizationHeaders() {
+  try {
+    const idToken = await firebase.auth().currentUser.getIdToken(true);
+
+    return idToken ? { [AUTHORIZATION_HEADER]: idToken } : {};
+  } catch (e) {
+    return {};
+  }
 }
 
 async function refreshToken() {
@@ -30,8 +36,8 @@ async function refreshToken() {
   });
 }
 
-function enhancedFetch(config, retry = false) {
-  const headers = getAuthorizationHeaders();
+async function enhancedFetch(config, retry = false) {
+  const headers = await getAuthorizationHeaders();
 
   return axios({
     ...config,
