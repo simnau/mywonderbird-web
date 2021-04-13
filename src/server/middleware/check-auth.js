@@ -48,7 +48,7 @@ const requireAuth = async (req, res, next) => {
     }
 
     if (jwtToken.startsWith(BEARER_PREFIX)) {
-      return handleFirebaseToken({
+      return await handleFirebaseToken({
         jwtToken: jwtToken.substring(BEARER_PREFIX.length),
         req,
         res,
