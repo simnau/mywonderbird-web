@@ -10,11 +10,7 @@ workflows:
           repo: '${AWS_RESOURCE_NAME_PREFIX}'
           region: ${AWS_DEFAULT_REGION}
           tag: 'latest'
-          environment:
-            FIREBASE_API_KEY: ${FIREBASE_API_KEY}
-            FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
-            FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-            FIREBASE_APP_ID: ${FIREBASE_APP_ID}
+          context: MyWonderbirdServer
       - aws-ecs/deploy-service-update:
           requires:
             - aws-ecr/build_and_push_image
