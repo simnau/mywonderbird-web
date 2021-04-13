@@ -18,7 +18,7 @@ export async function getAuthorizationHeaders() {
   try {
     const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-    return idToken ? { [AUTHORIZATION_HEADER]: idToken } : {};
+    return idToken ? { [AUTHORIZATION_HEADER]: `Bearer ${idToken}` } : {};
   } catch (e) {
     return {};
   }
