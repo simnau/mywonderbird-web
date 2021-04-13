@@ -10,7 +10,6 @@ workflows:
           repo: '${AWS_RESOURCE_NAME_PREFIX}'
           region: AWS_DEFAULT_REGION
           tag: 'latest'
-          context: MyWonderbirdServer
       - aws-ecs/deploy-service-update:
           requires:
             - aws-ecr/build-and-push-image

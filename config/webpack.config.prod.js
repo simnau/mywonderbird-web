@@ -1,4 +1,6 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: ['./src/web/index.js'],
@@ -38,6 +40,21 @@ module.exports = {
         minifyCSS: true,
         minifyURLs: true,
       },
+    }),
+    new Dotenv(),
+    new webpack.DefinePlugin({
+      'process.env.FIREBASE_API_KEY': JSON.stringify(
+        process.env.FIREBASE_API_KEY,
+      ),
+      'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(
+        process.env.FIREBASE_AUTH_DOMAIN,
+      ),
+      'process.env.FIREBASE_PROJECT_ID': JSON.stringify(
+        process.env.FIREBASE_PROJECT_ID,
+      ),
+      'process.env.FIREBASE_APP_ID': JSON.stringify(
+        process.env.FIREBASE_APP_ID,
+      ),
     }),
   ],
 };
