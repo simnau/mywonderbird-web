@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const asyncHandler = require('express-async-handler');
+const Sentry = require('@sentry/node');
 
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
@@ -124,10 +125,14 @@ router.post(
     if (typeof acceptedNewsletter !== 'undefined') {
       profileUpdate.acceptedNewsletter = acceptedNewsletter;
 
-      if (acceptedNewsletter) {
-        await subscriptionService.subscribeNewsletter(email);
-      } else {
-        await subscriptionService.unsubscribeNewsletter(email);
+      try {
+        if (acceptedNewsletter) {
+          await subscriptionService.subscribeNewsletter(email);
+        } else {
+          await subscriptionService.unsubscribeNewsletter(email);
+        }
+      } catch (e) {
+        Sentry.captureException(e);
       }
     }
 
