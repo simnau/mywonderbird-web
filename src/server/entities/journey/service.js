@@ -374,12 +374,12 @@ function unpublish(id) {
   );
 }
 
-function create(journey) {
-  return sequelize.transaction(transaction => {
-    return Journey.create(journey, {
-      include: INCLUDE_MODELS,
-      transaction,
-    });
+async function create(journey, { transaction } = {}) {
+  const tx = transaction || (await sequelize.transaction());
+
+  return Journey.create(journey, {
+    include: INCLUDE_MODELS,
+    transaction: tx,
   });
 }
 

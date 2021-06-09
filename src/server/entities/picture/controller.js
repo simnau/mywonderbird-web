@@ -12,6 +12,54 @@ const {
 const pictureRouter = Router();
 
 pictureRouter.post(
+  '/',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: {
+        title,
+        description,
+        creationDate,
+
+        journeyId,
+        journeyTitle,
+
+        locationTitle,
+        locationCountry,
+        locationCountryCode,
+        locationLat,
+        locationLng,
+      },
+      files,
+      user: { id },
+    } = req;
+
+    const picture = {
+      title,
+      description,
+      creationDate,
+      location: {
+        title: locationTitle,
+        country: locationCountry,
+        countryCode: locationCountryCode,
+        lat: locationLat,
+        lng: locationLng,
+      },
+    };
+
+    await service.sharePictureWithJourney({
+      picture,
+      journeyId,
+      journeyTitle,
+      userId: id,
+      files,
+    });
+
+    res.send({ success: true });
+  }),
+);
+
+pictureRouter.post(
   '/:journeyId',
   requireAuth,
   asyncHandler(async (req, res) => {

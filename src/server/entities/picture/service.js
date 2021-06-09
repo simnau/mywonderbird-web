@@ -7,11 +7,13 @@ const placeService = require('../place/service');
 const likeService = require('../like/service');
 const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
+const journeyService = require('../journey/service');
 
 async function sharePicture(
   { title, imageUrl, location, creationDate },
   journeyId,
   userId,
+  { transaction } = {},
 ) {
   const lastGem = await gemService.findLastForJourney(journeyId);
 
@@ -35,22 +37,77 @@ async function sharePicture(
     ],
   };
 
-  const transaction = await sequelize.transaction();
+  const tx = transaction || (await sequelize.transaction());
 
   try {
-    const createdGem = await gemService.create(gem, transaction);
-    await placeService.createFromGem(
-      createdGem.toJSON(),
-      location,
-      userId,
-      transaction,
-    );
+    const createdGem = await gemService.create(gem, tx);
+    await placeService.createFromGem(createdGem.toJSON(), location, userId, tx);
 
-    await transaction.commit();
+    await tx.commit();
     return createdGem;
   } catch (e) {
-    await transaction.rollback();
+    if (!transaction) {
+      await tx.rollback();
+    }
     throw e;
+  }
+}
+
+async function sharePictureWithJourney({
+  picture,
+  journeyId,
+  journeyTitle,
+  userId,
+  files,
+}) {
+  if (!files) {
+    throw new Error('No images provided when sharing');
+  }
+
+  if (journeyId) {
+    const { images } = await uploadFiles(files, journeyId);
+
+    return sharePicture(
+      {
+        ...picture,
+        imageUrl: images[0],
+      },
+      journeyId,
+      userId,
+    );
+  } else {
+    const transaction = await sequelize.transaction();
+
+    try {
+      const savedJourney = await journeyService.create(
+        {
+          title: journeyTitle,
+          startDate: new Date(),
+          userId,
+          creatorId: userId,
+          draft: false,
+        },
+        {
+          transaction,
+        },
+      );
+
+      const { images } = await uploadFiles(files, savedJourney.id);
+      await sharePicture(
+        {
+          ...picture,
+          imageUrl: images[0],
+        },
+        savedJourney.id,
+        userId,
+        { transaction },
+      );
+
+      await transaction.commit();
+    } catch (e) {
+      await transaction.rollback();
+      throw e;
+    }
   }
 }
 
@@ -169,6 +226,7 @@ async function toFeedDto(feedItem) {
 
 module.exports = {
   sharePicture,
+  sharePictureWithJourney,
   uploadFiles,
   findFeedItems,
   augmentFeed,
