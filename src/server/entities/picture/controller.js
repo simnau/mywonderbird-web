@@ -85,6 +85,12 @@ pictureRouter.post(
       user: { id },
     } = req;
 
+    if (!journeyId || journeyId === 'null') {
+      return res.status(400).send({
+        message: 'Invalid journeyId',
+      });
+    }
+
     const existingJourney = await journeyService.findById(journeyId);
 
     if (!existingJourney) {
