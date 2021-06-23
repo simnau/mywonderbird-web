@@ -67,6 +67,7 @@ async function suggestLocationsPaginated(
     latMax,
     lngMin,
     lngMax,
+    selectedLocations,
   },
 ) {
   const places = await placeService.findPlacesPaginated({
@@ -77,6 +78,7 @@ async function suggestLocationsPaginated(
     latMax,
     lngMin,
     lngMax,
+    selectedLocations,
   });
 
   return places;

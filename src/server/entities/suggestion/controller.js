@@ -19,6 +19,7 @@ suggestionRouter.get(
         latMax,
         lngMin,
         lngMax,
+        selectedLocations = [],
       },
       user: { id },
     } = req;
@@ -31,6 +32,7 @@ suggestionRouter.get(
       latMax,
       lngMin,
       lngMax,
+      selectedLocations: Array.isArray(selectedLocations) ? selectedLocations : [selectedLocations],
     });
     const suggestedLocationDTOs = suggestedLocations.map(
       service.toSuggestedLocationDTO,
