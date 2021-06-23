@@ -123,7 +123,7 @@ async function createFromGem(gem, location, userId, transaction = null) {
 }
 
 async function findPlacesPaginated(
-  { page, pageSize, tags, latMin, latMax, lngMin, lngMax },
+  { page, pageSize, tags, latMin, latMax, lngMin, lngMax, selectedLocations },
   { includeDeleted = false } = {},
 ) {
   const include = [
@@ -169,6 +169,11 @@ async function findPlacesPaginated(
 
   if (!includeDeleted) {
     where.deletedAt = null;
+  }
+
+  if (selectedLocations.length) {
+    where.id =
+      { [Op.notIn]: selectedLocations };
   }
 
   const result = await Place.findAll({
