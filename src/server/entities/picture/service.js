@@ -43,12 +43,16 @@ async function sharePicture(
     const createdGem = await gemService.create(gem, tx);
     await placeService.createFromGem(createdGem.toJSON(), location, userId, tx);
 
-    await tx.commit();
+    if (!transaction) {
+      await tx.commit();
+    }
+
     return createdGem;
   } catch (e) {
     if (!transaction) {
       await tx.rollback();
     }
+
     throw e;
   }
 }
