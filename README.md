@@ -3,6 +3,12 @@
 This is the back-end REST service for MyWonderbird. 
 It also serves the landing page and administration panel front-ends.
 
+
+## Running in Docker
+Execute the command `docker-compose up` in the project's directory. It will:
+- Start a postgres service
+- Attach the project's folder on the host machine to the docker container. It should hot-reload when something changes on the host file system.
+
 ## Pre-requisites
 To be able to run the back-end service you need:
 - Node.js at least version 12.13 (could work with an earlier version though). The easiest approach is to use node version manager (`nvm`) if you have multiple node versions

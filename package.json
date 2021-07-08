@@ -6,7 +6,7 @@
   "scripts": {
     "start:server": "node src/server/index.js",
     "start:server:dev": "nodemon src/server/index.js",
-    "debug:server:dev": "nodemon --inspect src/server/index.js",
+    "debug:server:dev": "nodemon --inspect=0.0.0.0:9228 src/server/index.js",
     "build:web": "webpack --config ./config/webpack.config.prod.js --mode production",
     "start:web:dev": "webpack-dev-server --config ./config/webpack.config.dev.js --mode development",
     "migrate": "npx sequelize-cli db:migrate",

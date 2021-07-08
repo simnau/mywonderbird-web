@@ -1,0 +1,9 @@
+FROM node:12.13.0-alpine
+
+WORKDIR /app
+
+RUN apk add python make gcc g++
+
+ENTRYPOINT ["docker/entrypoint.sh"]
+
+EXPOSE 8080

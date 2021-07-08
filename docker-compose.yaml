@@ -1,0 +1,27 @@
+version: '2'
+services:
+  db:
+    image: postgres:9.6-alpine
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  application:
+    env_file:
+      - .env
+    entrypoint: docker/entrypoint.sh
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.dev
+    ports:
+      - '8080:8080'
+      - '9228:9228' # for debugging
+    depends_on:
+      - db
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: npm run debug:server:dev
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
