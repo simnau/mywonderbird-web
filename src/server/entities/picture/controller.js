@@ -39,7 +39,7 @@ pictureRouter.post(
       description,
       creationDate,
       location: {
-        title: locationTitle,
+        title: locationTitle || title,
         country: locationCountry,
         countryCode: locationCountryCode,
         lat: locationLat,
