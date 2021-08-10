@@ -4,7 +4,9 @@ const { SavedTrip } = require('../../orm/models/saved-trip');
 const { SavedTripLocation } = require('../../orm/models/saved-trip-location');
 const geoService = require('../geo/service');
 const placeService = require('../place/service');
+const savedTripLocationService = require('../saved-trip-location/service');
 const { indexBy, flatMap } = require('../../util/array');
+const sequelize = require('../../setup/sequelize');
 
 const INCLUDE_MODELS = [
   {
@@ -79,6 +81,40 @@ async function update(id, updateData) {
   return SavedTrip.update(updateData, { where: { id } });
 }
 
+async function updateFullTrip(
+  existingTrip,
+  { id, userId, savedTripLocations, ...updateData },
+) {
+  const update = {
+    ...existingTrip.toJSON(),
+    ...updateData,
+  };
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    await SavedTrip.update(update, {
+      where: { id: existingTrip.id },
+      include: INCLUDE_MODELS,
+      transaction,
+    });
+    await savedTripLocationService.overrideSavedTripLocations(
+      existingTrip.id,
+      savedTripLocations,
+      {
+        transaction,
+      },
+    );
+
+    await transaction.commit();
+  } catch (e) {
+    await transaction.rollback();
+    throw e;
+  }
+
+  return findById(existingTrip.id, { includeModels: true });
+}
+
 async function toTripDTO(savedTrip) {
   const tripLocationDTOs = await toTripLocationDTOs(
     savedTrip.savedTripLocations,
@@ -117,6 +153,7 @@ async function toTripLocationDTOs(savedTripLocations) {
 
     return {
       id: savedTripLocation.id,
+      placeId: place.id,
       name: place.title,
       countryCode: place.countryCode,
       country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
@@ -187,6 +224,7 @@ module.exports = {
   findById,
   destroy,
   update,
+  updateFullTrip,
   toTripDTO,
   findLocationById,
   markLocationSkipped,

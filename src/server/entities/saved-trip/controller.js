@@ -54,43 +54,44 @@ router.post(
   asyncHandler(async (req, res) => {
     const {
       user: { id },
-      body: { trip, qValues },
+      body: { trip },
     } = req;
-
-    const locationCount = qValues && Number(qValues.locationCount);
-
-    let currentIndex = 0;
-    let dayIndex = 0;
-
-    trip.savedTripLocations = trip.savedTripLocations.map(location => {
-      if (!locationCount) {
-        return {
-          ...location,
-          dayIndex: 0,
-        };
-      }
-
-      if (currentIndex < locationCount) {
-        const updatedLocation = {
-          ...location,
-          dayIndex: dayIndex,
-        };
-        currentIndex++;
-        return updatedLocation;
-      }
-      currentIndex = 1;
-      dayIndex++;
-
-      return {
-        ...location,
-        dayIndex,
-      };
-    });
 
     const savedTrip = await service.create(trip, id);
     const savedTripDTO = await service.toTripDTO(savedTrip);
 
     res.send({ trip: savedTripDTO });
+  }),
+);
+
+router.put(
+  '/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id: userId },
+      params: { id },
+      body: { trip },
+    } = req;
+
+    const existingTrip = await service.findById(id);
+
+    if (!existingTrip) {
+      const error = new Error('Trip not found');
+      error.status = 404;
+
+      throw error;
+    } else if (existingTrip.userId !== userId) {
+      const error = new Error('The user is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    const updatedTrip = await service.updateFullTrip(existingTrip, trip);
+    const updatedTripDTO = await service.toTripDTO(updatedTrip);
+
+    res.send({ trip: updatedTripDTO });
   }),
 );
 
