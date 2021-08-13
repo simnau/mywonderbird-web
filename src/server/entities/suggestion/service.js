@@ -4,7 +4,10 @@ const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
-const { findLocationOrder } = require('../../util/geo');
+const {
+  findLocationOrder,
+  sortLocationsByDistanceToPoint,
+} = require('../../util/geo');
 
 const DEFAULT_LOCATIONS_PER_PAGE = 10;
 
@@ -106,8 +109,17 @@ function toSuggestedLocationImageDTO(locationImage) {
   };
 }
 
-async function suggestJourneyByLocations(userId, locationIds) {
-  const locations = await placeService.findByIds(locationIds);
+async function suggestJourneyByLocations(
+  userId,
+  locationIds,
+  startingLocation,
+) {
+  let locations = await placeService.findByIds(locationIds);
+
+  if (startingLocation && startingLocation.lat && startingLocation.lng) {
+    locations = sortLocationsByDistanceToPoint(locations, startingLocation);
+  }
+
   const sortedLocations = await sortLocationsByDistance(locations);
   const locationDTOs = sortedLocations.map(toSuggestedLocationDTO);
   const country = findLocationsCountry(locationDTOs);

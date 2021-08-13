@@ -48,8 +48,20 @@ function locationToPoint(location) {
   };
 }
 
+function sortLocationsByDistanceToPoint(locations, point) {
+  const locationsCopy = [...locations];
+
+  return locationsCopy.sort((prev, curr) => {
+    const distanceToPointPrev = distanceTo(prev, point);
+    const distanceToPointCurr = distanceTo(curr, point);
+
+    return distanceToPointPrev - distanceToPointCurr;
+  });
+}
+
 module.exports = {
   findCoordinateBoundingBox,
   getGeohash,
   findLocationOrder,
+  sortLocationsByDistanceToPoint,
 };

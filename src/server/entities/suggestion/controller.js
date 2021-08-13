@@ -32,7 +32,9 @@ suggestionRouter.get(
       latMax,
       lngMin,
       lngMax,
-      selectedLocations: Array.isArray(selectedLocations) ? selectedLocations : [selectedLocations],
+      selectedLocations: Array.isArray(selectedLocations)
+        ? selectedLocations
+        : [selectedLocations],
     });
     const suggestedLocationDTOs = suggestedLocations.map(
       service.toSuggestedLocationDTO,
@@ -84,13 +86,14 @@ suggestionRouter.post(
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      body: { locationIds },
+      body: { locationIds, startingLocation },
       user: { id },
     } = req;
 
     const suggestedJourney = await service.suggestJourneyByLocations(
       id,
       locationIds,
+      startingLocation,
     );
 
     res.send({ journey: suggestedJourney });
