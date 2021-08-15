@@ -155,6 +155,12 @@ async function findPlacesPaginated(
         },
       });
     }
+  } else {
+    include.push({
+      model: PlaceTag,
+      as: 'placeTags',
+      where: {},
+    });
   }
 
   const where = addPlaceFilters(
@@ -172,8 +178,7 @@ async function findPlacesPaginated(
   }
 
   if (selectedLocations.length) {
-    where.id =
-      { [Op.notIn]: selectedLocations };
+    where.id = { [Op.notIn]: selectedLocations };
   }
 
   const result = await Place.findAll({
