@@ -59,9 +59,57 @@ function sortLocationsByDistanceToPoint(locations, point) {
   });
 }
 
+function rearrangeToStartFromPlace(locations, startingPlaceId) {
+  if (!locations) {
+    return [];
+  }
+
+  if (locations.length <= 1) {
+    return locations;
+  }
+
+  const locationIndex = locations.findIndex(
+    location => location.id === startingPlaceId,
+  );
+
+  const locationsWithoutStartingPoint = [
+    ...locations.slice(0, locationIndex),
+    ...locations.slice(locationIndex + 1),
+  ];
+
+  const startingLocation = locations[locationIndex];
+
+  const {
+    location: furthestLocation,
+    index: furtherLocationIndex,
+  } = locationsWithoutStartingPoint.reduce((currentMax, element, index) => {
+    if (!currentMax) {
+      return { location: element, index };
+    }
+
+    const distanceFromCurrentMax = distanceTo(
+      currentMax.location,
+      startingLocation,
+    );
+    const distanceFromCurrentElement = distanceTo(element, startingLocation);
+
+    return distanceFromCurrentMax >= distanceFromCurrentElement
+      ? currentMax
+      : { location: element, index };
+  }, null);
+
+  return [
+    startingLocation,
+    ...locationsWithoutStartingPoint.slice(0, furtherLocationIndex),
+    ...locationsWithoutStartingPoint.slice(furtherLocationIndex + 1),
+    furthestLocation,
+  ];
+}
+
 module.exports = {
   findCoordinateBoundingBox,
   getGeohash,
   findLocationOrder,
   sortLocationsByDistanceToPoint,
+  rearrangeToStartFromPlace,
 };

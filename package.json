@@ -13,7 +13,10 @@
     "migrate:prod": "sequelize db:migrate",
     "seed": "npx sequelize-cli db:seed:all",
     "seed:prod": "sequelize db:seed:all",
-    "prettier": "prettier --write src/**/*.js"
+    "prettier": "prettier --write src/**/*.js",
+    "test:server": "jest --config=src/server/jest.config.js",
+    "test:server:dev": "jest --config=src/server/jest.config.js --watch",
+    "test": "npm run test:server"
   },
   "repository": {
     "type": "git",
@@ -89,6 +92,7 @@
     "fix-orientation": "^1.1.0",
     "history": "^4.10.1",
     "html-webpack-plugin": "^3.2.0",
+    "jest": "^27.0.6",
     "mapbox-gl": "^1.4.1",
     "mdi-react": "^6.2.0",
     "mobx-react-lite": "^1.5.0",

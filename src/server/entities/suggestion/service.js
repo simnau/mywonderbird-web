@@ -7,6 +7,7 @@ const geoService = require('../geo/service');
 const {
   findLocationOrder,
   sortLocationsByDistanceToPoint,
+  rearrangeToStartFromPlace,
 } = require('../../util/geo');
 
 const DEFAULT_LOCATIONS_PER_PAGE = 10;
@@ -132,6 +133,26 @@ async function suggestJourneyByLocations(
   };
 }
 
+async function suggestJourneyByLocationsFromLocation(
+  userId,
+  locationIds,
+  placeToStartFromId,
+) {
+  let locations = await placeService.findByIds(locationIds);
+  locations = rearrangeToStartFromPlace(locations, placeToStartFromId);
+
+  const sortedLocations = await sortLocationsByDistance(locations);
+  const locationDTOs = sortedLocations.map(toSuggestedLocationDTO);
+  const country = findLocationsCountry(locationDTOs);
+  const imageUrl = findLocationsImageUrl(locationDTOs);
+
+  return {
+    ...country,
+    imageUrl,
+    locations: locationDTOs,
+  };
+}
+
 function findLocationsCountry(locationDTOs) {
   const locationWithCountry = locationDTOs.find(
     locationDTO => !!locationDTO.country,
@@ -168,6 +189,7 @@ module.exports = {
   suggestLocations,
   toSuggestedLocationDTO,
   suggestJourneyByLocations,
+  suggestJourneyByLocationsFromLocation,
 
   suggestLocationsPaginated,
   DEFAULT_LOCATIONS_PER_PAGE,

@@ -100,6 +100,26 @@ suggestionRouter.post(
   }),
 );
 
+suggestionRouter.post(
+  '/locations/from-point/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: { locationIds },
+      params: { id: locationToStartFromId },
+      user: { id },
+    } = req;
+
+    const suggestedJourney = await service.suggestJourneyByLocationsFromLocation(
+      id,
+      locationIds,
+      locationToStartFromId,
+    );
+
+    res.send({ journey: suggestedJourney });
+  }),
+);
+
 suggestionRouter.get(
   '/:bookmarkGroupId',
   requireAuth,
