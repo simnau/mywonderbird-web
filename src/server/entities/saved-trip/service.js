@@ -5,8 +5,10 @@ const { SavedTripLocation } = require('../../orm/models/saved-trip-location');
 const geoService = require('../geo/service');
 const placeService = require('../place/service');
 const savedTripLocationService = require('../saved-trip-location/service');
+const suggestionService = require('../suggestion/service');
 const { indexBy, flatMap } = require('../../util/array');
 const sequelize = require('../../setup/sequelize');
+const { rearrangeToStartFromPlace } = require('../../util/geo');
 
 const INCLUDE_MODELS = [
   {
@@ -113,6 +115,40 @@ async function updateFullTrip(
   }
 
   return findById(existingTrip.id, { includeModels: true });
+}
+
+async function startTripFromLocation(existingTrip, startingLocationId) {
+  const locationsByPlaceId = indexBy(
+    existingTrip.savedTripLocations,
+    'placeId',
+  );
+  const locationsToSortIds = existingTrip.savedTripLocations
+    .filter(location => !location.visitedAt && !location.skipped)
+    .map(location => location.placeId);
+
+  let locations = await placeService.findByIds(locationsToSortIds);
+  locations = rearrangeToStartFromPlace(locations, startingLocationId);
+  locations = await suggestionService.sortLocationsByDistance(locations);
+
+  const firstNonVisitedLocationIndex = existingTrip.savedTripLocations.findIndex(
+    location => !location.visitedAt && !location.skipped,
+  );
+
+  const rearrangedLocations = [
+    ...existingTrip.savedTripLocations
+      .slice(0, firstNonVisitedLocationIndex)
+      .map(location => location.dataValues),
+    ...locations.map((location, index) => {
+      return {
+        ...locationsByPlaceId[location.id].dataValues,
+        sequenceNumber: firstNonVisitedLocationIndex + index,
+      };
+    }),
+  ];
+
+  return updateFullTrip(existingTrip, {
+    savedTripLocations: rearrangedLocations,
+  });
 }
 
 async function toTripDTO(savedTrip) {
@@ -225,6 +261,7 @@ module.exports = {
   destroy,
   update,
   updateFullTrip,
+  startTripFromLocation,
   toTripDTO,
   findLocationById,
   markLocationSkipped,

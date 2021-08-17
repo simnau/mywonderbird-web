@@ -95,6 +95,40 @@ router.put(
   }),
 );
 
+router.put(
+  '/:id/from-point',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id: userId },
+      params: { id },
+      body: { startingLocationId },
+    } = req;
+
+    const existingTrip = await service.findById(id, { includeModels: true });
+
+    if (!existingTrip) {
+      const error = new Error('Trip not found');
+      error.status = 404;
+
+      throw error;
+    } else if (existingTrip.userId !== userId) {
+      const error = new Error('The user is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    const updatedTrip = await service.startTripFromLocation(
+      existingTrip,
+      startingLocationId,
+    );
+    const updatedTripDTO = await service.toTripDTO(updatedTrip);
+
+    res.send({ trip: updatedTripDTO });
+  }),
+);
+
 router.post(
   '/:id/started',
   requireAuth,

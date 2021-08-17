@@ -101,19 +101,18 @@ suggestionRouter.post(
 );
 
 suggestionRouter.post(
-  '/locations/from-point/:id',
+  '/locations/from-point',
   requireAuth,
   asyncHandler(async (req, res) => {
     const {
-      body: { locationIds },
-      params: { id: locationToStartFromId },
+      body: { locationIds, startingLocationId },
       user: { id },
     } = req;
 
     const suggestedJourney = await service.suggestJourneyByLocationsFromLocation(
       id,
       locationIds,
-      locationToStartFromId,
+      startingLocationId,
     );
 
     res.send({ journey: suggestedJourney });

@@ -136,10 +136,10 @@ async function suggestJourneyByLocations(
 async function suggestJourneyByLocationsFromLocation(
   userId,
   locationIds,
-  placeToStartFromId,
+  startingLocationId,
 ) {
   let locations = await placeService.findByIds(locationIds);
-  locations = rearrangeToStartFromPlace(locations, placeToStartFromId);
+  locations = rearrangeToStartFromPlace(locations, startingLocationId);
 
   const sortedLocations = await sortLocationsByDistance(locations);
   const locationDTOs = sortedLocations.map(toSuggestedLocationDTO);
@@ -190,6 +190,7 @@ module.exports = {
   toSuggestedLocationDTO,
   suggestJourneyByLocations,
   suggestJourneyByLocationsFromLocation,
+  sortLocationsByDistance,
 
   suggestLocationsPaginated,
   DEFAULT_LOCATIONS_PER_PAGE,
