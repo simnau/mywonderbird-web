@@ -13,6 +13,7 @@ const favoriteJourneyService = require('../favorite-journey/service');
 const { deleteFolder } = require('../../util/s3');
 const { findCoordinateBoundingBox } = require('../../util/geo');
 const { unique } = require('../../util/array');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
 const gemService = require('../gem/service');
@@ -456,7 +457,13 @@ function journeyToFeedJourneyDTO(journey) {
         gem.gemCaptures.length &&
         gem.gemCaptures[0].url
       ) {
-        images.push(gem.gemCaptures[0].url);
+        const gemCapture = gemCaptures[0];
+
+        images.push(
+          gemCapture.imagePath
+            ? imagePathToImageUrl(gemCapture.imagePath)
+            : gemCapture.url,
+        );
       }
 
       coordinates.push({
@@ -602,7 +609,11 @@ function journeyToFeedJourneyDTOV2(journey) {
 
   for (const gem of gems) {
     for (const gemCapture of gem.gemCaptures) {
-      images.push(gemCapture.url);
+      images.push(
+        gemCapture.imagePath
+          ? imagePathToImageUrl(gemCapture.imagePath)
+          : gemCapture.url,
+      );
     }
 
     coordinates.push({
@@ -633,7 +644,15 @@ function journeyToJourneyDTOV2(journey) {
   const locations = gems.map(gem => {
     const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
 
-    const imageUrl = gem.gemCaptures.length ? gem.gemCaptures[0].url : null;
+    let imageUrl = null;
+
+    if (gem.gemCaptures.length) {
+      const [gemCapture] = gem.gemCaptures;
+
+      imageUrl = gemCapture.imagePath
+        ? imagePathToImageUrl(gemCapture.imagePath)
+        : gemCapture.url;
+    }
 
     if (!journeyImageUrl && imageUrl) {
       journeyImageUrl = imageUrl;

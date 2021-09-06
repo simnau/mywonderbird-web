@@ -88,13 +88,17 @@ placeRouter.post(
 
     const createdPlace = await service.createFull(place);
     if (files) {
-      const { images } = await uploadFile(
+      const { parsedImages } = await uploadFile(
         files,
         getPlaceImagesDirectory(createdPlace.id),
       );
       await placeImageService.createForPlace(
         createdPlace.id,
-        images.map(image => ({ url: image, title: body.title, userId })),
+        parsedImages.map(image => ({
+          imagePath: image.pathname,
+          title: body.title,
+          userId,
+        })),
       );
     }
 
@@ -149,10 +153,17 @@ placeRouter.put(
 
     const updatedPlace = await service.update(id, place);
     if (files) {
-      const { images } = await uploadFile(files, getPlaceImagesDirectory(id));
+      const { parsedImages } = await uploadFile(
+        files,
+        getPlaceImagesDirectory(id),
+      );
       await placeImageService.createForPlace(
         id,
-        images.map(image => ({ url: image, title: body.title, userId })),
+        parsedImages.map(image => ({
+          imagePath: image.pathname,
+          title: body.title,
+          userId,
+        })),
       );
     }
 

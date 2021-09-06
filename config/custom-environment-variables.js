@@ -11,6 +11,7 @@ module.exports = {
       maxSize: 'MEDIA_FILE_UPLOAD_MAX_SIZE',
     },
     uploader: 'MEDIA_UPLOADER',
+    hostname: 'MEDIA_HOSTNAME',
   },
   aws: {
     accessKey: 'AWS_ACCESS_KEY',

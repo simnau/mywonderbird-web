@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 
 const { Tag } = require('../../orm/models/tag');
 const { getTagImagePath, getTagImagesDirectory } = require('../../util/file');
-const { uploadFile } = require('../../util/file-upload');
+const { uploadFile, imagePathToImageUrl } = require('../../util/file-upload');
 const { deleteFile } = require('../../util/s3');
 
 async function findAll() {
@@ -35,11 +35,11 @@ async function findById(id) {
 
 async function create(tag, { images }) {
   if (images) {
-    const imageUrl = await uploadImage(images);
+    const image = await uploadImage(images);
 
     return Tag.create({
       ...tag,
-      imageUrl,
+      imagePath: image.pathname,
     });
   }
 
@@ -56,21 +56,26 @@ async function update(id, tag, { images }) {
     throw error;
   }
 
-  if (existingTag.imageUrl && tag.imageUrl !== existingTag.imageUrl) {
-    const imageFilename = existingTag.imageUrl.substring(
-      existingTag.imageUrl.lastIndexOf('/') + 1,
-    );
-    const s3Filename = getTagImagePath(imageFilename);
+  if (
+    images &&
+    Object.keys(images).length &&
+    (existingTag.imageUrl || existingTag.imagePath)
+  ) {
+    const imageFilename = existingTag.imagePath
+      ? existingTag.imagePath
+      : existingTag.imageUrl.substring(
+          existingTag.imageUrl.lastIndexOf('/') + 1,
+        );
 
-    await deleteFile(s3Filename);
+    await deleteFile(imageFilename);
   }
 
   if (images) {
-    const imageUrl = await uploadImage(images);
+    const image = await uploadImage(images);
 
     return existingTag.update({
       ...tag,
-      imageUrl,
+      imagePath: image.pathname,
     });
   }
 
@@ -84,13 +89,14 @@ async function deleteById(id) {
     return;
   }
 
-  if (existingTag.imageUrl) {
-    const imageFilename = existingTag.imageUrl.substring(
-      existingTag.imageUrl.lastIndexOf('/') + 1,
-    );
-    const s3Filename = getTagImagePath(imageFilename);
+  if (existingTag.imageUrl || existingTag.imagePath) {
+    const imageFilename = existingTag.imagePath
+      ? existingTag.imagePath
+      : existingTag.imageUrl.substring(
+          existingTag.imageUrl.lastIndexOf('/') + 1,
+        );
 
-    await deleteFile(s3Filename);
+    await deleteFile(imageFilename);
   }
 
   return Tag.destroy({
@@ -109,10 +115,21 @@ async function uploadImage(images) {
     .filter((_, index) => index == 0)
     .reduce((result, [key, value]) => ({ ...result, [key]: value }), {});
   const {
-    images: [tagImage],
+    parsedImages: [tagImage],
   } = await uploadFile(filesObject, getTagImagesDirectory());
 
   return tagImage;
+}
+
+function toDTO(tag) {
+  const rawTag = tag.toJSON ? tag.toJSON() : tag;
+
+  return {
+    ...rawTag,
+    imageUrl: rawTag.imagePath
+      ? imagePathToImageUrl(rawTag.imagePath)
+      : rawTag.imageUrl,
+  };
 }
 
 module.exports = {
@@ -123,4 +140,5 @@ module.exports = {
   create,
   update,
   deleteById,
+  toDTO,
 };

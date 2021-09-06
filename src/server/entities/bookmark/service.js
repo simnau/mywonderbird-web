@@ -7,6 +7,7 @@ const {
 } = require('../../orm/models/bookmark');
 const gemCaptureService = require('../gem-capture/service');
 const gemService = require('../gem/service');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -40,7 +41,9 @@ async function findGemCaptureBookmarks(
         gemCaptureId: bookmark.entityId,
         title: gemCapture.title,
         country,
-        imageUrl: gemCapture.url,
+        imageUrl: gemCapture.imagePath
+          ? imagePathToImageUrl(gemCapture.imagePath)
+          : gemCapture.url,
         location: {
           lat: gemCapture.gem.lat,
           lng: gemCapture.gem.lng,

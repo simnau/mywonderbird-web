@@ -552,6 +552,7 @@ async function toDTOs(places) {
     return {
       ...(place.toJSON ? place.toJSON() : place),
       country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
+      placeImages: place.placeImages.map(placeImageService.toDTO),
       placeTags: place.placeTags.map(placeTag => {
         return {
           ...(placeTag.toJSON ? placeTag.toJSON() : placeTag),
@@ -570,6 +571,7 @@ async function toDTO(place) {
   return {
     ...(place.toJSON ? place.toJSON() : place),
     country: geoService.getLabelBy3LetterCountryCode(place.countryCode),
+    placeImages: place.placeImages.map(placeImageService.toDTO),
     placeTags: place.placeTags.map(placeTag => {
       return {
         ...(placeTag.toJSON ? placeTag.toJSON() : placeTag),

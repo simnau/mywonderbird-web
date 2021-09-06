@@ -14,7 +14,11 @@ const FIELDS = {
   },
   url: {
     type: Sequelize.TEXT,
-    allowNull: false,
+    allowNull: true,
+  },
+  imagePath: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
   userId: {
     type: Sequelize.STRING,

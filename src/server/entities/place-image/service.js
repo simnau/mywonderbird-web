@@ -1,13 +1,14 @@
 const { Op } = require('sequelize');
 
-const { getPlaceImagePath } = require('../../util/file');
 const { PlaceImage } = require('../../orm/models/place-image');
 const { deleteFile } = require('../../util/s3');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 function fromGemCapture(gemCapture, userId, placeId = null) {
   return {
     title: gemCapture.title,
     url: gemCapture.url,
+    imagePath: gemCapture.imagePath,
     userId,
     placeId,
     gemCaptureId: gemCapture.id,
@@ -23,16 +24,22 @@ async function createForPlace(placeId, images) {
   );
 }
 
-async function updateAll(placeId, updateImages, existingImages, { transaction }) {
+async function updateAll(
+  placeId,
+  updateImages,
+  existingImages,
+  { transaction },
+) {
   const placesToDelete = existingImages.filter(existingImage =>
     updateImages.every(updateImage => updateImage.id !== existingImage.id),
   );
 
   for (const placeToDelete of placesToDelete) {
-    const filename = placeToDelete.url.substring(placeToDelete.url.lastIndexOf('/') + 1);
-    const s3Filename = getPlaceImagePath(placeId, filename);
+    const filename = placeToDelete.imagePath
+      ? placeToDelete.imagePath
+      : placeToDelete.url.substring(placeToDelete.url.lastIndexOf('/') + 1);
 
-    await deleteFile(s3Filename);
+    await deleteFile(filename);
   }
 
   await PlaceImage.destroy({
@@ -51,9 +58,21 @@ function bulkCreate(placeImages, transaction = null) {
   });
 }
 
+function toDTO(placeImage) {
+  const rawPlaceImage = placeImage.toJSON ? placeImage.toJSON() : placeImage;
+
+  return {
+    ...rawPlaceImage,
+    url: rawPlaceImage.imagePath
+      ? imagePathToImageUrl(rawPlaceImage.imagePath)
+      : rawPlaceImage.url,
+  };
+}
+
 module.exports = {
   bulkCreate,
   fromGemCapture,
   createForPlace,
   updateAll,
+  toDTO,
 };

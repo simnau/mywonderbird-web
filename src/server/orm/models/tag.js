@@ -18,7 +18,11 @@ const FIELDS = {
   },
   imageUrl: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
+  },
+  imagePath: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
 };
 

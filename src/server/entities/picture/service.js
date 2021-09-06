@@ -1,6 +1,6 @@
 const sequelize = require('../../setup/sequelize');
 const { unique, indexBy } = require('../../util/array');
-const { uploadFile } = require('../../util/file-upload');
+const { uploadFile, imagePathToImageUrl } = require('../../util/file-upload');
 const gemService = require('../gem/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
@@ -10,7 +10,7 @@ const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
 
 async function sharePicture(
-  { title, imageUrl, location, creationDate },
+  { title, imagePath, location, creationDate },
   journeyId,
   userId,
   { transaction } = {},
@@ -31,7 +31,7 @@ async function sharePicture(
     gemCaptures: [
       {
         title,
-        url: imageUrl,
+        imagePath,
         sequenceNumber: 0,
       },
     ],
@@ -69,12 +69,14 @@ async function sharePictureWithJourney({
   }
 
   if (journeyId) {
-    const { images } = await uploadFiles(files, journeyId);
+    const {
+      parsedImages: [uploadedImage],
+    } = await uploadFiles(files, journeyId);
 
     return sharePicture(
       {
         ...picture,
-        imageUrl: images[0],
+        imagePath: uploadedImage.pathname,
       },
       journeyId,
       userId,
@@ -96,11 +98,13 @@ async function sharePictureWithJourney({
         },
       );
 
-      const { images } = await uploadFiles(files, savedJourney.id);
+      const {
+        parsedImages: [uploadedImage],
+      } = await uploadFiles(files, savedJourney.id);
       await sharePicture(
         {
           ...picture,
-          imageUrl: images[0],
+          imagePath: uploadedImage.pathname,
         },
         savedJourney.id,
         userId,
@@ -116,11 +120,7 @@ async function sharePictureWithJourney({
 }
 
 async function uploadFiles(files, folder) {
-  const { images } = await uploadFile(files, folder);
-
-  return {
-    images,
-  };
+  return uploadFile(files, folder);
 }
 
 async function findFeedItems(lastDatetime, limit, direction) {
@@ -145,7 +145,9 @@ async function augmentFeed(gemCaptures, userId) {
   const augmented = gemCaptures.map(gemCapture => {
     const rawGemCapture = gemCapture.toJSON();
     const rawUser = groupedProfiles[gemCapture.gem.journey.userId]
-      ? groupedProfiles[gemCapture.gem.journey.userId].toJSON()
+      ? groupedProfiles[gemCapture.gem.journey.userId].toJSON
+        ? groupedProfiles[gemCapture.gem.journey.userId].toJSON()
+        : groupedProfiles[gemCapture.gem.journey.userId]
       : null;
 
     return {
@@ -216,7 +218,9 @@ async function toFeedDto(feedItem) {
   return {
     id: feedItem.id,
     journeyId: feedItem.gem ? feedItem.gem.journeyId : null,
-    imageUrl: feedItem.url,
+    imageUrl: feedItem.imagePath
+      ? imagePathToImageUrl(feedItem.imagePath)
+      : feedItem.url,
     title: feedItem.gem ? feedItem.gem.title : feedItem.title,
     country,
     updatedAt: feedItem.updatedAt,

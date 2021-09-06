@@ -6,6 +6,7 @@ const {
 const { BookmarkGroup } = require('../../orm/models/bookmark-group');
 const bookmarkService = require('../bookmark/service');
 const gemCaptureService = require('../gem-capture/service');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 const GEM_CAPTURE_INCLUDE_MODELS = [
   {
@@ -55,7 +56,9 @@ async function findGemCaptureBookmarkGroups(userId) {
         const gemCapture = await gemCaptureService.findById(bookmark.entityId);
 
         if (gemCapture) {
-          imageUrl = gemCapture.url;
+          imageUrl = gemCapture.imagePath
+            ? imagePathToImageUrl(gemCapture.imagePath)
+            : gemCapture.url;
         }
       }
 

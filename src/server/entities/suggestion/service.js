@@ -9,6 +9,7 @@ const {
   sortLocationsByDistanceToPoint,
   rearrangeToStartFromPlace,
 } = require('../../util/geo');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 const DEFAULT_LOCATIONS_PER_PAGE = 10;
 
@@ -106,7 +107,9 @@ function toSuggestedLocationImageDTO(locationImage) {
   return {
     id: locationImage.id,
     name: locationImage.title,
-    url: locationImage.url,
+    url: locationImage.imagePath
+      ? imagePathToImageUrl(locationImage.imagePath)
+      : locationImage.url,
   };
 }
 

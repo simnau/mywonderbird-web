@@ -12,7 +12,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const tags = await service.findAll();
 
-    res.send({ tags });
+    res.send({ tags: tags.map(service.toDTO) });
   }),
 );
 
@@ -26,7 +26,7 @@ router.get(
 
     const tag = await service.findById(id);
 
-    res.send({ tag });
+    res.send({ tag: service.toDTO(tag) });
   }),
 );
 
@@ -38,7 +38,7 @@ router.post(
 
     const createdTag = await service.create(body, { images: files });
 
-    res.send({ tag: createdTag });
+    res.send({ tag: service.toDTO(createdTag) });
   }),
 );
 
@@ -53,7 +53,7 @@ router.put(
     } = req;
     const updatedTag = await service.update(id, body, { images: files });
 
-    res.send({ tag: updatedTag });
+    res.send({ tag: service.toDTO(updatedTag) });
   }),
 );
 

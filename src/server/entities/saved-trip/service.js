@@ -9,6 +9,7 @@ const suggestionService = require('../suggestion/service');
 const { indexBy, flatMap } = require('../../util/array');
 const sequelize = require('../../setup/sequelize');
 const { rearrangeToStartFromPlace } = require('../../util/geo');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 const INCLUDE_MODELS = [
   {
@@ -185,7 +186,11 @@ async function toTripLocationDTOs(savedTripLocations) {
 
   return savedTripLocations.map(savedTripLocation => {
     const place = placeMap[savedTripLocation.placeId];
-    const images = place.placeImages.map(placeImage => placeImage.url);
+    const images = place.placeImages.map(placeImage =>
+      placeImage.imagePath
+        ? imagePathToImageUrl(placeImage.imagePath)
+        : placeImage.url,
+    );
 
     return {
       id: savedTripLocation.id,

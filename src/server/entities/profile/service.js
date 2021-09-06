@@ -2,30 +2,40 @@ const { Op } = require('sequelize');
 
 const { AVATAR_FOLDER } = require('../../constants/s3');
 const { userAvatarUrl, deleteFile } = require('../../util/s3');
-const { uploadFile } = require('../../util/file-upload');
+const { uploadFile, imagePathToImageUrl } = require('../../util/file-upload');
 const { Profile } = require('../../orm/models/profile');
 
 async function findProfileById(id) {
-  return Profile.findByPk(id);
+  const profile = await Profile.findByPk(id);
+
+  return toDTO(profile);
 }
 
 async function findProfileByProviderId(providerId) {
-  return Profile.findOne({
+  const profile = await Profile.findOne({
     where: {
       providerId,
     },
   });
+
+  return toDTO(profile);
 }
 
 async function createProfile(providerId, profileData = {}) {
-  return Profile.create({ ...profileData, providerId });
+  const createdProfile = await Profile.create({ ...profileData, providerId });
+
+  return toDTO(createdProfile);
 }
 
 async function createOrUpdateProfileByProviderId(providerId, profileData) {
   const existingProfile = await findProfileByProviderId(providerId);
 
   if (existingProfile) {
-    await existingProfile.update(profileData);
+    await Profile.update(profileData, {
+      where: {
+        id: existingProfile.id,
+      },
+    });
     return findProfileByProviderId(providerId);
   } else {
     return createProfile(providerId, profileData);
@@ -35,24 +45,22 @@ async function createOrUpdateProfileByProviderId(providerId, profileData) {
 async function deletePreviousAvatar(userId) {
   const userProfile = await findProfileByProviderId(userId);
 
-  if (!userProfile.avatarUrl) {
+  if (!userProfile.avatarUrl && !userProfile.avatarPath) {
     return;
   }
 
-  const imageName = userProfile.avatarUrl.substring(
-    userProfile.avatarUrl.lastIndexOf('/') + 1,
-  );
+  const imageName = userProfile.avatarPath
+    ? userProfile.avatarPath
+    : userProfile.avatarUrl.substring(
+        userProfile.avatarUrl.lastIndexOf('/') + 1,
+      );
   const avatarFile = userAvatarUrl(AVATAR_FOLDER, userId, imageName);
 
   await deleteFile(avatarFile);
 }
 
 async function uploadAvatar(files, folder) {
-  const { images } = await uploadFile(files, folder);
-
-  return {
-    images,
-  };
+  return uploadFile(files, folder);
 }
 
 async function findOrCreateProfileByProviderId(providerId) {
@@ -74,30 +82,55 @@ async function findOrCreateProfilesByProviderIds(providerIds) {
 }
 
 async function findProfilesByProviderIds(providerIds) {
-  return Profile.findAll({
+  const profiles = await Profile.findAll({
     where: {
       providerId: {
         [Op.in]: providerIds,
       },
     },
   });
+
+  return profiles.map(toDTO);
 }
 
 async function updateRole({ id, role }) {
   const existingProfile = await findProfileByProviderId(id);
 
-  await existingProfile.update({
-    role,
-  });
+  await Profile.update(
+    {
+      role,
+    },
+    {
+      where: {
+        id: existingProfile.id,
+      },
+    },
+  );
   return findProfileByProviderId(id);
 }
 
 async function deleteProfile({ id }, { transaction } = {}) {
-  return Profile.destroy({
-    where: {
-      providerId: id,
+  return Profile.destroy(
+    {
+      where: {
+        providerId: id,
+      },
     },
-  }, { transaction });
+    { transaction },
+  );
+}
+
+function toDTO(profile) {
+  if (!profile) {
+    return profile;
+  }
+
+  return {
+    ...(profile.toJSON ? profile.toJSON() : profile),
+    avatarUrl: profile.avatarPath
+      ? imagePathToImageUrl(profile.avatarPath)
+      : profile.avatarUrl,
+  };
 }
 
 module.exports = {
@@ -112,4 +145,5 @@ module.exports = {
   deletePreviousAvatar,
   updateRole,
   deleteProfile,
+  toDTO,
 };

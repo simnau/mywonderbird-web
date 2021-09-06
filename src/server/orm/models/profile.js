@@ -18,7 +18,11 @@ const FIELDS = {
     allowNull: true,
   },
   avatarUrl: {
-    type: Sequelize.STRING,
+    type: Sequelize.TEXT,
+    allowNull: true,
+  },
+  avatarPath: {
+    type: Sequelize.TEXT,
     allowNull: true,
   },
   acceptedNewsletter: {

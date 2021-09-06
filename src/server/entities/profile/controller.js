@@ -69,11 +69,11 @@ router.post(
 
     if (files && Object.entries(files).length) {
       const {
-        images: [avatarUrl],
+        parsedImages: [avatarImage],
       } = await service.uploadAvatar(files, `${AVATAR_FOLDER}/${id}`);
       await service.deletePreviousAvatar(id);
 
-      profileUpdate.avatarUrl = avatarUrl;
+      profileUpdate.avatarPath = avatarImage.pathname;
     }
 
     const updatedProfile = await service.createOrUpdateProfileByProviderId(

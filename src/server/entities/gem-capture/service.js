@@ -23,11 +23,7 @@ const INCLUDE_MODELS = [
 ];
 
 async function uploadFiles(files, folder) {
-  const { images } = await uploadFile(files, folder);
-
-  return {
-    images,
-  };
+  return uploadFile(files, folder);
 }
 
 async function deleteByIds(ids, transaction) {
