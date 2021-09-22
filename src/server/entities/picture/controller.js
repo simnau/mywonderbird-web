@@ -60,6 +60,49 @@ pictureRouter.post(
 );
 
 pictureRouter.post(
+  '/single',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: {
+        title,
+        description,
+        creationDate,
+
+        locationTitle,
+        locationCountry,
+        locationCountryCode,
+        locationLat,
+        locationLng,
+      },
+      files,
+      user: { id },
+    } = req;
+
+    const picture = {
+      title,
+      description,
+      creationDate,
+      location: {
+        title: locationTitle || title,
+        country: locationCountry,
+        countryCode: locationCountryCode,
+        lat: locationLat,
+        lng: locationLng,
+      },
+    };
+
+    await service.shareSinglePicture({
+      picture,
+      userId: id,
+      files,
+    });
+
+    res.send({ success: true });
+  }),
+);
+
+pictureRouter.post(
   '/:journeyId',
   requireAuth,
   asyncHandler(async (req, res) => {
@@ -122,6 +165,30 @@ pictureRouter.get(
     } = req;
 
     const feedItems = await service.findFeedItems(
+      lastDatetime,
+      limit,
+      direction,
+    );
+    const feedDto = await service.augmentFeed(feedItems, id);
+
+    res.send({ feedItems: feedDto });
+  }),
+);
+
+pictureRouter.get(
+  '/v2/feed',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: {
+        lastDatetime,
+        limit = DEFAULT_LIMIT,
+        direction = OLDER_DIRECTION,
+      },
+      user: { id },
+    } = req;
+
+    const feedItems = await service.findFeedItemsV2(
       lastDatetime,
       limit,
       direction,

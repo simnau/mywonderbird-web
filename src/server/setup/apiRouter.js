@@ -2,6 +2,7 @@ const { Router } = require('express');
 
 const journey = require('../entities/journey/controller');
 const favoriteJourney = require('../entities/favorite-journey/controller');
+const gems = require('../entities/gem/controller');
 const gemCaptures = require('../entities/gem-capture/controller');
 const user = require('../entities/user/controller');
 const profile = require('../entities/profile/controller');
@@ -40,6 +41,7 @@ apiRouter.use('/places', place);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);
+apiRouter.use('/gems', gems);
 apiRouter.use('/gem-captures', gemCaptures);
 apiRouter.use('/users', user);
 apiRouter.use('/profile', profile);

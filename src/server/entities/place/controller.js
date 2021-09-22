@@ -71,6 +71,23 @@ placeRouter.get(
   }),
 );
 
+placeRouter.get(
+  '/details/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { id },
+    } = req;
+
+    const place = await service.findById(id);
+    const placeDetailsDTO = await service.toDetailsDTO(place);
+
+    res.send({
+      place: placeDetailsDTO,
+    });
+  }),
+);
+
 placeRouter.post(
   '/',
   requireRole(ADMIN_ROLE),

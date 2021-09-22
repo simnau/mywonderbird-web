@@ -7,6 +7,7 @@ const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
 const { getGeohash } = require('../../util/geo');
+const { imagePathToImageUrl } = require('../../util/file-upload');
 
 const INCLUDE_MODELS = [
   {
@@ -137,10 +138,43 @@ async function getGemCountry(gem) {
   return geoService.getLabelBy3LetterCountryCode(place.countryCode);
 }
 
+async function findById(id) {
+  return Gem.findByPk(id, {
+    include: INCLUDE_MODELS,
+  });
+}
+
+function toDTO(gem) {
+  const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
+
+  const images = gem.gemCaptures.map(gemCapture => {
+    return gemCapture.imagePath
+      ? imagePathToImageUrl(gemCapture.imagePath)
+      : gemCapture.url;
+  });
+
+  const imageUrl = images.length ? images[0] : null;
+
+  return {
+    id: gem.id,
+    name: gem.title,
+    countryCode: gem.countryCode,
+    country,
+    imageUrl,
+    images,
+    location: {
+      lat: gem.lat,
+      lng: gem.lng,
+    },
+  };
+}
+
 module.exports = {
   updateDayGems,
   create,
   update,
   findLastForJourney,
   getGemCountry,
+  findById,
+  toDTO,
 };

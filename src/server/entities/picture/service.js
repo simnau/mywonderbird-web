@@ -9,6 +9,8 @@ const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
 
+const SINGLE_SHARE_FOLDER = 'standalone';
+
 async function sharePicture(
   { title, imagePath, location, creationDate },
   journeyId,
@@ -119,12 +121,67 @@ async function sharePictureWithJourney({
   }
 }
 
+async function shareSinglePicture({
+  picture: { title, location, creationDate },
+  userId,
+  files,
+}) {
+  const {
+    parsedImages: [uploadedImage],
+  } = await uploadFiles(files, SINGLE_SHARE_FOLDER);
+
+  const gem = {
+    title,
+    countryCode: location.countryCode,
+    lat: location.lat,
+    lng: location.lng,
+    sequenceNumber: 0,
+    createdAt: creationDate,
+    updatedAt: creationDate,
+    userId,
+    gemCaptures: [
+      {
+        title,
+        imagePath: uploadedImage.pathname,
+        sequenceNumber: 0,
+      },
+    ],
+  };
+
+  const tx = await sequelize.transaction();
+
+  try {
+    const createdGem = await gemService.create(gem, tx);
+    await placeService.createFromGem(createdGem.toJSON(), location, userId, tx);
+
+    await tx.commit();
+
+    return createdGem;
+  } catch (e) {
+    if (!transaction) {
+      await tx.rollback();
+    }
+
+    throw e;
+  }
+}
+
 async function uploadFiles(files, folder) {
   return uploadFile(files, folder);
 }
 
 async function findFeedItems(lastDatetime, limit, direction) {
   const gemCaptures = await gemCaptureService.findFeedItems(
+    lastDatetime,
+    limit,
+    direction,
+  );
+
+  return gemCaptures;
+}
+
+async function findFeedItemsV2(lastDatetime, limit, direction) {
+  const gemCaptures = await gemCaptureService.findFeedItemsV2(
     lastDatetime,
     limit,
     direction,
@@ -144,10 +201,14 @@ async function augmentFeed(gemCaptures, userId) {
 
   const augmented = gemCaptures.map(gemCapture => {
     const rawGemCapture = gemCapture.toJSON();
-    const rawUser = groupedProfiles[gemCapture.gem.journey.userId]
-      ? groupedProfiles[gemCapture.gem.journey.userId].toJSON
-        ? groupedProfiles[gemCapture.gem.journey.userId].toJSON()
-        : groupedProfiles[gemCapture.gem.journey.userId]
+    const gemUserId = gemCapture.gem.journeyId
+      ? gemCapture.gem.journey.userId
+      : gemCapture.gem.userId;
+
+    const rawUser = groupedProfiles[gemUserId]
+      ? groupedProfiles[gemUserId].toJSON
+        ? groupedProfiles[gemUserId].toJSON()
+        : groupedProfiles[gemUserId]
       : null;
 
     return {
@@ -155,7 +216,7 @@ async function augmentFeed(gemCaptures, userId) {
       likeCount: likeCounts[gemCapture.id],
       isLiked: groupedUserLikes[gemCapture.id] || false,
       isBookmarked: groupedUserBookmarks[gemCapture.id] || false,
-      userId: gemCapture.gem.journey.userId,
+      userId: gemUserId,
       userAvatarUrl: rawUser && rawUser.avatarUrl,
     };
   });
@@ -203,7 +264,9 @@ async function getBookmarkStats(gemCaptureIds, userId) {
 async function getUserProfiles(gemCaptures) {
   const userIds = unique(
     gemCaptures.map(gemCapture => {
-      return gemCapture.gem.journey.userId;
+      return gemCapture.gem.journeyId
+        ? gemCapture.gem.journey.userId
+        : gemCapture.gem.userId;
     }),
   );
 
@@ -229,13 +292,16 @@ async function toFeedDto(feedItem) {
     isBookmarked: feedItem.isBookmarked,
     userId: feedItem.userId,
     userAvatarUrl: feedItem.userAvatarUrl,
+    locationId: feedItem.gemId,
   };
 }
 
 module.exports = {
   sharePicture,
   sharePictureWithJourney,
+  shareSinglePicture,
   uploadFiles,
   findFeedItems,
+  findFeedItemsV2,
   augmentFeed,
 };

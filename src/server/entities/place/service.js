@@ -1,7 +1,10 @@
 const { Op } = require('sequelize');
 const axios = require('axios');
 
-const { uploadFileArray } = require('../../util/file-upload');
+const {
+  uploadFileArray,
+  imagePathToImageUrl,
+} = require('../../util/file-upload');
 const sequelize = require('../../setup/sequelize');
 const { getGeohash } = require('../../util/geo');
 const { Place } = require('../../orm/models/place');
@@ -581,6 +584,31 @@ async function toDTO(place) {
   };
 }
 
+async function toDetailsDTO(place) {
+  const country = geoService.getLabelBy3LetterCountryCode(place.countryCode);
+
+  const images = place.placeImages.map(placeImage => {
+    return placeImage.imagePath
+      ? imagePathToImageUrl(placeImage.imagePath)
+      : placeImage.url;
+  });
+
+  const imageUrl = images.length ? images[0] : null;
+
+  return {
+    id: place.id,
+    name: place.title,
+    countryCode: place.countryCode,
+    country,
+    imageUrl,
+    images,
+    location: {
+      lat: place.lat,
+      lng: place.lng,
+    },
+  };
+}
+
 function addPlaceFilters(where, { latMin, latMax, lngMin, lngMax } = {}) {
   if (latMin && latMax && lngMin && lngMax) {
     return {
@@ -620,6 +648,6 @@ module.exports = {
   update,
   toDTOs,
   toDTO,
-
+  toDetailsDTO,
   findPlacesPaginated,
 };

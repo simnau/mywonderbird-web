@@ -22,6 +22,33 @@ const INCLUDE_MODELS = [
   },
 ];
 
+const INCLUDE_MODELS_FEED = [
+  {
+    model: Gem,
+    where: {
+      journeyId: {
+        [Op.ne]: null,
+      },
+    },
+    include: [
+      {
+        model: Journey,
+      },
+    ],
+  },
+];
+
+const INCLUDE_MODELS_FEED_V2 = [
+  {
+    model: Gem,
+    include: [
+      {
+        model: Journey,
+      },
+    ],
+  },
+];
+
 async function uploadFiles(files, folder) {
   return uploadFile(files, folder);
 }
@@ -118,7 +145,43 @@ async function findFeedItems(lastDatetime, limit, direction = OLDER_DIRECTION) {
     where,
     limit,
     order,
-    include: INCLUDE_MODELS,
+    include: INCLUDE_MODELS_FEED,
+  });
+}
+
+async function findFeedItemsV2(
+  lastDatetime,
+  limit,
+  direction = OLDER_DIRECTION,
+) {
+  let where = {};
+  let order;
+
+  if (direction === NEWER_DIRECTION) {
+    if (lastDatetime) {
+      where = {
+        updatedAt: {
+          [Op.gt]: lastDatetime,
+        },
+      };
+    }
+    order = [['updatedAt', 'ASC']];
+  } else {
+    if (lastDatetime) {
+      where = {
+        updatedAt: {
+          [Op.lt]: lastDatetime,
+        },
+      };
+    }
+    order = [['updatedAt', 'DESC']];
+  }
+
+  return GemCapture.findAll({
+    where,
+    limit,
+    order,
+    include: INCLUDE_MODELS_FEED_V2,
   });
 }
 
@@ -141,6 +204,7 @@ module.exports = {
   uploadFiles,
   updateGemCaptures,
   findFeedItems,
+  findFeedItemsV2,
   findById,
   findByIds,
 };

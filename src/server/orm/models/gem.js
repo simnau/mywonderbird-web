@@ -38,6 +38,10 @@ const FIELDS = {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
+  userId: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   dayId: {
     type: Sequelize.UUID,
     allowNull: true,
