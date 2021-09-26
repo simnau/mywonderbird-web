@@ -8,6 +8,8 @@ const placeService = require('../place/service');
 const geoService = require('../geo/service');
 const { getGeohash } = require('../../util/geo');
 const { imagePathToImageUrl } = require('../../util/file-upload');
+const { deleteFile } = require('../../util/s3');
+const sequelize = require('../../setup/sequelize');
 
 const INCLUDE_MODELS = [
   {
@@ -144,6 +146,37 @@ async function findById(id) {
   });
 }
 
+async function findStandaloneByUserId(userId) {
+  return Gem.findAll({
+    where: {
+      userId,
+      journeyId: null,
+    },
+    order: [['updatedAt', 'DESC']],
+    include: INCLUDE_MODELS,
+  });
+}
+
+async function del(gem) {
+  return sequelize.transaction(async transaction => {
+    return Promise.all([
+      Gem.destroy({
+        where: { id: gem.id },
+        transaction,
+      }),
+      deleteImages(gem),
+    ]);
+  });
+}
+
+async function deleteImages(gem) {
+  return Promise.all(
+    gem.gemCaptures.map(async gemCapture => {
+      return deleteFile(gemCapture.imagePath);
+    }),
+  );
+}
+
 function toDTO(gem) {
   const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
 
@@ -176,5 +209,7 @@ module.exports = {
   findLastForJourney,
   getGemCountry,
   findById,
+  findStandaloneByUserId,
+  delete: del,
   toDTO,
 };

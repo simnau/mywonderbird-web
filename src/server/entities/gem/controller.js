@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const asyncHandler = require('express-async-handler');
+const { ADMIN_ROLE } = require('../../constants/roles');
 
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
@@ -18,6 +19,51 @@ gemRouter.get(
     const gemDTO = service.toDTO(gem);
 
     res.send({ gem: gemDTO });
+  }),
+);
+
+gemRouter.get(
+  '/',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      user: { id },
+    } = req;
+
+    const gems = await service.findStandaloneByUserId(id);
+    const gemDTOs = gems.map(gem => service.toDTO(gem));
+
+    res.send({ gems: gemDTOs });
+  }),
+);
+
+gemRouter.delete(
+  '/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { id },
+      user: { id: userId, role },
+    } = req;
+
+    const gem = await service.findById(id);
+
+    if (!gem) {
+      return res.send({
+        message: `Gem with id ${id} deleted`,
+      });
+    } else if (role !== ADMIN_ROLE && gem.userId !== userId) {
+      const error = new Error('User is not authorized to do this action');
+      error.status = 403;
+
+      throw error;
+    }
+
+    await service.delete(gem);
+
+    return res.send({
+      message: `Gem with id ${id} deleted`,
+    });
   }),
 );
 

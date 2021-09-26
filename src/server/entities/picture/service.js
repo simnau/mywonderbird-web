@@ -8,8 +8,7 @@ const likeService = require('../like/service');
 const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
-
-const SINGLE_SHARE_FOLDER = 'standalone';
+const { SINGLE_SHARE_FOLDER } = require('../../constants/s3');
 
 async function sharePicture(
   { title, imagePath, location, creationDate },
