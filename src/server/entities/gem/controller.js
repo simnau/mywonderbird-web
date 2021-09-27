@@ -37,6 +37,21 @@ gemRouter.get(
   }),
 );
 
+gemRouter.get(
+  '/users/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      params: { id },
+    } = req;
+
+    const gems = await service.findStandaloneByUserId(id);
+    const gemDTOs = gems.map(gem => service.toDTO(gem));
+
+    res.send({ gems: gemDTOs });
+  }),
+);
+
 gemRouter.delete(
   '/:id',
   requireAuth,
