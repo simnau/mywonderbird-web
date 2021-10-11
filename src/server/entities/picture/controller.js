@@ -60,6 +60,55 @@ pictureRouter.post(
 );
 
 pictureRouter.post(
+  '/v2',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      body: {
+        pictureDatas: pictureDatasJson,
+
+        journeyId,
+        journeyTitle,
+      },
+      files,
+      user: { id },
+    } = req;
+
+    const pictureDatas = JSON.parse(pictureDatasJson).map(pictureData => ({
+      title: pictureData.title,
+      description: pictureData.description,
+      creationDate: pictureData.creationDate,
+      location: {
+        title: pictureData.locationTitle || pictureData.title,
+        country: pictureData.locationCountry,
+        countryCode: pictureData.locationCountryCode,
+        lat: pictureData.locationLat,
+        lng: pictureData.locationLng,
+      },
+      imageIds: pictureData.imageIds,
+    }));
+
+    if (journeyId || journeyTitle) {
+      await service.sharePicturesWithJourney({
+        pictureDatas,
+        journeyId,
+        journeyTitle,
+        userId: id,
+        files,
+      });
+    } else {
+      await service.shareSinglePictures({
+        pictureDatas,
+        userId: id,
+        files,
+      });
+    }
+
+    res.send({ success: true });
+  }),
+);
+
+pictureRouter.post(
   '/single',
   requireAuth,
   asyncHandler(async (req, res) => {

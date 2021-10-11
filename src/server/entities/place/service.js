@@ -15,7 +15,7 @@ const placeImageService = require('../place-image/service');
 const geoService = require('../geo/service');
 const tagService = require('../tag/service');
 const placeTagService = require('../place-tag/service');
-const { unique, flatMap, indexBy } = require('../../util/array');
+const { unique, flatMap, indexBy, groupBy } = require('../../util/array');
 const { getPlaceImagesDirectory } = require('../../util/file');
 const { Readable } = require('stream');
 const csv = require('csv-parser');
@@ -45,6 +45,22 @@ function findByGeohash(geohash, { includeDeleted = false } = {}) {
   }
 
   return Place.findOne({
+    where,
+  });
+}
+
+function findByGeohashes(geohashes, { includeDeleted = false } = {}) {
+  const where = {
+    geohash: {
+      [Op.in]: geohashes,
+    },
+  };
+
+  if (!includeDeleted) {
+    where.deletedAt = null;
+  }
+
+  return Place.findAll({
     where,
   });
 }
@@ -94,10 +110,69 @@ async function fromGem(gem, location, userId) {
   return place;
 }
 
+async function fromGems(gems, userId) {
+  let location;
+  let lat;
+  let lng;
+
+  for (const gem of gems) {
+    if (gem.location) {
+      location = gem.location;
+    }
+
+    if (gem.lat && gem.lng) {
+      lat = gem.lat;
+      lng = gem.lng;
+    }
+
+    if (location && lat && lng) {
+      break;
+    }
+  }
+
+  let { countryCode, title } = location;
+
+  if (!countryCode && (lat || lat == 0) && (lng || lng == 0)) {
+    const location = `${lat},${lng}`;
+    const herePlace = await geoService.locationToAddress(location);
+
+    if (herePlace) {
+      countryCode = herePlace.countryCode;
+    }
+  }
+
+  if (!countryCode) {
+    return null;
+  }
+
+  const place = {
+    title,
+    countryCode,
+    lat: lat,
+    lng: lng,
+    geohash: getGeohash(lat, lng),
+    placeImages: flatMap(gems, gem => {
+      return gem.gemCaptures.map(gemCapture =>
+        placeImageService.fromGemCapture(gemCapture, userId),
+      );
+    }),
+  };
+
+  return place;
+}
+
 async function create(place, transaction = null) {
   return Place.create(place, {
     include: INCLUDE_MODELS,
     transaction,
+  });
+}
+
+async function bulkCreate(places, transaction = null) {
+  return Place.bulkCreate(places, {
+    include: INCLUDE_MODELS,
+    transaction,
+    returning: true,
   });
 }
 
@@ -123,6 +198,70 @@ async function createFromGem(gem, location, userId, transaction = null) {
       await create(place, transaction);
     }
   }
+}
+
+async function createPlacesFromGems(
+  gemsWithoutPlaces,
+  userId,
+  transaction = null,
+) {
+  const places = [];
+
+  for (const { gems } of gemsWithoutPlaces) {
+    const place = await fromGems(gems, userId);
+
+    places.push(place);
+  }
+
+  return bulkCreate(places, transaction);
+}
+
+async function createImagesForExistingPlaces(
+  gemsWithPlaces,
+  userId,
+  transaction = null,
+) {
+  let placeImages = [];
+
+  for (const { gems, place } of gemsWithPlaces) {
+    const images = flatMap(gems, gem => {
+      return gem.gemCaptures.map(gemCapture =>
+        placeImageService.fromGemCapture(gemCapture, userId, place.id),
+      );
+    });
+
+    placeImages = [...placeImages, ...images];
+  }
+
+  return placeImageService.bulkCreate(placeImages, transaction);
+}
+
+async function createFromGems(gems, userId, transaction) {
+  if (!gems || !gems.length) {
+    return;
+  }
+
+  const gemsByGeohash = groupBy(gems, ({ lat, lng }) => getGeohash(lat, lng));
+  const existingPlaces = await findByGeohashes(Object.keys(gemsByGeohash));
+  const existingPlacesByGeohash = indexBy(
+    existingPlaces.map(existingPlace => existingPlace.toJSON()),
+    'geohash',
+  );
+
+  const gemsWithPlace = Object.entries(gemsByGeohash).map(([geohash, gems]) => {
+    const place = existingPlacesByGeohash[geohash];
+
+    return {
+      gems,
+      place,
+    };
+  });
+
+  const gemsWithPlaces = gemsWithPlace.filter(({ place }) => !!place);
+  const gemsWithoutPlaces = gemsWithPlace.filter(({ place }) => !place);
+
+  await createPlacesFromGems(gemsWithoutPlaces, userId, transaction);
+  await createImagesForExistingPlaces(gemsWithPlaces, userId, transaction);
 }
 
 async function findPlacesPaginated(
@@ -638,6 +777,7 @@ module.exports = {
   createFromCSV,
   createFromCSVData,
   createFromGem,
+  createFromGems,
   findByGeohash,
   findPlacesByQuestionnaire,
   findById,

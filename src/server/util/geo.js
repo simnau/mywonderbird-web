@@ -106,10 +106,19 @@ function rearrangeToStartFromPlace(locations, startingPlaceId) {
   ];
 }
 
+function toLatLngString(latLng) {
+  if (!latLng) {
+    return null;
+  }
+
+  return `${latLng.lat},${latLng.lng}`;
+}
+
 module.exports = {
   findCoordinateBoundingBox,
   getGeohash,
   findLocationOrder,
   sortLocationsByDistanceToPoint,
   rearrangeToStartFromPlace,
+  toLatLngString,
 };

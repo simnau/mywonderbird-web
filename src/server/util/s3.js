@@ -41,6 +41,19 @@ async function deleteFile(filePath) {
   await s3.deleteObject(deleteParams).promise();
 }
 
+async function deleteFiles(filePaths) {
+  const deleteParams = {
+    Bucket: bucketName,
+    Delete: {
+      Objects: filePaths.map(path => ({
+        Key: path,
+      })),
+    },
+  };
+
+  await s3.deleteObjects(deleteParams).promise();
+}
+
 function userAvatarUrl(avatarFolder, userId, filename) {
   return `${avatarFolder}/${userId}/${filename}`;
 }
@@ -48,5 +61,6 @@ function userAvatarUrl(avatarFolder, userId, filename) {
 module.exports = {
   deleteFolder,
   deleteFile,
+  deleteFiles,
   userAvatarUrl,
 };

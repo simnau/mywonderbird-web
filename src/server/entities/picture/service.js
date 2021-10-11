@@ -1,6 +1,10 @@
 const sequelize = require('../../setup/sequelize');
-const { unique, indexBy } = require('../../util/array');
-const { uploadFile, imagePathToImageUrl } = require('../../util/file-upload');
+const { flatMap, unique, indexBy } = require('../../util/array');
+const {
+  uploadFile,
+  uploadFilesMap,
+  imagePathToImageUrl,
+} = require('../../util/file-upload');
 const gemService = require('../gem/service');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
@@ -9,6 +13,8 @@ const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
 const { SINGLE_SHARE_FOLDER } = require('../../constants/s3');
+const service = require('../gem/service');
+const { deleteFiles, deleteFolder } = require('../../util/s3');
 
 async function sharePicture(
   { title, imagePath, location, creationDate },
@@ -120,6 +126,171 @@ async function sharePictureWithJourney({
   }
 }
 
+async function uploadAndExtendPictureDatas({ pictureDatas, files, folder }) {
+  const { parsedImages } = await uploadFilesMap(files, folder);
+
+  const pictures = pictureDatas.map(({ imageIds, ...pictureData }) => {
+    const imagePaths = imageIds
+      .map(imageId => {
+        const image = parsedImages[imageId];
+
+        if (!image || !image.pathname) {
+          return null;
+        }
+
+        return image.pathname;
+      })
+      .filter(image => !!image);
+
+    return {
+      ...pictureData,
+      imagePaths: imagePaths,
+    };
+  });
+
+  return pictures;
+}
+
+async function sharePictures({
+  pictures,
+  journeyId = null,
+  userId,
+  transaction,
+}) {
+  const lastGem = journeyId
+    ? await gemService.findLastForJourney(journeyId)
+    : null;
+
+  const gems = pictures.map(
+    ({ title, imagePaths, location, creationDate }, index) => ({
+      title,
+      countryCode: location.countryCode,
+      lat: location.lat,
+      lng: location.lng,
+      sequenceNumber: lastGem ? lastGem.sequenceNumber + index + 1 : index,
+      journeyId,
+      createdAt: creationDate,
+      updatedAt: creationDate,
+      userId,
+      gemCaptures: imagePaths.map((imagePath, index) => ({
+        title,
+        imagePath,
+        sequenceNumber: index,
+      })),
+    }),
+  );
+
+  const tx = transaction || (await sequelize.transaction());
+
+  try {
+    const createdGems = await service.bulkCreate(gems, tx);
+
+    const gemsWithLocations = createdGems.map((gem, index) => {
+      const location = pictures[index].location;
+
+      return {
+        ...gem.toJSON(),
+        location,
+      };
+    });
+
+    await placeService.createFromGems(gemsWithLocations, userId, tx);
+
+    if (!transaction) {
+      await tx.commit();
+    }
+
+    return createdGems;
+  } catch (e) {
+    if (!transaction) {
+      await tx.rollback();
+    }
+
+    throw e;
+  }
+}
+
+async function rollbackPictureUploads(pictureDatas) {
+  if (!pictureDatas || !pictureDatas.length) {
+    return;
+  }
+
+  const pictureUrls = unique(
+    flatMap(pictureDatas, pictureData => {
+      return pictureData.imagePaths;
+    }),
+  );
+
+  deleteFiles(pictureUrls);
+}
+
+async function sharePicturesWithJourney({
+  pictureDatas,
+  journeyId,
+  journeyTitle,
+  userId,
+  files,
+}) {
+  if (!files) {
+    throw new Error('No images provided when sharing');
+  }
+
+  let transaction;
+  let journey;
+  let pictures;
+
+  try {
+    if (!journeyId) {
+      transaction = await sequelize.transaction();
+      journey = await journeyService.create(
+        {
+          title: journeyTitle,
+          startDate: new Date(),
+          userId,
+          creatorId: userId,
+          draft: false,
+        },
+        {
+          transaction,
+        },
+      );
+    }
+
+    const localJourneyId = journeyId || journey.id;
+
+    pictures = await uploadAndExtendPictureDatas({
+      pictureDatas,
+      files,
+      folder: localJourneyId,
+    });
+
+    const result = await sharePictures({
+      pictures,
+      journeyId: localJourneyId,
+      userId,
+      transaction,
+    });
+
+    if (transaction) {
+      await transaction.commit();
+    }
+
+    return result;
+  } catch (e) {
+    if (transaction) {
+      await transaction.rollback();
+    }
+
+    if (journey) {
+      deleteFolder(journey.id);
+    } else {
+      rollbackPictureUploads(pictures);
+    }
+
+    throw e;
+  }
+}
+
 async function shareSinglePicture({
   picture: { title, location, creationDate },
   userId,
@@ -163,6 +334,23 @@ async function shareSinglePicture({
 
     throw e;
   }
+}
+
+async function shareSinglePictures({ pictureDatas, userId, files }) {
+  if (!files) {
+    throw new Error('No images provided when sharing');
+  }
+
+  const pictures = await uploadAndExtendPictureDatas({
+    pictureDatas,
+    files,
+    folder: SINGLE_SHARE_FOLDER,
+  });
+
+  return sharePictures({
+    pictures,
+    userId,
+  });
 }
 
 async function uploadFiles(files, folder) {
@@ -298,7 +486,9 @@ async function toFeedDto(feedItem) {
 module.exports = {
   sharePicture,
   sharePictureWithJourney,
+  sharePicturesWithJourney,
   shareSinglePicture,
+  shareSinglePictures,
   uploadFiles,
   findFeedItems,
   findFeedItemsV2,

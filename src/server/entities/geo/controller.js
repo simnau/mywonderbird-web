@@ -69,6 +69,17 @@ geoRouter.get(
   }),
 );
 
+geoRouter.post(
+  '/places/reverse-geocode',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { locations } = req.body;
+    const result = await service.multiReverseGeocode(locations);
+
+    res.send({ locations: result });
+  }),
+);
+
 geoRouter.get(
   '/places/country',
   asyncHandler(async (req, res) => {

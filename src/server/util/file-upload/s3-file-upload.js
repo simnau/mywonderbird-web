@@ -35,6 +35,33 @@ async function uploadFiles(files, folder, useOriginalFilename = false) {
   };
 }
 
+async function uploadFilesMap(files, folder, useOriginalFilename = false) {
+  const images = {};
+
+  for (const [key, file] of Object.entries(files)) {
+    const imageType = fileType(file.data);
+    const filename = useOriginalFilename
+      ? file.name
+      : `${uuidv4()}.${imageType.ext}`;
+    const fullFilename = `${folder}/${filename}`;
+
+    const params = {
+      Bucket: bucketName,
+      Key: fullFilename,
+      Body: file.data,
+      ContentType: imageType.mime,
+    };
+
+    const imageUploadData = await s3.upload(params).promise();
+
+    images[key] = imageUploadData.Location;
+  }
+
+  return {
+    images,
+  };
+}
+
 async function uploadFileArray(fileBuffers, folder) {
   const images = [];
 
@@ -63,4 +90,5 @@ async function uploadFileArray(fileBuffers, folder) {
 module.exports = {
   uploadFiles,
   uploadFileArray,
+  uploadFilesMap,
 };

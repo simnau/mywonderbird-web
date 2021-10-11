@@ -15,6 +15,22 @@ function indexBy(array, key) {
   }, {});
 }
 
+function groupBy(array, key) {
+  if (!array) {
+    return {};
+  }
+
+  return array.reduce((result, item) => {
+    const resolvedKey = typeof key === 'function' ? key(item) : key;
+    const items = [...(result[resolvedKey] || []), item];
+
+    return {
+      ...result,
+      [resolvedKey]: items,
+    };
+  }, {});
+}
+
 function flatMap(array, mapFunction) {
   if (!array) {
     return [];
@@ -28,5 +44,6 @@ function flatMap(array, mapFunction) {
 module.exports = {
   unique,
   indexBy,
+  groupBy,
   flatMap,
 };

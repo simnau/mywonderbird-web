@@ -39,6 +39,42 @@ async function uploadFile(files, folder, useOriginalFilename = false) {
   return { images, parsedImages };
 }
 
+async function uploadFilesMap(files, folder, useOriginalFilename = false) {
+  const fileUploader = fileUploaderMapping[fileUploaderType];
+
+  if (!fileUploader) {
+    throw new Error(`Unknown file uploader with type ${fileUploaderType}`);
+  }
+
+  const { images } = await fileUploader.uploadFilesMap(
+    files,
+    folder,
+    useOriginalFilename,
+  );
+
+  const parsedImages = Object.entries(images).reduce((result, [key, image]) => {
+    if (!image) {
+      return {
+        ...result,
+        [key]: image,
+      };
+    }
+
+    const imageUrl = new URL(image);
+
+    return {
+      ...result,
+      [key]: {
+        originalUrl: image,
+        hostname: imageUrl.hostname,
+        pathname: imageUrl.pathname.substring(1),
+      },
+    };
+  }, {});
+
+  return { images, parsedImages };
+}
+
 async function uploadFileArray(files, folder) {
   const fileUploader = fileUploaderMapping[fileUploaderType];
 
@@ -55,6 +91,7 @@ function imagePathToImageUrl(path) {
 
 module.exports = {
   uploadFile,
+  uploadFilesMap,
   uploadFileArray,
   imagePathToImageUrl,
 };

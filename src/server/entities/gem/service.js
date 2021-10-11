@@ -110,6 +110,14 @@ async function create(gem, transaction = null) {
   });
 }
 
+async function bulkCreate(gems, transaction = null) {
+  return Gem.bulkCreate(gems, {
+    include: INCLUDE_MODELS,
+    transaction,
+    returning: true,
+  });
+}
+
 async function update(id, updateObject, transaction = null) {
   return Gem.update(updateObject, {
     where: {
@@ -205,6 +213,7 @@ function toDTO(gem) {
 module.exports = {
   updateDayGems,
   create,
+  bulkCreate,
   update,
   findLastForJourney,
   getGemCountry,

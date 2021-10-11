@@ -83,6 +83,30 @@ async function reverseGeocode(location) {
   return place ? hereToDTO(place) : null;
 }
 
+async function multiReverseGeocode(locations) {
+  const resultLocations = await Promise.all(
+    locations.map(async ({ latLng }) => {
+      if (!latLng) {
+        return null;
+      }
+
+      const locationString = `${latLng[0]},${latLng[1]}`;
+      const place = await hereLocationToPlace(locationString);
+
+      return place
+        ? hereToDTO(place)
+        : {
+            location: {
+              lat: latLng[0],
+              lng: latLng[1],
+            },
+          };
+    }),
+  );
+
+  return resultLocations;
+}
+
 async function locationToAddress(location) {
   const place = await hereLocationToAddress(location);
 
@@ -111,6 +135,7 @@ module.exports = {
   getLabelBy3LetterCountryCode,
   findBoundsBy3LetterCountryCode,
   reverseGeocode,
+  multiReverseGeocode,
   locationCountry,
   locationToAddress,
   searchPlaces,
