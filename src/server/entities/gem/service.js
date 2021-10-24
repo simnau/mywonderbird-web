@@ -143,6 +143,8 @@ async function getGemCountry(gem) {
     return null;
   }
 
+  // TODO: This might no longer be necessary
+  // it was introduced to back-port countryCodes to gems because they weren't available before
   await update(gem.id, { countryCode: place.countryCode });
 
   return geoService.getLabelBy3LetterCountryCode(place.countryCode);

@@ -12,6 +12,7 @@ const likeService = require('../like/service');
 const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
+const geoService = require('../geo/service');
 const { SINGLE_SHARE_FOLDER } = require('../../constants/s3');
 const service = require('../gem/service');
 const { deleteFiles, deleteFolder } = require('../../util/s3');
@@ -161,23 +162,47 @@ async function sharePictures({
     ? await gemService.findLastForJourney(journeyId)
     : null;
 
-  const gems = pictures.map(
-    ({ title, imagePaths, location, creationDate }, index) => ({
-      title,
-      countryCode: location.countryCode,
-      lat: location.lat,
-      lng: location.lng,
-      sequenceNumber: lastGem ? lastGem.sequenceNumber + index + 1 : index,
-      journeyId,
-      createdAt: creationDate,
-      updatedAt: creationDate,
-      userId,
-      gemCaptures: imagePaths.map((imagePath, index) => ({
-        title,
-        imagePath,
-        sequenceNumber: index,
-      })),
-    }),
+  const gems = await Promise.all(
+    pictures.map(
+      async ({ title, imagePaths, location, creationDate }, index) => {
+        const { lat, lng } = location;
+        let { countryCode } = location;
+
+        if (!countryCode && (lat || lat == 0) && (lng || lng == 0)) {
+          const location = `${lat},${lng}`;
+          const herePlace = await geoService.locationToAddress(location);
+
+          if (herePlace) {
+            countryCode = herePlace.countryCode;
+          }
+        }
+
+        return {
+          title,
+          countryCode,
+          lat,
+          lng,
+          sequenceNumber: lastGem ? lastGem.sequenceNumber + index + 1 : index,
+          journeyId,
+          createdAt: creationDate,
+          updatedAt: creationDate,
+          userId,
+          gemCaptures: imagePaths.map((imagePath, gemCaptureIndex) => {
+            const timestamp = new Date(
+              Date.now() + index * 100 + gemCaptureIndex,
+            );
+
+            return {
+              title,
+              imagePath,
+              sequenceNumber: gemCaptureIndex,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            };
+          }),
+        };
+      },
+    ),
   );
 
   const tx = transaction || (await sequelize.transaction());
