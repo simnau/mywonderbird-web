@@ -154,7 +154,11 @@ async function findFeedItemsV2(
   limit,
   direction = OLDER_DIRECTION,
 ) {
-  let where = {};
+  let where = {
+    // HACK: we only want to show a picture once for each gem
+    // the first picture for a gem will always be with the sequenceNumber of 0
+    sequenceNumber: 0,
+  };
   let order;
 
   if (direction === NEWER_DIRECTION) {
