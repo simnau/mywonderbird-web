@@ -168,7 +168,7 @@ async function sharePictures({
         const { lat, lng } = location;
         let { countryCode } = location;
 
-        if (!countryCode && (lat || lat == 0) && (lng || lng == 0)) {
+        if (!countryCode && (lat || lat === 0) && (lng || lng === 0)) {
           const location = `${lat},${lng}`;
           const herePlace = await geoService.locationToAddress(location);
 
@@ -353,10 +353,7 @@ async function shareSinglePicture({
 
     return createdGem;
   } catch (e) {
-    if (!transaction) {
-      await tx.rollback();
-    }
-
+    await tx.rollback();
     throw e;
   }
 }

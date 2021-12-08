@@ -457,7 +457,7 @@ function journeyToFeedJourneyDTO(journey) {
         gem.gemCaptures.length &&
         gem.gemCaptures[0].url
       ) {
-        const gemCapture = gemCaptures[0];
+        const gemCapture = gem.gemCaptures[0];
 
         images.push(
           gemCapture.imagePath
@@ -722,6 +722,30 @@ function validateJourney(journey) {
   return errors;
 }
 
+async function findTripCountByUserId({ userId }) {
+  return Journey.count({
+    where: {
+      userId,
+    },
+  });
+}
+
+async function findLastTripByUserId({ userId }) {
+  const lastTrip = await Journey.findOne({
+    where: {
+      userId,
+    },
+    include: INCLUDE_MODELS_V2,
+    order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER_V2],
+  });
+
+  if (!lastTrip) {
+    return null;
+  }
+
+  return journeyToJourneyDTOV2(lastTrip);
+}
+
 module.exports = {
   findAll,
   findAllByUser,
@@ -745,4 +769,6 @@ module.exports = {
   validateJourney,
   publish,
   unpublish,
+  findTripCountByUserId,
+  findLastTripByUserId,
 };

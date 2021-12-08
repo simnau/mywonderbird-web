@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { col, fn, Op } = require('sequelize');
 const uuidv4 = require('uuid/v4');
 
 const { Gem } = require('../../orm/models/gem');
@@ -42,18 +42,6 @@ function deleteByIds(ids, transaction) {
     },
     transaction,
   });
-}
-
-function bulkCreate(gems, transaction) {
-  return Gem.bulkCreate(gems, { include: INCLUDE_MODELS, transaction });
-}
-
-function update(gems, transaction) {
-  return Promise.all(
-    gems.map(async gem =>
-      Gem.update(gem, { where: { id: gem.id }, transaction }),
-    ),
-  );
 }
 
 async function updateDayGems(
@@ -187,6 +175,42 @@ async function deleteImages(gem) {
   );
 }
 
+async function findCountryCodesByUserId({ userId }) {
+  const countryCodes = await Gem.findAll({
+    where: {
+      userId,
+    },
+    attributes: [[fn('DISTINCT', col('countryCode')), 'countryCode']],
+  });
+
+  return countryCodes.map(({ countryCode }) => countryCode);
+}
+
+async function findSpotCountByUserId({ userId }) {
+  const spotCount = await Gem.count({
+    where: {
+      userId,
+      journeyId: null,
+    },
+  });
+
+  return spotCount;
+}
+
+async function findSpotsByUserId({ userId, limit }) {
+  const spots = await Gem.findAll({
+    where: {
+      userId,
+      journeyId: null,
+    },
+    limit,
+    order: [['updatedAt', 'DESC']],
+    include: INCLUDE_MODELS,
+  });
+
+  return spots.map(toDTO);
+}
+
 function toDTO(gem) {
   const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
 
@@ -223,5 +247,8 @@ module.exports = {
   findById,
   findStandaloneByUserId,
   delete: del,
+  findCountryCodesByUserId,
+  findSpotCountByUserId,
+  findSpotsByUserId,
   toDTO,
 };

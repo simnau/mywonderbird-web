@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 
 const { SavedTrip } = require('../../orm/models/saved-trip');
 const { SavedTripLocation } = require('../../orm/models/saved-trip-location');
@@ -10,6 +10,7 @@ const { indexBy, flatMap } = require('../../util/array');
 const sequelize = require('../../setup/sequelize');
 const { rearrangeToStartFromPlace } = require('../../util/geo');
 const { imagePathToImageUrl } = require('../../util/file-upload');
+const { Place } = require('../../orm/models/place');
 
 const INCLUDE_MODELS = [
   {
@@ -166,8 +167,11 @@ async function toTripDTO(savedTrip) {
     finishDate: savedTrip.finishedAt,
     imageUrl,
     country: geoService.getLabelBy3LetterCountryCode(savedTrip.countryCode),
+    countryCode: savedTrip.countryCode,
     images,
     locations: tripLocationDTOs,
+    createdAt: savedTrip.createdAt,
+    updatedAt: savedTrip.updatedAt,
   };
 }
 
@@ -258,6 +262,113 @@ async function endTrip(id) {
   );
 }
 
+async function findFinishedTripCountByUserId({ userId }) {
+  return SavedTrip.count({
+    where: {
+      userId,
+      finishedAt: {
+        [Op.ne]: null,
+      },
+    },
+  });
+}
+
+async function findPlannedTripCountByUserId({ userId }) {
+  return SavedTrip.count({
+    where: {
+      userId,
+      startedAt: null,
+      finishedAt: null,
+    },
+  });
+}
+
+async function findFinishedTripCountryCodesByUserId({ userId }) {
+  const savedTripLocations = await SavedTripLocation.findAll({
+    include: [
+      {
+        model: SavedTrip,
+        where: {
+          userId,
+        },
+        attributes: ['userId'],
+      },
+    ],
+  });
+  const placeIds = savedTripLocations.map(({ placeId }) => placeId);
+
+  const countryCodes = await Place.findAll({
+    where: {
+      id: {
+        [Op.in]: placeIds,
+      },
+    },
+    attributes: [[fn('DISTINCT', col('countryCode')), 'countryCode']],
+  });
+
+  return countryCodes.map(({ countryCode }) => countryCode);
+}
+
+async function findCurrentTripByUserId({ userId }) {
+  const currentTrip = await SavedTrip.findOne({
+    where: {
+      userId,
+      startedAt: {
+        [Op.ne]: null,
+      },
+      finishedAt: null,
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  if (!currentTrip) {
+    return null;
+  }
+
+  return toTripDTO(currentTrip);
+}
+
+async function findUpcomingTripByUserId({ userId }) {
+  const upcomingTrip = await SavedTrip.findOne({
+    where: {
+      userId,
+      startedAt: null,
+      finishedAt: null,
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  if (!upcomingTrip) {
+    return null;
+  }
+
+  return toTripDTO(upcomingTrip);
+}
+
+async function findLastFinishedTripByUserId({ userId }) {
+  const lastFinishedTrip = await SavedTrip.findOne({
+    where: {
+      userId,
+      startedAt: {
+        [Op.ne]: null,
+      },
+      finishedAt: {
+        [Op.ne]: null,
+      },
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  if (!lastFinishedTrip) {
+    return null;
+  }
+
+  return toTripDTO(lastFinishedTrip);
+}
+
 module.exports = {
   findAllByUser,
   findAllFinishedByUser,
@@ -272,4 +383,10 @@ module.exports = {
   markLocationSkipped,
   markLocationVisited,
   endTrip,
+  findFinishedTripCountByUserId,
+  findPlannedTripCountByUserId,
+  findFinishedTripCountryCodesByUserId,
+  findCurrentTripByUserId,
+  findUpcomingTripByUserId,
+  findLastFinishedTripByUserId,
 };
