@@ -209,6 +209,7 @@ function toDTO(gem) {
       lat: gem.lat,
       lng: gem.lng,
     },
+    description: gem.description,
   };
 }
 
