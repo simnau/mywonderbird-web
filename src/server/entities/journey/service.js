@@ -746,6 +746,18 @@ async function findLastTripByUserId({ userId }) {
   return journeyToJourneyDTOV2(lastTrip);
 }
 
+async function findTripsByUserId({ userId }) {
+  const trips = await Journey.findAll({
+    where: {
+      userId,
+    },
+    include: INCLUDE_MODELS_V2,
+    order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER_V2],
+  });
+
+  return Promise.all(trips.map(trip => journeyToJourneyDTOV2(trip)));
+}
+
 module.exports = {
   findAll,
   findAllByUser,
@@ -771,4 +783,5 @@ module.exports = {
   unpublish,
   findTripCountByUserId,
   findLastTripByUserId,
+  findTripsByUserId,
 };

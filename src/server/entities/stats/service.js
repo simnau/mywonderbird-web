@@ -1,12 +1,11 @@
 const { unique } = require('../../util/array');
 const journeyService = require('../journey/service');
 const savedTripService = require('../saved-trip/service');
+const tripStatsService = require('../trip-stats/service');
 const gemService = require('../gem/service');
-const { findRouteLength } = require('../../util/geo');
+const { SAVED_TRIP_TYPE, SHARED_TRIP_TYPE } = require('../../constants/trips');
 
 const SPOT_LIMIT = 8;
-const SHARED_TRIP_TYPE = 'SHARED_TRIP';
-const SAVED_TRIP_TYPE = 'SAVED_TRIP';
 
 async function findUserStats({ userId }) {
   const tripCount = await findFinishedTripCount({
@@ -77,7 +76,7 @@ async function findCurrentTrip({ userId }) {
     return null;
   }
 
-  return tripDTOToStatsDTO(currentTrip, SAVED_TRIP_TYPE);
+  return tripStatsService.tripDTOToStatsDTO(currentTrip, SAVED_TRIP_TYPE);
 }
 
 async function findUpcomingTrip({ userId }) {
@@ -89,7 +88,7 @@ async function findUpcomingTrip({ userId }) {
     return null;
   }
 
-  return tripDTOToStatsDTO(upcomingTrip, SAVED_TRIP_TYPE);
+  return tripStatsService.tripDTOToStatsDTO(upcomingTrip, SAVED_TRIP_TYPE);
 }
 
 async function findLastTrip({ userId }) {
@@ -119,31 +118,7 @@ async function findLastTrip({ userId }) {
     return null;
   }
 
-  return tripDTOToStatsDTO(latestTrip, tripType);
-}
-
-function tripDTOToStatsDTO(tripDto, tripType) {
-  let currentStep = 0;
-
-  tripDto.locations.forEach(({ skipped, visitedAt }) => {
-    if (skipped || visitedAt) {
-      currentStep++;
-    }
-  });
-
-  const distance = findRouteLength(tripDto.locations);
-
-  return {
-    id: tripDto.id,
-    name: tripDto.title,
-    spotCount: tripDto.locations.length,
-    currentStep,
-    imageUrl: tripDto.imageUrl,
-    country: tripDto.country,
-    countryCode: tripDto.countryCode,
-    distance,
-    tripType,
-  };
+  return tripStatsService.tripDTOToStatsDTO(latestTrip, tripType);
 }
 
 async function findSpots({ userId }) {

@@ -369,6 +369,58 @@ async function findLastFinishedTripByUserId({ userId }) {
   return toTripDTO(lastFinishedTrip);
 }
 
+async function findCurrentTripsByUserId({ userId }) {
+  const currentTrips = await SavedTrip.findAll({
+    where: {
+      userId,
+      startedAt: {
+        [Op.ne]: null,
+      },
+      finishedAt: null,
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  return Promise.all(currentTrips.map(currentTrip => toTripDTO(currentTrip)));
+}
+
+async function findUpcomingTripsByUserId({ userId }) {
+  const upcomingTrips = await SavedTrip.findAll({
+    where: {
+      userId,
+      startedAt: null,
+      finishedAt: null,
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  return Promise.all(
+    upcomingTrips.map(upcomingTrip => toTripDTO(upcomingTrip)),
+  );
+}
+
+async function findFinishedTripsByUserId({ userId }) {
+  const finishedTrips = await SavedTrip.findAll({
+    where: {
+      userId,
+      startedAt: {
+        [Op.ne]: null,
+      },
+      finishedAt: {
+        [Op.ne]: null,
+      },
+    },
+    include: INCLUDE_MODELS,
+    order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
+  });
+
+  return Promise.all(
+    finishedTrips.map(finishedTrip => toTripDTO(finishedTrip)),
+  );
+}
+
 module.exports = {
   findAllByUser,
   findAllFinishedByUser,
@@ -389,4 +441,7 @@ module.exports = {
   findCurrentTripByUserId,
   findUpcomingTripByUserId,
   findLastFinishedTripByUserId,
+  findCurrentTripsByUserId,
+  findUpcomingTripsByUserId,
+  findFinishedTripsByUserId,
 };

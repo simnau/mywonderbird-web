@@ -20,6 +20,8 @@ const search = require('../entities/search/controller');
 const tag = require('../entities/tag/controller');
 const place = require('../entities/place/controller');
 const stats = require('../entities/stats/controller');
+const tripStats = require('../entities/trip-stats/controller');
+const spotStats = require('../entities/spot-stats/controller');
 
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
@@ -40,6 +42,8 @@ apiRouter.use('/search', search);
 apiRouter.use('/tags', tag);
 apiRouter.use('/places', place);
 apiRouter.use('/stats', stats);
+apiRouter.use('/trip-stats', tripStats);
+apiRouter.use('/spot-stats', spotStats);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);

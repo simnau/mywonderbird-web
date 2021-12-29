@@ -1,0 +1,7 @@
+const SHARED_TRIP_TYPE = 'SHARED_TRIP';
+const SAVED_TRIP_TYPE = 'SAVED_TRIP';
+
+module.exports = {
+  SHARED_TRIP_TYPE,
+  SAVED_TRIP_TYPE,
+};

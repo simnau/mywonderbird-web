@@ -227,6 +227,7 @@ function toDTO(gem) {
     name: gem.title,
     countryCode: gem.countryCode,
     country,
+    firstGemCaptureId: gem.gemCaptures[0] ? gem.gemCaptures[0].id : null,
     imageUrl,
     images,
     location: {
@@ -234,6 +235,8 @@ function toDTO(gem) {
       lng: gem.lng,
     },
     description: gem.description,
+    createdAt: gem.createdAt,
+    updatedAt: gem.updatedAt,
   };
 }
 
