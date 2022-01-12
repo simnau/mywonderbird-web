@@ -430,6 +430,8 @@ async function augmentFeed(gemCaptures, userId) {
       isBookmarked: groupedUserBookmarks[gemCapture.id] || false,
       userId: gemUserId,
       userAvatarUrl: rawUser && rawUser.avatarUrl,
+      userName: rawUser && rawUser.username,
+      userBio: rawUser && rawUser.bio,
     };
   });
 
@@ -505,6 +507,8 @@ async function toFeedDto(feedItem) {
     userId: feedItem.userId,
     userAvatarUrl: feedItem.userAvatarUrl,
     locationId: feedItem.gemId,
+    userName: feedItem.userName,
+    userBio: feedItem.userBio,
   };
 }
 
