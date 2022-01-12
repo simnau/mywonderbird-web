@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 
 const sequelize = require('../../setup/sequelize');
+const { Place } = require('./place');
 
 const FIELDS = {
   id: {
@@ -38,10 +39,14 @@ const FIELDS = {
   },
   dayIndex: {
     type: Sequelize.INTEGER,
-  }
+  },
 };
 
 const SavedTripLocation = sequelize.define('savedTripLocations', FIELDS);
+
+SavedTripLocation.belongsToMany(Place, {
+  through: 'placeId',
+});
 
 module.exports = {
   SavedTripLocation,

@@ -114,6 +114,32 @@ function toLatLngString(latLng) {
   return `${latLng.lat},${latLng.lng}`;
 }
 
+function findRouteLength(locations) {
+  if (!locations || locations.length < 2) {
+    return {
+      value: 0.0,
+      units: 'KM',
+    };
+  }
+
+  let lengthInMeters = 0.0;
+
+  for (let i = 1; i < locations.length; i++) {
+    const point1 = locations[i - 1].location;
+    const point2 = locations[i].location;
+
+    lengthInMeters += distanceTo(
+      { lat: point1.lat, lng: point1.lng },
+      { lat: point2.lat, lng: point2.lng },
+    );
+  }
+
+  return {
+    value: lengthInMeters / 1000,
+    units: 'KM',
+  };
+}
+
 module.exports = {
   findCoordinateBoundingBox,
   getGeohash,
@@ -121,4 +147,5 @@ module.exports = {
   sortLocationsByDistanceToPoint,
   rearrangeToStartFromPlace,
   toLatLngString,
+  findRouteLength,
 };

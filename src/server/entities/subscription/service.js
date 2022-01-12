@@ -4,7 +4,6 @@ const axios = require('axios');
 const {
   MAILERLITE_WEB_GROUP_SUBSCRIBERS_URL,
   MAILERLITE_NEWSLETTER_GROUP_SUBSCRIBERS_URL,
-  MAILERLITE_UNSUBSCRIBE_URL,
 } = require('../../constants/urls');
 
 const { apiKey } = config.get('mailerlite');
