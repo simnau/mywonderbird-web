@@ -4,6 +4,7 @@ const { ADMIN_ROLE } = require('../../constants/roles');
 
 const requireAuth = require('../../middleware/require-auth');
 const service = require('./service');
+const placeImageService = require('../place-image/service');
 
 const gemRouter = Router();
 
@@ -17,8 +18,11 @@ gemRouter.get(
 
     const gem = await service.findById(id);
     const gemDTO = service.toDTO(gem);
+    const placeId = await placeImageService.findPlaceIdByGemCaptureId(
+      gemDTO.firstGemCaptureId,
+    );
 
-    res.send({ gem: gemDTO });
+    res.send({ gem: { ...gemDTO, placeId } });
   }),
 );
 

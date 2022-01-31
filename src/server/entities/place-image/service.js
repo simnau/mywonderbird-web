@@ -69,10 +69,25 @@ function toDTO(placeImage) {
   };
 }
 
+async function findPlaceIdByGemCaptureId(id) {
+  if (!id) {
+    return null;
+  }
+
+  const placeImage = await PlaceImage.findOne({
+    where: {
+      gemCaptureId: id,
+    },
+  });
+
+  return placeImage.placeId;
+}
+
 module.exports = {
   bulkCreate,
   fromGemCapture,
   createForPlace,
   updateAll,
   toDTO,
+  findPlaceIdByGemCaptureId,
 };
