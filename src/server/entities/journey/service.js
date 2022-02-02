@@ -12,7 +12,7 @@ const profileService = require('../profile/service');
 const favoriteJourneyService = require('../favorite-journey/service');
 const { deleteFolder } = require('../../util/s3');
 const { findCoordinateBoundingBox } = require('../../util/geo');
-const { unique } = require('../../util/array');
+const { unique, flatMap } = require('../../util/array');
 const { imagePathToImageUrl } = require('../../util/file-upload');
 const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
@@ -758,6 +758,28 @@ async function findTripsByUserId({ userId }) {
   return Promise.all(trips.map(trip => journeyToJourneyDTOV2(trip)));
 }
 
+async function findCountryCodesByUserId({ userId }) {
+  const trips = await Journey.findAll({
+    where: {
+      userId,
+    },
+    attributes: ['userId'],
+    include: [
+      {
+        model: Gem,
+        as: 'gems',
+        attributes: ['countryCode'],
+      },
+    ],
+  });
+
+  const countryCodes = flatMap(trips, trip =>
+    trip.gems.map(gem => gem.countryCode),
+  );
+
+  return unique(countryCodes);
+}
+
 module.exports = {
   findAll,
   findAllByUser,
@@ -784,4 +806,5 @@ module.exports = {
   findTripCountByUserId,
   findLastTripByUserId,
   findTripsByUserId,
+  findCountryCodesByUserId,
 };
