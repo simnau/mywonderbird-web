@@ -197,12 +197,18 @@ async function findSpotCountByUserId({ userId }) {
   return spotCount;
 }
 
-async function findSpotsByUserId({ userId, limit }) {
+async function findSpots({ countryCode, userId, limit }) {
+  const where = {
+    userId,
+    journeyId: null,
+  };
+
+  if (countryCode) {
+    where.countryCode = countryCode;
+  }
+
   const spots = await Gem.findAll({
-    where: {
-      userId,
-      journeyId: null,
-    },
+    where,
     limit,
     order: [['updatedAt', 'DESC']],
     include: INCLUDE_MODELS,
@@ -252,6 +258,6 @@ module.exports = {
   delete: del,
   findCountryCodesByUserId,
   findSpotCountByUserId,
-  findSpotsByUserId,
+  findSpots,
   toDTO,
 };

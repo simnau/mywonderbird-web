@@ -34,4 +34,52 @@ router.get(
   }),
 );
 
+router.get(
+  '/country',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { countryCode },
+      user: { id: userId },
+    } = req;
+
+    if (!countryCode) {
+      throw new Error(
+        'You have to provide a "countryCode" query param with a valid 3 letter country code',
+      );
+    }
+
+    const visitedTripsAndSpots = await service.findVisitedTripsAndSpots({
+      countryCode,
+      userId,
+    });
+
+    res.send({ stats: visitedTripsAndSpots });
+  }),
+);
+
+router.get(
+  '/country/:userId',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { countryCode },
+      params: { userId },
+    } = req;
+
+    if (!countryCode) {
+      throw new Error(
+        'You have to provide a "countryCode" query param with a valid 3 letter country code',
+      );
+    }
+
+    const visitedTripsAndSpots = await service.findVisitedTripsAndSpots({
+      countryCode,
+      userId,
+    });
+
+    res.send({ stats: visitedTripsAndSpots });
+  }),
+);
+
 module.exports = router;

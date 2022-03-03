@@ -401,17 +401,23 @@ async function findUpcomingTripsByUserId({ userId }) {
   );
 }
 
-async function findFinishedTripsByUserId({ userId }) {
-  const finishedTrips = await SavedTrip.findAll({
-    where: {
-      userId,
-      startedAt: {
-        [Op.ne]: null,
-      },
-      finishedAt: {
-        [Op.ne]: null,
-      },
+async function findFinishedTrips({ userId, countryCode }) {
+  const where = {
+    userId,
+    startedAt: {
+      [Op.ne]: null,
     },
+    finishedAt: {
+      [Op.ne]: null,
+    },
+  };
+
+  if (countryCode) {
+    where.countryCode = countryCode;
+  }
+
+  const finishedTrips = await SavedTrip.findAll({
+    where,
     include: INCLUDE_MODELS,
     order: [['createdAt', 'DESC'], ...INCLUDE_ORDER],
   });
@@ -443,5 +449,5 @@ module.exports = {
   findLastFinishedTripByUserId,
   findCurrentTripsByUserId,
   findUpcomingTripsByUserId,
-  findFinishedTripsByUserId,
+  findFinishedTrips,
 };

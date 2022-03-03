@@ -30,10 +30,10 @@ async function findUpcomingTripsByUserId({ userId }) {
 }
 
 async function findTripsByUserId({ userId }) {
-  const finishedTrips = await savedTripService.findFinishedTripsByUserId({
+  const finishedTrips = await savedTripService.findFinishedTrips({
     userId,
   });
-  const sharedTrips = await journeyService.findTripsByUserId({ userId });
+  const sharedTrips = await journeyService.findTrips({ userId });
 
   const finishedTripStats = finishedTrips.map(finishedTrip =>
     tripDTOToStatsDTO(finishedTrip, SAVED_TRIP_TYPE, FINISHED_TRIP_STATUS),

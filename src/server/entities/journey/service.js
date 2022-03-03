@@ -746,12 +746,28 @@ async function findLastTripByUserId({ userId }) {
   return journeyToJourneyDTOV2(lastTrip);
 }
 
-async function findTripsByUserId({ userId }) {
+async function findTrips({ countryCode, userId }) {
+  const include = countryCode
+    ? {
+        model: Gem,
+        as: 'gems',
+        where: {
+          countryCode,
+        },
+        include: [
+          {
+            model: GemCapture,
+            as: 'gemCaptures',
+          },
+        ],
+      }
+    : INCLUDE_MODELS_V2;
+
   const trips = await Journey.findAll({
     where: {
       userId,
     },
-    include: INCLUDE_MODELS_V2,
+    include,
     order: [['updatedAt', 'DESC'], ...INCLUDE_ORDER_V2],
   });
 
@@ -805,6 +821,6 @@ module.exports = {
   unpublish,
   findTripCountByUserId,
   findLastTripByUserId,
-  findTripsByUserId,
+  findTrips,
   findCountryCodesByUserId,
 };

@@ -53,7 +53,7 @@ function findByCode(code) {
   return countryDtoByCodeMap[code.toUpperCase()];
 }
 
-function findBoundsBy3LetterCountryCode(code) {
+function findBoundsBy3LetterCountryCode(code, { latLng = false } = {}) {
   if (!code) {
     throw new Error('Code is required');
   }
@@ -63,6 +63,19 @@ function findBoundsBy3LetterCountryCode(code) {
 
   if (!boundaries) {
     throw new Error(`Boundaries for country ${code} not found`);
+  }
+
+  if (latLng) {
+    return {
+      topLeft: {
+        lat: boundaries.bottomLeft.lat,
+        lng: boundaries.topRight.lon,
+      },
+      bottomRight: {
+        lat: boundaries.topRight.lat,
+        lng: boundaries.bottomLeft.lon,
+      },
+    };
   }
 
   return {

@@ -1,8 +1,10 @@
+const { average } = require('geolocation-utils');
 const { unique } = require('../../util/array');
 const journeyService = require('../journey/service');
 const savedTripService = require('../saved-trip/service');
 const tripStatsService = require('../trip-stats/service');
 const gemService = require('../gem/service');
+const geoService = require('../geo/service');
 const {
   SAVED_TRIP_TYPE,
   SHARED_TRIP_TYPE,
@@ -10,6 +12,7 @@ const {
   PLANNED_TRIP_STATUS,
   IN_PROGRESS_TRIP_STATUS,
 } = require('../../constants/trips');
+const { SPOT_TYPE, TRIP_TYPE } = require('../../constants/countryStats');
 
 const SPOT_LIMIT = 8;
 
@@ -24,9 +27,11 @@ async function findUserStats({ userId }) {
   const upcomingTrip = await findUpcomingTrip({ userId });
   const lastTrip = await findLastTrip({ userId });
   const spots = await findSpots({ userId });
+  const visitedCountries = visitedCountryCodes.map(createVisitedCountryModel);
 
   return {
     visitedCountryCodes,
+    visitedCountries,
     tripCount,
     plannedTripCount,
     spotCount,
@@ -150,7 +155,7 @@ async function findLastTrip({ userId }) {
 }
 
 async function findSpots({ userId }) {
-  const spots = await gemService.findSpotsByUserId({
+  const spots = await gemService.findSpots({
     userId,
     limit: SPOT_LIMIT,
   });
@@ -161,6 +166,97 @@ async function findSpots({ userId }) {
   }));
 }
 
+function createVisitedCountryModel(visitedCountryCode) {
+  const boundaries = geoService.findBoundsBy3LetterCountryCode(
+    visitedCountryCode,
+    {
+      latLng: true,
+    },
+  );
+  const center = average([boundaries.topLeft, boundaries.bottomRight]);
+  const country = geoService.getLabelBy3LetterCountryCode(visitedCountryCode);
+
+  return {
+    country,
+    countryCode: visitedCountryCode,
+    boundaries,
+    center,
+  };
+}
+
+async function findVisitedTripsAndSpots({ countryCode, userId }) {
+  const visitedSpots = await gemService.findSpots({
+    countryCode,
+    userId,
+  });
+  const finishedTrips = await savedTripService.findFinishedTrips({
+    countryCode,
+    userId,
+  });
+  const sharedTrips = await journeyService.findTrips({
+    countryCode,
+    userId,
+  });
+
+  return mergeVisitedTripsAndSpots({
+    visitedSpots,
+    finishedTrips,
+    sharedTrips,
+  });
+}
+
+function mergeVisitedTripsAndSpots({
+  visitedSpots,
+  finishedTrips,
+  sharedTrips,
+}) {
+  const visitedSpotDTOs = visitedSpots.map(spot => ({
+    updatedAt: spot.updatedAt,
+    type: SPOT_TYPE,
+    item: {
+      id: spot.id,
+      imageUrl: spot.imageUrl,
+      name: spot.name,
+    },
+  }));
+  const finishedTripDTOs = finishedTrips.map(finishedTrip => {
+    const dto = tripStatsService.tripDTOToStatsDTO(
+      finishedTrip,
+      SAVED_TRIP_TYPE,
+      FINISHED_TRIP_STATUS,
+    );
+
+    return {
+      updatedAt: dto.updatedAt,
+      type: TRIP_TYPE,
+      item: dto,
+    };
+  });
+  const sharedTripDTOs = sharedTrips.map(sharedTrip => {
+    const dto = tripStatsService.tripDTOToStatsDTO(
+      sharedTrip,
+      SHARED_TRIP_TYPE,
+    );
+
+    return {
+      updatedAt: dto.updatedAt,
+      type: TRIP_TYPE,
+      item: dto,
+    };
+  });
+
+  const mergedItems = [
+    ...visitedSpotDTOs,
+    ...finishedTripDTOs,
+    ...sharedTripDTOs,
+  ].sort((a, b) => {
+    return b.updatedAt - a.updatedAt;
+  });
+
+  return mergedItems;
+}
+
 module.exports = {
   findUserStats,
+  findVisitedTripsAndSpots,
 };
