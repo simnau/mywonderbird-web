@@ -2,7 +2,7 @@ const gemService = require('../gem/service');
 const likeService = require('../like/service');
 
 async function findSpotsByUserId({ userId }) {
-  const spots = await gemService.findSpotsByUserId({ userId });
+  const spots = await gemService.findSpots({ userId });
   const gemCaptureIds = spots.map(({ firstGemCaptureId }) => firstGemCaptureId);
   const likesByGemCaptureIds = await likeService.countByGemCaptureIds(
     gemCaptureIds,
