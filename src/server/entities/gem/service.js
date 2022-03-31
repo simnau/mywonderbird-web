@@ -175,11 +175,27 @@ async function deleteImages(gem) {
   );
 }
 
-async function findCountryCodesByUserId({ userId }) {
+async function findCountryCodesByUserId({ userId, startDate, endDate }) {
+  const where = {
+    userId,
+  };
+
+  if (startDate && endDate) {
+    where.updatedAt = {
+      [Op.between]: [startDate, endDate],
+    };
+  } else if (startDate) {
+    where.updatedAt = {
+      [Op.gte]: startDate,
+    };
+  } else if (endDate) {
+    where.updatedAt = {
+      [Op.lte]: endDate,
+    };
+  }
+
   const countryCodes = await Gem.findAll({
-    where: {
-      userId,
-    },
+    where,
     attributes: [[fn('DISTINCT', col('countryCode')), 'countryCode']],
   });
 

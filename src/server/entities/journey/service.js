@@ -774,11 +774,27 @@ async function findTrips({ countryCode, userId }) {
   return Promise.all(trips.map(trip => journeyToJourneyDTOV2(trip)));
 }
 
-async function findCountryCodesByUserId({ userId }) {
+async function findCountryCodes({ userId, startDate, endDate }) {
+  const where = {
+    userId,
+  };
+
+  if (startDate && endDate) {
+    where.updatedAt = {
+      [Op.between]: [startDate, endDate],
+    };
+  } else if (startDate) {
+    where.updatedAt = {
+      [Op.gte]: startDate,
+    };
+  } else if (endDate) {
+    where.updatedAt = {
+      [Op.lte]: endDate,
+    };
+  }
+
   const trips = await Journey.findAll({
-    where: {
-      userId,
-    },
+    where,
     attributes: ['userId'],
     include: [
       {
@@ -822,5 +838,5 @@ module.exports = {
   findTripCountByUserId,
   findLastTripByUserId,
   findTrips,
-  findCountryCodesByUserId,
+  findCountryCodes,
 };

@@ -35,6 +35,27 @@ router.get(
 );
 
 router.get(
+  '/visited-countries',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const {
+      query: { startDate, endDate },
+      user: { id: userId },
+    } = req;
+
+    const visitedCountries = await service.findVisitedCountryCodes({
+      userId,
+      startDate,
+      endDate,
+    });
+
+    res.send({
+      visitedCountries,
+    });
+  }),
+);
+
+router.get(
   '/country',
   requireAuth,
   asyncHandler(async (req, res) => {

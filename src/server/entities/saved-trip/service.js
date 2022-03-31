@@ -283,14 +283,34 @@ async function findPlannedTripCountByUserId({ userId }) {
   });
 }
 
-async function findFinishedTripCountryCodesByUserId({ userId }) {
+async function findFinishedTripCountryCodesByUserId({
+  userId,
+  startDate,
+  endDate,
+}) {
+  const where = {
+    userId,
+  };
+
+  if (startDate && endDate) {
+    where.updatedAt = {
+      [Op.between]: [startDate, endDate],
+    };
+  } else if (startDate) {
+    where.updatedAt = {
+      [Op.gte]: startDate,
+    };
+  } else if (endDate) {
+    where.updatedAt = {
+      [Op.lte]: endDate,
+    };
+  }
+
   const savedTripLocations = await SavedTripLocation.findAll({
     include: [
       {
         model: SavedTrip,
-        where: {
-          userId,
-        },
+        where,
         attributes: ['userId'],
       },
     ],

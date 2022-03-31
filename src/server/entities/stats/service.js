@@ -61,18 +61,20 @@ async function findPlannedTripCount({ userId }) {
   return plannedTripCount;
 }
 
-async function findVisitedCountryCodes({ userId }) {
+async function findVisitedCountryCodes({ userId, startDate, endDate }) {
   // This takes into account the journeys that were created before gems had a userId field
-  const sharedLegacyTripCountryCodes = await journeyService.findCountryCodesByUserId(
-    {
-      userId,
-    },
-  );
+  const sharedLegacyTripCountryCodes = await journeyService.findCountryCodes({
+    userId,
+    startDate,
+    endDate,
+  });
   const sharedTripCountryCodes = await gemService.findCountryCodesByUserId({
     userId,
+    startDate,
+    endDate,
   });
   const finishedTripCountryCodes = await savedTripService.findFinishedTripCountryCodesByUserId(
-    { userId },
+    { userId, startDate, endDate },
   );
 
   return unique([
@@ -259,4 +261,5 @@ function mergeVisitedTripsAndSpots({
 module.exports = {
   findUserStats,
   findVisitedTripsAndSpots,
+  findVisitedCountryCodes,
 };
