@@ -2,7 +2,14 @@ const { Op, fn } = require('sequelize');
 
 const { Like, LIKE_TYPE_GEM_CAPTURE } = require('../../orm/models/like');
 
-function createGemCaptureLike({ userId, gemCaptureId: entityId }) {
+const notificationService = require('../notifications/service');
+
+async function createGemCaptureLike({ userId, gemCaptureId: entityId }) {
+  await notificationService.createGemCaptureLikeNotification({
+    relatedUserId: userId,
+    gemCaptureId: entityId,
+  });
+
   return Like.create({
     userId,
     entityId,

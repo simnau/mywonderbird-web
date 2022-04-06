@@ -3,13 +3,13 @@ const uuidv4 = require('uuid/v4');
 
 const { uploadFile } = require('../../util/file-upload');
 const { Gem } = require('../../orm/models/gem');
+const { Like } = require('../../orm/models/like');
 const { Journey } = require('../../orm/models/journey');
 const { GemCapture } = require('../../orm/models/gem-capture');
 const {
   OLDER_DIRECTION,
   NEWER_DIRECTION,
 } = require('../../constants/infinite-scroll');
-const likeService = require('../like/service');
 
 const INCLUDE_MODELS = [
   {
@@ -54,7 +54,17 @@ async function uploadFiles(files, folder) {
 }
 
 async function deleteByIds(ids, transaction) {
-  await likeService.deleteByGemCaptureIds(ids, { transaction });
+  // Not using the likeService as it creates a circular loop through the notification service...
+  await Like.destroy(
+    {
+      where: {
+        entityId: {
+          [Op.in]: ids,
+        },
+      },
+    },
+    { transaction },
+  );
 
   return GemCapture.destroy({
     where: {
@@ -189,7 +199,13 @@ async function findFeedItemsV2(
   });
 }
 
-function findById(id) {
+function findById(id, { includeModels = false } = {}) {
+  if (includeModels) {
+    return GemCapture.findByPk(id, {
+      include: INCLUDE_MODELS,
+    });
+  }
+
   return GemCapture.findByPk(id);
 }
 
