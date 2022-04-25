@@ -23,6 +23,7 @@ const stats = require('../entities/stats/controller');
 const tripStats = require('../entities/trip-stats/controller');
 const spotStats = require('../entities/spot-stats/controller');
 const notifications = require('../entities/notifications/controller');
+const pushNotifications = require('../entities/push-notifications/controller');
 
 const journeyComment = require('../entities/journey-comment/controller');
 const journeyLike = require('../entities/journey-like/controller');
@@ -46,6 +47,7 @@ apiRouter.use('/stats', stats);
 apiRouter.use('/trip-stats', tripStats);
 apiRouter.use('/spot-stats', spotStats);
 apiRouter.use('/notifications', notifications);
+apiRouter.use('/push-notifications', pushNotifications);
 
 apiRouter.use('/journeys', journey);
 apiRouter.use('/favorite-journeys', favoriteJourney);

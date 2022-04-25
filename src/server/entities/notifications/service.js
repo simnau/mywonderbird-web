@@ -7,6 +7,7 @@ const {
 } = require('../../orm/models/notification');
 const gemCaptureService = require('../gem-capture/service');
 const profileService = require('../profile/service');
+const pushNotificationService = require('../push-notifications/service');
 const { unique, indexBy } = require('../../util/array');
 
 async function createGemCaptureLikeNotification({
@@ -41,6 +42,11 @@ async function createGemCaptureLikeNotification({
   if (existingNotification) {
     return existingNotification;
   }
+
+  await pushNotificationService.sendPushNotification({
+    userId,
+    notificationType: pushNotificationService.NOTIFICATION_TYPES.like,
+  });
 
   return Notification.create({
     userId,
