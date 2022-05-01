@@ -16,7 +16,8 @@
     "prettier": "prettier --write src/**/*.js",
     "test:server": "jest --config=src/server/jest.config.js",
     "test:server:dev": "jest --config=src/server/jest.config.js --watch",
-    "test": "npm run test:server"
+    "test": "npm run test:server",
+    "script": "node src/server/scripts/run-script.js"
   },
   "repository": {
     "type": "git",
