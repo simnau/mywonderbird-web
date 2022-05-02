@@ -466,7 +466,7 @@ journeyRouter.delete(
       params: { id },
       user: { id: currentUserId, role },
     } = req;
-    const journey = await service.findById(id);
+    const journey = await service.findByIdV2(id);
 
     if (!journey) {
       return res.send({
@@ -479,7 +479,10 @@ journeyRouter.delete(
       throw error;
     }
 
-    await service.delete(id);
+    await service.deleteWithStatistics({
+      journey,
+      userId: currentUserId,
+    });
 
     return res.send({
       message: `Journey with id ${id} deleted`,

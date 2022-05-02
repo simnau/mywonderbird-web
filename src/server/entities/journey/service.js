@@ -18,6 +18,7 @@ const journeyCommentService = require('../journey-comment/service');
 const journeyLikeService = require('../journey-like/service');
 const gemService = require('../gem/service');
 const geoService = require('../geo/service');
+const userStatisticsService = require('../user-statistics/service');
 
 const feedMaxImageCount = config.get('feed.maxImageCount');
 
@@ -406,6 +407,35 @@ async function del(id) {
       deleteFolder(id),
     ]);
   });
+}
+
+async function deleteWithStatistics({ journey, userId }) {
+  const t = await sequelize.transaction();
+
+  try {
+    const sharedPhotoDecrement = journey.gems.reduce((result, gem) => {
+      return result + gem.gemCaptures.length;
+    }, 0);
+
+    await userStatisticsService.decrementSharedPhotos(
+      {
+        userId,
+        sharedPhotoDecrement,
+      },
+      {
+        transaction: t,
+      },
+    );
+    await Journey.destroy({
+      where: { id: journey.id },
+      transaction: t,
+    });
+    await deleteFolder(journey.id);
+    await t.commit();
+  } catch (e) {
+    await t.rollback();
+    throw e;
+  }
 }
 
 async function addUserProfileToJourneys(journeys) {
@@ -824,6 +854,7 @@ module.exports = {
   create,
   update,
   delete: del,
+  deleteWithStatistics,
   addUserProfileToJourney,
   addUserProfileToJourneys,
   findCountByUser,

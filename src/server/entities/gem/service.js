@@ -3,9 +3,11 @@ const uuidv4 = require('uuid/v4');
 
 const { Gem } = require('../../orm/models/gem');
 const { GemCapture } = require('../../orm/models/gem-capture');
+const { Journey } = require('../../orm/models/journey');
 const gemCaptureService = require('../gem-capture/service');
 const placeService = require('../place/service');
 const geoService = require('../geo/service');
+const userStatisticsService = require('../user-statistics/service');
 const { getGeohash } = require('../../util/geo');
 const { imagePathToImageUrl } = require('../../util/file-upload');
 const { deleteFile } = require('../../util/s3');
@@ -155,8 +157,18 @@ async function findStandaloneByUserId(userId) {
   });
 }
 
-async function del(gem) {
+async function del(gem, userId) {
   return sequelize.transaction(async transaction => {
+    await userStatisticsService.decrementSharedPhotos(
+      {
+        userId,
+        sharedPhotoDecrement: gem.gemCaptures.length,
+      },
+      {
+        transaction,
+      },
+    );
+
     return Promise.all([
       Gem.destroy({
         where: { id: gem.id },
@@ -233,6 +245,20 @@ async function findSpots({ countryCode, userId, limit }) {
   return spots.map(toDTO);
 }
 
+async function findAllWithJourneys() {
+  const gems = await Gem.findAll({
+    include: [
+      ...INCLUDE_MODELS,
+      {
+        model: Journey,
+        as: 'journey',
+      },
+    ],
+  });
+
+  return gems;
+}
+
 function toDTO(gem) {
   const country = geoService.getLabelBy3LetterCountryCode(gem.countryCode);
 
@@ -276,4 +302,5 @@ module.exports = {
   findSpotCountByUserId,
   findSpots,
   toDTO,
+  findAllWithJourneys,
 };

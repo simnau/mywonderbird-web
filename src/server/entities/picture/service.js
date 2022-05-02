@@ -13,6 +13,7 @@ const bookmarkService = require('../bookmark/service');
 const profileService = require('../profile/service');
 const journeyService = require('../journey/service');
 const geoService = require('../geo/service');
+const userStatisticService = require('../user-statistics/service');
 const { SINGLE_SHARE_FOLDER } = require('../../constants/s3');
 const service = require('../gem/service');
 const { deleteFiles, deleteFolder } = require('../../util/s3');
@@ -50,6 +51,15 @@ async function sharePicture(
   try {
     const createdGem = await gemService.create(gem, tx);
     await placeService.createFromGem(createdGem.toJSON(), location, userId, tx);
+    await userStatisticService.incrementSharedPhotos(
+      {
+        userId,
+        sharedPhotoIncrement: 1,
+      },
+      {
+        transaction: tx,
+      },
+    );
 
     if (!transaction) {
       await tx.commit();
@@ -219,7 +229,20 @@ async function sharePictures({
       };
     });
 
+    const pictureCount = pictures.reduce((result, picture) => {
+      return result + picture.imagePaths.length;
+    }, 0);
+
     await placeService.createFromGems(gemsWithLocations, userId, tx);
+    await userStatisticService.incrementSharedPhotos(
+      {
+        userId,
+        sharedPhotoIncrement: pictureCount,
+      },
+      {
+        transaction: tx,
+      },
+    );
 
     if (!transaction) {
       await tx.commit();
@@ -348,6 +371,15 @@ async function shareSinglePicture({
   try {
     const createdGem = await gemService.create(gem, tx);
     await placeService.createFromGem(createdGem.toJSON(), location, userId, tx);
+    await userStatisticService.incrementSharedPhotos(
+      {
+        userId,
+        sharedPhotoIncrement: 1,
+      },
+      {
+        transaction: tx,
+      },
+    );
 
     await tx.commit();
 

@@ -78,7 +78,7 @@ gemRouter.delete(
       throw error;
     }
 
-    await service.delete(gem);
+    await service.delete(gem, userId);
 
     return res.send({
       message: `Gem with id ${id} deleted`,
