@@ -1,5 +1,6 @@
 require('dotenv').config();
 const sequelize = require('../setup/sequelize');
+const logger = require('../util/logger');
 
 const gemService = require('../entities/gem/service');
 const { UserStatistic } = require('../orm/models/user-statistic');
@@ -40,6 +41,8 @@ async function run() {
     };
   });
 
+  logger.info(`Updating stats for ${Object.keys(statsByUserId).length} users`);
+
   const userIdBatches = splitIntoBatches(Object.keys(statsByUserId));
   const statBatches = userIdBatches.map(batch => {
     return batch.map(userId => {
@@ -51,6 +54,8 @@ async function run() {
       };
     });
   });
+
+  logger.info(`Updating stats in ${statBatches.length} batches`);
 
   const t = await sequelize.transaction();
 
@@ -68,6 +73,9 @@ async function run() {
 
     await t.commit();
   } catch (e) {
+    logger.error(
+      `An error has occurred while calculating user stats ${e.message}`,
+    );
     await t.rollback();
     throw e;
   }
