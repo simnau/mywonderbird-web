@@ -72,6 +72,7 @@ async function run() {
     }
 
     await t.commit();
+    logger.info('Finished updating stats');
   } catch (e) {
     logger.error(
       `An error has occurred while calculating user stats ${e.message}`,
