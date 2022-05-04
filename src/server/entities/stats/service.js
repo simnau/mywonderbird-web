@@ -182,7 +182,11 @@ function createVisitedCountryModel(visitedCountryCode) {
     country,
     countryCode: visitedCountryCode,
     boundaries,
-    center,
+    // TODO: remove the logic to add 0.00000001 once the apps can handle int values as well
+    center: {
+      lat: center.lat % 1 === 0 ? center.lat + 0.00000001 : center.lat,
+      lng: center.lng % 1 === 0 ? center.lng + 0.00000001 : center.lng,
+    },
   };
 }
 

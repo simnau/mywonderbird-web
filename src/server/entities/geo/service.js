@@ -68,12 +68,25 @@ function findBoundsBy3LetterCountryCode(code, { latLng = false } = {}) {
   if (latLng) {
     return {
       topLeft: {
-        lat: boundaries.bottomLeft.lat,
-        lng: boundaries.topRight.lon,
+        // TODO: remove the logic to add 0.00000001 once the apps can handle int values as well
+        lat:
+          boundaries.bottomLeft.lat % 1 === 0
+            ? boundaries.bottomLeft.lat + 0.00000001
+            : boundaries.bottomLeft.lat,
+        lng:
+          boundaries.topRight.lon % 1 === 0
+            ? boundaries.topRight.lon + 0.00000001
+            : boundaries.topRight.lon,
       },
       bottomRight: {
-        lat: boundaries.topRight.lat,
-        lng: boundaries.bottomLeft.lon,
+        lat:
+          boundaries.topRight.lat % 1 === 0
+            ? boundaries.topRight.lat + 0.00000001
+            : boundaries.topRight.lat,
+        lng:
+          boundaries.bottomLeft.lon % 1 === 0
+            ? boundaries.bottomLeft.lon + 0.00000001
+            : boundaries.bottomLeft.lon,
       },
     };
   }
