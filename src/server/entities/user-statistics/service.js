@@ -1,4 +1,8 @@
+const {
+  CONTENT_CREATOR_TYPE,
+} = require('../../orm/models/badge-configuration');
 const { UserStatistic } = require('../../orm/models/user-statistic');
+const badgeService = require('../badges/service');
 
 async function findByUserId({ userId }, options) {
   return UserStatistic.findOne({
@@ -19,12 +23,23 @@ async function incrementSharedPhotos(
     return userStatistic;
   }
 
-  return userStatistic.update(
+  const oldPhotoCount = userStatistic.sharedPhotos;
+  const newSharedPhotoCount = userStatistic.sharedPhotos + sharedPhotoIncrement;
+  const userStatisticUpdate = await userStatistic.update(
     {
-      sharedPhotos: userStatistic.sharedPhotos + sharedPhotoIncrement,
+      sharedPhotos: newSharedPhotoCount,
     },
     options,
   );
+
+  await badgeService.handleBadgeChanges({
+    userId,
+    type: CONTENT_CREATOR_TYPE,
+    newCount: newSharedPhotoCount,
+    startingCount: oldPhotoCount,
+  });
+
+  return userStatisticUpdate;
 }
 
 async function decrementSharedPhotos(

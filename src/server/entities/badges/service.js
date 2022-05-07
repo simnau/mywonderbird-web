@@ -3,7 +3,8 @@ const {
   CONTENT_CREATOR_TYPE,
 } = require('../../orm/models/badge-configuration');
 const { groupBy } = require('../../util/array');
-const userStatisticsService = require('../user-statistics/service');
+const notificationService = require('../notifications/service');
+const { UserStatistic } = require('../../orm/models/user-statistic');
 
 const BADGE_TYPES = [CONTENT_CREATOR_TYPE];
 
@@ -66,10 +67,12 @@ async function findBadges({ userId }) {
   });
 
   const groupedConfigurations = groupBy(badgeConfigurations, item => item.type);
-  const userStatistics = (await userStatisticsService.findByUserId(
-    { userId },
-    { raw: true },
-  )) || {
+  const userStatistics = (await UserStatistic.findOne({
+    raw: true,
+    where: {
+      userId,
+    },
+  })) || {
     sharedPhotos: 0,
   };
 
@@ -90,6 +93,31 @@ async function findBadges({ userId }) {
   return badges;
 }
 
+async function handleBadgeChanges({ type, userId, startingCount, newCount }) {
+  const badgeConfigurations = await BadgeConfiguration.findAll({
+    where: {
+      type,
+    },
+    order: [['type', 'ASC'], ['level', 'ASC']],
+    raw: true,
+  });
+
+  if (!BADGE_TYPES.includes(type)) {
+    return null;
+  }
+
+  const oldBadge = resolveBadge(startingCount, badgeConfigurations, type);
+  const newBadge = resolveBadge(newCount, badgeConfigurations, type);
+
+  if (oldBadge.level < newBadge.level) {
+    await notificationService.createNewBadgeNotification({
+      userId,
+      badge: newBadge,
+    });
+  }
+}
+
 module.exports = {
   findBadges,
+  handleBadgeChanges,
 };

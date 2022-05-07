@@ -4,6 +4,7 @@ const {
   Notification,
   NOTIFICATION_TYPE_LIKE,
   GEM_ENTITY_TYPE,
+  NOTIFICATION_TYPE_BADGE_RECEIVED,
 } = require('../../orm/models/notification');
 const gemCaptureService = require('../gem-capture/service');
 const profileService = require('../profile/service');
@@ -57,6 +58,30 @@ async function createGemCaptureLikeNotification({
   });
 }
 
+async function createNewBadgeNotification({ userId, badge }) {
+  await pushNotificationService.sendPushNotification({
+    userId,
+    notificationType: 'badge-received',
+    extraData: {
+      badgeType: badge.type,
+      level: `${badge.level}`,
+      badgeLevels: `${badge.badgeLevels}`,
+      name: `${badge.name}`,
+    },
+  });
+
+  return Notification.create({
+    userId,
+    type: NOTIFICATION_TYPE_BADGE_RECEIVED,
+    extraData: {
+      badgeType: badge.type,
+      level: `${badge.level}`,
+      badgeLevels: `${badge.badgeLevels}`,
+      name: `${badge.name}`,
+    },
+  });
+}
+
 async function findAll({ userId, lastDatetime, limit }) {
   const where = {};
 
@@ -72,7 +97,7 @@ async function findAll({ userId, lastDatetime, limit }) {
 
   return Notification.findAll({
     where,
-    order: [['updatedAt', 'DESC']],
+    order: [['createdAt', 'DESC']],
     limit,
   });
 }
@@ -147,6 +172,7 @@ async function findUnreadCount({ userId }) {
 
 module.exports = {
   createGemCaptureLikeNotification,
+  createNewBadgeNotification,
   findAll,
   findById,
   markAsRead,

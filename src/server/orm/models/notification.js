@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../../setup/sequelize');
 
 const NOTIFICATION_TYPE_LIKE = 10;
+const NOTIFICATION_TYPE_BADGE_RECEIVED = 20;
 
 const GEM_ENTITY_TYPE = 1000;
 
@@ -36,6 +37,10 @@ const FIELDS = {
     type: Sequelize.BOOLEAN,
     defaultValue: false,
   },
+  extraData: {
+    type: Sequelize.JSONB,
+    allowNull: true,
+  },
 };
 
 const Notification = sequelize.define('notifications', FIELDS, {
@@ -43,6 +48,11 @@ const Notification = sequelize.define('notifications', FIELDS, {
     like: {
       where: {
         type: NOTIFICATION_TYPE_LIKE,
+      },
+    },
+    badgeReceived: {
+      where: {
+        type: NOTIFICATION_TYPE_BADGE_RECEIVED,
       },
     },
     gem: {
@@ -57,5 +67,6 @@ module.exports = {
   Notification,
   FIELDS,
   NOTIFICATION_TYPE_LIKE,
+  NOTIFICATION_TYPE_BADGE_RECEIVED,
   GEM_ENTITY_TYPE,
 };
