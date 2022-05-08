@@ -14,6 +14,10 @@ const FIELDS = {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  description: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+  },
   countryCode: {
     type: Sequelize.STRING,
     allowNull: false,

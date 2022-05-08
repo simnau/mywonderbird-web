@@ -83,7 +83,7 @@ async function fromGem(gem, location, userId) {
   const { title } = location;
   let { countryCode } = location;
 
-  if (!countryCode && (lat || lat == 0) && (lng || lng == 0)) {
+  if (!countryCode && (lat || lat === 0) && (lng || lng === 0)) {
     const location = `${lat},${lng}`;
     const herePlace = await geoService.locationToAddress(location);
 
@@ -112,6 +112,7 @@ async function fromGem(gem, location, userId) {
 
 async function fromGems(gems, userId) {
   let location;
+  let description;
   let lat;
   let lng;
 
@@ -120,19 +121,23 @@ async function fromGems(gems, userId) {
       location = gem.location;
     }
 
+    if (gem.description) {
+      description = gem.description;
+    }
+
     if (gem.lat && gem.lng) {
       lat = gem.lat;
       lng = gem.lng;
     }
 
-    if (location && lat && lng) {
+    if (location && lat && lng && description) {
       break;
     }
   }
 
   let { countryCode, title } = location;
 
-  if (!countryCode && (lat || lat == 0) && (lng || lng == 0)) {
+  if (!countryCode && (lat || lat === 0) && (lng || lng === 0)) {
     const location = `${lat},${lng}`;
     const herePlace = await geoService.locationToAddress(location);
 
@@ -147,6 +152,7 @@ async function fromGems(gems, userId) {
 
   const place = {
     title,
+    description,
     countryCode,
     lat: lat,
     lng: lng,
@@ -536,9 +542,9 @@ async function createFromCSVData(csvPlace, userId) {
     title,
     location,
     source,
-    country_code,
+    country_code: countryCode,
     tags: tagsString,
-    image_urls,
+    image_urls: imageUrlsString,
   } = csvPlace;
 
   const [lat, lng] = location.split(';');
@@ -552,7 +558,7 @@ async function createFromCSVData(csvPlace, userId) {
   }
 
   const tagCodes = tagsString.split(';');
-  const imageUrls = image_urls.split(';');
+  const imageUrls = imageUrlsString.split(';');
 
   const tags = await tagService.findByCodes(tagCodes);
   const tagsByCode = indexBy(tags, 'code');
@@ -576,7 +582,7 @@ async function createFromCSVData(csvPlace, userId) {
     lat,
     lng,
     source,
-    countryCode: country_code,
+    countryCode,
     placeTags,
   };
 
@@ -737,6 +743,7 @@ async function toDetailsDTO(place) {
   return {
     id: place.id,
     name: place.title,
+    description: place.description,
     countryCode: place.countryCode,
     country,
     imageUrl,

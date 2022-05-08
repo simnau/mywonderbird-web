@@ -174,7 +174,10 @@ async function sharePictures({
 
   const gems = await Promise.all(
     pictures.map(
-      async ({ title, imagePaths, location, creationDate }, index) => {
+      async (
+        { title, imagePaths, location, creationDate, ...picture },
+        index,
+      ) => {
         const { lat, lng } = location;
         let { countryCode } = location;
 
@@ -188,6 +191,7 @@ async function sharePictures({
         }
 
         return {
+          ...picture,
           title,
           countryCode,
           lat,

@@ -10,7 +10,7 @@ import { getResizedImages } from '../../../../util/image';
 import { get, post, put } from '../../../../util/fetch';
 import { H3, H4 } from '../../../../components/typography';
 import { Button } from '../../../../components/button';
-import { TextField } from '../../../../components/input';
+import { TextField, TextArea } from '../../../../components/input';
 import { CenteredContainer } from '../../../../components/layout/containers';
 import Loader from '../../../../components/loader';
 import LocationMap from './location-map';
@@ -33,6 +33,7 @@ function CreateEditPlace({ id }) {
     lng: null,
     lat: null,
     country: null,
+    description: '',
     source: '',
     tags: [],
     selectedTags: [],
@@ -66,6 +67,7 @@ function CreateEditPlace({ id }) {
         };
         state.lat = place.lat;
         state.lng = place.lng;
+        state.description = place.description;
         state.titleObject = {
           label: place.title,
           value: place.title,
@@ -98,6 +100,7 @@ function CreateEditPlace({ id }) {
     formData.append('title', state.titleObject.label);
     formData.append('lat', state.lat);
     formData.append('lng', state.lng);
+    formData.append('description', state.description);
     formData.append('countryCode', state.country.countryCode);
     formData.append('source', state.source);
     if (state.selectedTags && state.selectedTags.length) {
@@ -125,6 +128,7 @@ function CreateEditPlace({ id }) {
     formData.append('title', state.titleObject.label);
     formData.append('lat', state.lat);
     formData.append('lng', state.lng);
+    formData.append('description', state.description);
     formData.append('countryCode', state.country.countryCode);
     formData.append('source', state.source);
 
@@ -333,6 +337,13 @@ function CreateEditPlace({ id }) {
             value={countryText}
             type="text"
             disabled
+          />
+          <TextArea
+            label="Description"
+            name="description"
+            value={state.description}
+            onChange={onFieldChange}
+            placeholder="Place description"
           />
           <TextField
             label="Source"
